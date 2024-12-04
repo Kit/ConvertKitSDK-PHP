@@ -254,25 +254,16 @@ trait ConvertKit_API_Traits
      *
      * @param integer $form_id       Form ID.
      * @param string  $email_address Email Address.
-     * @param string  $referrer      Referrer.
      *
      * @see https://developers.convertkit.com/v4.html#add-subscriber-to-form-by-email-address
      *
      * @return false|mixed
      */
-    public function add_subscriber_to_form_by_email(int $form_id, string $email_address, string $referrer = '')
+    public function add_subscriber_to_form_by_email(int $form_id, string $email_address)
     {
-        // Build parameters.
-        $options = ['email_address' => $email_address];
-
-        if (!empty($referrer)) {
-            $options['referrer'] = $referrer;
-        }
-
-        // Send request.
         return $this->post(
             sprintf('forms/%s/subscribers', $form_id),
-            $options
+            ['email_address' => $email_address]
         );
     }
 
@@ -281,7 +272,6 @@ trait ConvertKit_API_Traits
      *
      * @param integer $form_id       Form ID.
      * @param integer $subscriber_id Subscriber ID.
-     * @param string  $referrer      Referrer URL.
      *
      * @see https://developers.convertkit.com/v4.html#add-subscriber-to-form
      *
@@ -289,20 +279,9 @@ trait ConvertKit_API_Traits
      *
      * @return false|mixed
      */
-    public function add_subscriber_to_form(int $form_id, int $subscriber_id, string $referrer = '')
+    public function add_subscriber_to_form(int $form_id, int $subscriber_id)
     {
-        // Build parameters.
-        $options = [];
-
-        if (!empty($referrer)) {
-            $options['referrer'] = $referrer;
-        }
-
-        // Send request.
-        return $this->post(
-            sprintf('forms/%s/subscribers/%s', $form_id, $subscriber_id),
-            $options
-        );
+        return $this->post(sprintf('forms/%s/subscribers/%s', $form_id, $subscriber_id));
     }
 
     /**
