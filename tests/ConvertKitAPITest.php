@@ -2752,9 +2752,6 @@ class ConvertKitAPITest extends TestCase
             referrer: 'https://example.com',
         );
 
-        var_dump($result);
-        die();
-
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
