@@ -25,7 +25,7 @@ class ConvertKit_API
      *
      * @var string
      */
-    public const VERSION = '2.0.0';
+    public const VERSION = '2.0.1';
 
     /**
      * Debug
@@ -143,6 +143,7 @@ class ConvertKit_API
         $message = preg_replace_callback(
             '^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})^',
             function ($matches) {
+            // @phpstan-ignore-line
                 return preg_replace('/\B[^@.]/', '*', $matches[0]);
             },
             $message
