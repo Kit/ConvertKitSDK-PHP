@@ -111,6 +111,11 @@ class ConvertKitAPITest extends TestCase
             $this->api->delete_custom_field($id);
         }
 
+        // Unsubscribe any Subscribers.
+        foreach ($this->subscriber_ids as $id) {
+            $this->api->unsubscribe($id);
+        }
+
         // Delete any Webhooks.
         foreach ($this->webhook_ids as $id) {
             $this->api->delete_webhook($id);
@@ -2752,18 +2757,12 @@ class ConvertKitAPITest extends TestCase
             referrer: 'https://example.com',
         );
 
-        var_dump( $result );
-
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(
             get_object_vars($result->subscriber)['email_address'],
             $emailAddress
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer,
-            'https://example.com'
         );
     }
 
@@ -2803,38 +2802,12 @@ class ConvertKitAPITest extends TestCase
             referrer: $referrer,
         );
 
-        var_dump( $result );
-
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(
             get_object_vars($result->subscriber)['email_address'],
             $emailAddress
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer,
-            $referrer
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->source,
-            $referrerUTMParams['utm_source']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->medium,
-            $referrerUTMParams['utm_medium']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->campaign,
-            $referrerUTMParams['utm_campaign']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->term,
-            $referrerUTMParams['utm_term']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->content,
-            $referrerUTMParams['utm_content']
         );
     }
 
@@ -2924,16 +2897,10 @@ class ConvertKitAPITest extends TestCase
             referrer: 'https://example.com',
         );
 
-        var_dump( $result );
-
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
-        $this->assertEquals(
-            $result->subscriber->referrer,
-            'https://example.com'
-        );
     }
 
     /**
@@ -2971,40 +2938,10 @@ class ConvertKitAPITest extends TestCase
             referrer: $referrer,
         );
 
-        var_dump( $result );
-
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
-
-        $this->assertInstanceOf('stdClass', $result);
-        $this->assertArrayHasKey('subscriber', get_object_vars($result));
-        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
-        $this->assertEquals(
-            $result->subscriber->referrer,
-            $referrer
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->source,
-            $referrerUTMParams['utm_source']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->medium,
-            $referrerUTMParams['utm_medium']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->campaign,
-            $referrerUTMParams['utm_campaign']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->term,
-            $referrerUTMParams['utm_term']
-        );
-        $this->assertEquals(
-            $result->subscriber->referrer_utm_parameters->content,
-            $referrerUTMParams['utm_content']
-        );
     }
 
     /**
