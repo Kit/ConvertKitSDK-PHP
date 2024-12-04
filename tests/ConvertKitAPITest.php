@@ -762,8 +762,8 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-04:00');
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-04:00');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-05:00');
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-05:00');
     }
 
     /**
@@ -799,8 +799,8 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-04:00');
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-04:00');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-05:00');
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-05:00');
     }
 
     /**
