@@ -2769,10 +2769,9 @@ class ConvertKitAPITest extends TestCase
         );
 
         // Assert referrer data set for form subscriber.
-        $this->assertFormSubscriberHasReferrer(
-            formID: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
-            subscriberID: $subscriber->subscriber->id,
-            referrer: 'https://mywebsite.com/bfpromo/'
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
         );
     }
 
@@ -2821,11 +2820,29 @@ class ConvertKitAPITest extends TestCase
         );
 
         // Assert referrer data set for form subscriber.
-        $this->assertFormSubscriberHasReferrer(
-            formID: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
-            subscriberID: $subscriber->subscriber->id,
-            referrer: 'https://mywebsite.com/bfpromo/',
-            referrerUTMParams: $referrerUTMParams
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
         );
     }
 
@@ -2921,10 +2938,9 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
 
         // Assert referrer data set for form subscriber.
-        $this->assertFormSubscriberHasReferrer(
-            formID: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
-            subscriberID: $subscriber->subscriber->id,
-            referrer: 'https://mywebsite.com/bfpromo/'
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
         );
     }
 
@@ -2969,11 +2985,29 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
 
         // Assert referrer data set for form subscriber.
-        $this->assertFormSubscriberHasReferrer(
-            formID: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
-            subscriberID: $subscriber->subscriber->id,
-            referrer: 'https://mywebsite.com/bfpromo/',
-            referrerUTMParams: $referrerUTMParams
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
         );
     }
 
@@ -5356,33 +5390,5 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('start_cursor', $pagination);
         $this->assertArrayHasKey('end_cursor', $pagination);
         $this->assertArrayHasKey('per_page', $pagination);
-    }
-
-    /**
-     * Helper method to assert a form subscriber has the given referrer.
-     *
-     * @since   2.0.1
-     */
-    private function assertFormSubscriberHasReferrer($formID, $subscriberID, $referrer, $referrerUTMParams = false)
-    {
-        // Get form subscribers.
-        $subscribers = $this->api->get_form_subscriptions(
-            form_id: $formID
-        );
-
-        // Find subscriber.
-        foreach ($subscribers->subscribers as $formSubscriber) {
-            if ($formSubscriber->id === $subscriberID) {
-                // Assert subscriber has correct referrer.
-                $this->assertEquals(
-                    $formSubscriber->referrer,
-                    $referrer . ($referrerUTMParams ? '?' . http_build_query($referrerUTMParams) : '')
-                );
-                return;
-            }
-        }
-
-        // If here, subscriber not found.
-        $this->assertTrue(false);
     }
 }
