@@ -95,6 +95,9 @@ class ConvertKitAPITest extends TestCase
             clientSecret: $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET'],
             accessToken: $_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN']
         );
+
+        // Wait a second to avoid hitting a 429 rate limit.
+        sleep(1);
     }
 
     /**
