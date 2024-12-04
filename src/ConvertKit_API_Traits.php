@@ -242,6 +242,8 @@ trait ConvertKit_API_Traits
             $options['referrer'] = $referrer;
         }
 
+        var_dump($options);
+
         // Send request.
         return $this->post(
             sprintf('forms/%s/subscribers', $form_id),
