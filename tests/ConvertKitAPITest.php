@@ -5371,9 +5371,6 @@ class ConvertKitAPITest extends TestCase
         foreach ($subscribers->subscribers as $formSubscriber) {
             if ($formSubscriber->id === $subscriberID) {
                 // Assert subscriber has correct referrer.
-                var_dump( $formSubscriber );
-                var_dump( $referrer );
-                var_dump( $referrerUTMParams );
                 $this->assertEquals(
                     $formSubscriber->referrer,
                     $referrer . ($referrerUTMParams ? '?' . http_build_query($referrerUTMParams) : '')
