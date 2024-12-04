@@ -111,11 +111,6 @@ class ConvertKitAPITest extends TestCase
             $this->api->delete_custom_field($id);
         }
 
-        // Unsubscribe any Subscribers.
-        foreach ($this->subscriber_ids as $id) {
-            $this->api->unsubscribe($id);
-        }
-
         // Delete any Webhooks.
         foreach ($this->webhook_ids as $id) {
             $this->api->delete_webhook($id);
@@ -5295,11 +5290,11 @@ class ConvertKitAPITest extends TestCase
      *
      * @since   1.0.0
      *
-     * @param   string $domain     Domain (default: convertkit.com).
+     * @param   string $domain     Domain (default: kit.com).
      *
      * @return  string
      */
-    private function generateEmailAddress($domain = 'convertkit.com')
+    private function generateEmailAddress($domain = 'kit.com')
     {
         return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
     }
