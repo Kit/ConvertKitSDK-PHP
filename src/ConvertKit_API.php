@@ -25,7 +25,7 @@ class ConvertKit_API
      *
      * @var string
      */
-    public const VERSION = '2.0.1';
+    public const VERSION = '2.0.0';
 
     /**
      * Debug

@@ -2738,7 +2738,7 @@ class ConvertKitAPITest extends TestCase
      * Test that add_subscriber_to_form_by_email() returns the expected data
      * when a referrer is specified.
      *
-     * @since   2.0.1
+     * @since   2.1.0
      *
      * @return void
      */
@@ -2779,7 +2779,7 @@ class ConvertKitAPITest extends TestCase
      * Test that add_subscriber_to_form_by_email() returns the expected data
      * when a referrer is specified that includes UTM parameters.
      *
-     * @since   2.0.1
+     * @since   2.1.0
      *
      * @return void
      */
@@ -2911,7 +2911,7 @@ class ConvertKitAPITest extends TestCase
      * Test that add_subscriber_to_form() returns the expected data
      * when a referrer is specified.
      *
-     * @since   2.0.1
+     * @since   2.1.0
      *
      * @return void
      */
@@ -2948,7 +2948,7 @@ class ConvertKitAPITest extends TestCase
      * Test that add_subscriber_to_form() returns the expected data
      * when a referrer is specified that includes UTM parameters.
      *
-     * @since   2.0.1
+     * @since   2.1.0
      *
      * @return void
      */
