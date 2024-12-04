@@ -68,6 +68,11 @@ jobs:
       - name: Build PHP Autoloader
         run: composer dump-autoload
 
+      # Run PHPStan for static analysis.
+      - name: Run PHPStan Static Analysis
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: php vendor/bin/phpstan analyse --memory-limit=1250M
+
       # Run Coding Standards.
       - name: Run Coding Standards
         run: php vendor/bin/phpcs --standard=phpcs.xml

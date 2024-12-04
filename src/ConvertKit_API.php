@@ -142,7 +142,7 @@ class ConvertKit_API
         // Mask email addresses that may be contained within the message.
         $message = preg_replace_callback(
             '^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})^',
-            function ($matches) {
+            function ($matches) { // @phpstan-ignore-line - see https://github.com/phpstan/phpstan/issues/10396
                 return preg_replace('/\B[^@.]/', '*', $matches[0]);
             },
             $message
