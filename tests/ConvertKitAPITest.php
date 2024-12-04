@@ -2746,6 +2746,7 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
+        sleep(1);
         $result = $this->api->add_subscriber_to_form_by_email(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             email_address: $emailAddress,
@@ -2795,14 +2796,12 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
+        sleep(1);
         $result = $this->api->add_subscriber_to_form_by_email(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             email_address: $emailAddress,
             referrer: $referrer,
         );
-
-        var_dump( $result );
-        die();
 
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
@@ -2916,11 +2915,14 @@ class ConvertKitAPITest extends TestCase
         // Set subscriber_id to ensure subscriber is unsubscribed after test.
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
+        // Add subscriber to form.
+        sleep(1);
         $result = $this->api->add_subscriber_to_form(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             subscriber_id: $subscriber->subscriber->id,
             referrer: 'https://example.com',
         );
+
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
@@ -2959,6 +2961,8 @@ class ConvertKitAPITest extends TestCase
         // Set subscriber_id to ensure subscriber is unsubscribed after test.
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
+        // Add subscriber to form.
+        sleep(1);
         $result = $this->api->add_subscriber_to_form(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             subscriber_id: $subscriber->subscriber->id,
