@@ -2819,23 +2819,23 @@ class ConvertKitAPITest extends TestCase
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->source,
-            'source'
+            $referrerUTMParams['utm_source']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->medium,
-            'medium'
+            $referrerUTMParams['utm_medium']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->campaign,
-            'campaign'
+            $referrerUTMParams['utm_campaign']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->term,
-            'term'
+            $referrerUTMParams['utm_term']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->content,
-            'content'
+            $referrerUTMParams['utm_content']
         );
     }
 
@@ -2928,7 +2928,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
         $this->assertEquals(
-            get_object_vars($result->subscriber)['referrer'],
+            $result->subscriber->referrer,
             'https://example.com'
         );
     }
@@ -2981,23 +2981,23 @@ class ConvertKitAPITest extends TestCase
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->source,
-            'source'
+            $referrerUTMParams['utm_source']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->medium,
-            'medium'
+            $referrerUTMParams['utm_medium']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->campaign,
-            'campaign'
+            $referrerUTMParams['utm_campaign']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->term,
-            'term'
+            $referrerUTMParams['utm_term']
         );
         $this->assertEquals(
             $result->subscriber->referrer_utm_parameters->content,
-            'content'
+            $referrerUTMParams['utm_content']
         );
     }
 
