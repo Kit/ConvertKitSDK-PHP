@@ -42,7 +42,7 @@ jobs:
       # Make sure your committed .env.dist.testing file ends with a newline.
       # The formatting of the contents to include a blank newline is deliberate.
       - name: Define GitHub Secrets in .env.dist.testing
-        uses: DamianReeves/write-file-action@v1.1
+        uses: DamianReeves/write-file-action@v1.3
         with:
           path: .env.dist.testing
           contents: |
@@ -67,6 +67,11 @@ jobs:
       # Generate autoloader
       - name: Build PHP Autoloader
         run: composer dump-autoload
+
+      # Run PHPStan for static analysis.
+      - name: Run PHPStan Static Analysis
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: php vendor/bin/phpstan analyse --memory-limit=1250M
 
       # Run Coding Standards.
       - name: Run Coding Standards
