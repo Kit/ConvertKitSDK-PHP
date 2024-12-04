@@ -225,8 +225,7 @@ trait ConvertKit_API_Traits
     /**
      * Adds subscribers to forms in bulk.
      *
-     * @param array<array<string,int>> $forms_subscribers_ids Array of arrays comprising of `form_id` and `subscriber_id`.
-     * @param string                   $referrer              Referrer URL.
+     * @param array<array<string,int>> $forms_subscribers_ids Array of arrays comprising of `form_id`, `subscriber_id` and optional `referrer` URL.
      * @param string                   $callback_url          URL to notify for large batch size when async processing complete.
      *
      * @since 2.1.0
@@ -235,15 +234,10 @@ trait ConvertKit_API_Traits
      *
      * @return false|object
      */
-    public function add_subscribers_to_forms(array $forms_subscribers_ids, string $referrer = '', string $callback_url = '')
+    public function add_subscribers_to_forms(array $forms_subscribers_ids, string $callback_url = '')
     {
         // Build parameters.
-        $options = [
-            'additions' => $forms_subscribers_ids,
-        ];
-        if (!empty($referrer)) {
-            $options['referrer'] = $referrer;
-        }
+        $options = ['additions' => $forms_subscribers_ids];
         if (!empty($callback_url)) {
             $options['callback_url'] = $callback_url;
         }

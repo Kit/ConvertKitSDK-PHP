@@ -2763,13 +2763,14 @@ class ConvertKitAPITest extends TestCase
                 [
                     'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
                     'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
                 ],
                 [
                     'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
                     'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
                 ],
-            ],
-            referrer: 'https://mywebsite.com/bfpromo/'
+            ]
         );
 
         // Assert no failures.
@@ -2779,11 +2780,11 @@ class ConvertKitAPITest extends TestCase
         $this->assertIsArray($result->subscribers);
 
         // Assert referrer data set for subscribers.
-        foreach($result->subscribers as $subscriber) {
+        foreach ($result->subscribers as $subscriber) {
              $this->assertEquals(
-                $subscriber->referrer,
-                'https://mywebsite.com/bfpromo/'
-            );
+                 $subscriber->referrer,
+                 'https://mywebsite.com/bfpromo/'
+             );
         }
     }
 
@@ -2822,13 +2823,14 @@ class ConvertKitAPITest extends TestCase
                 [
                     'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
                     'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
                 ],
                 [
                     'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
                     'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
                 ],
-            ],
-            referrer: $referer
+            ]
         );
 
         // Assert no failures.
@@ -2838,10 +2840,10 @@ class ConvertKitAPITest extends TestCase
         $this->assertIsArray($result->subscribers);
 
         // Assert referrer data set for subscribers.
-        foreach($result->subscribers as $subscriber) {
+        foreach ($result->subscribers as $subscriber) {
             $this->assertEquals(
                 $subscriber->referrer,
-                $referer
+                $referrer
             );
             $this->assertEquals(
                 $subscriber->referrer_utm_parameters->source,
@@ -2901,7 +2903,7 @@ class ConvertKitAPITest extends TestCase
 
         // Assert failures.
         $this->assertCount(2, $result->failures);
-        foreach($result->failures as $failure) {
+        foreach ($result->failures as $failure) {
             $this->assertEquals(
                 $failure->errors[0],
                 'Form does not exist'
@@ -2944,7 +2946,7 @@ class ConvertKitAPITest extends TestCase
 
         // Assert failures.
         $this->assertCount(2, $result->failures);
-        foreach($result->failures as $failure) {
+        foreach ($result->failures as $failure) {
             $this->assertEquals(
                 $failure->errors[0],
                 'Subscriber does not exist'
