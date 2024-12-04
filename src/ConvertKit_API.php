@@ -144,7 +144,6 @@ class ConvertKit_API
             '^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})^',
             // @phpstan-ignore-next-line - see https://github.com/phpstan/phpstan/issues/10396
             function ($matches) {
-            // @phpstan-ignore-line
                 return preg_replace('/\B[^@.]/', '*', $matches[0]);
             },
             $message
