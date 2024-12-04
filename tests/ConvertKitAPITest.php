@@ -2746,12 +2746,13 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
-        sleep(1);
         $result = $this->api->add_subscriber_to_form_by_email(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             email_address: $emailAddress,
             referrer: 'https://example.com',
         );
+
+        var_dump( $result );
 
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
@@ -2796,12 +2797,13 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
-        sleep(1);
         $result = $this->api->add_subscriber_to_form_by_email(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             email_address: $emailAddress,
             referrer: $referrer,
         );
+
+        var_dump( $result );
 
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
@@ -2916,12 +2918,13 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
-        sleep(1);
         $result = $this->api->add_subscriber_to_form(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             subscriber_id: $subscriber->subscriber->id,
             referrer: 'https://example.com',
         );
+
+        var_dump( $result );
 
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
@@ -2962,12 +2965,13 @@ class ConvertKitAPITest extends TestCase
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         // Add subscriber to form.
-        sleep(1);
         $result = $this->api->add_subscriber_to_form(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             subscriber_id: $subscriber->subscriber->id,
             referrer: $referrer,
         );
+
+        var_dump( $result );
 
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
