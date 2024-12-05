@@ -867,7 +867,19 @@ trait ConvertKit_API_Traits
             return false;
         }
 
+        if (!is_array($subscribers->subscribers)) {
+            return false;
+        }
+
         if (!count($subscribers->subscribers)) {
+            return false;
+        }
+
+        if (!$subscribers->subscribers[0] instanceof \stdClass) {
+            return false;
+        }
+
+        if (!is_int($subscribers->subscribers[0]->id)) {
             return false;
         }
 
