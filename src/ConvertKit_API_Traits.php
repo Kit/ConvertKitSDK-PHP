@@ -225,8 +225,8 @@ trait ConvertKit_API_Traits
     /**
      * Adds subscribers to forms in bulk.
      *
-     * @param array<array<string,int>> $forms_subscribers_ids Array of arrays comprising of `form_id`, `subscriber_id` and optional `referrer` URL.
-     * @param string                   $callback_url          URL to notify for large batch size when async processing complete.
+     * @param array<array<string,string>> $forms_subscribers_ids Array of arrays comprising of `form_id`, `subscriber_id` and optional `referrer` URL.
+     * @param string                      $callback_url          URL to notify for large batch size when async processing complete.
      *
      * @since 2.1.0
      *
