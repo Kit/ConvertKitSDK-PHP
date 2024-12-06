@@ -161,7 +161,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#convertkit-api-forms
      *
-     * @return false|array<int,\stdClass>
+     * @return mixed|array<int,\stdClass>
      */
     public function get_forms(
         string $status = 'active',
@@ -198,7 +198,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#convertkit-api-forms
      *
-     * @return false|array<int,\stdClass>
+     * @return mixed|array<int,\stdClass>
      */
     public function get_landing_pages(
         string $status = 'active',
@@ -456,7 +456,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#list-tags
      *
-     * @return false|array<int,\stdClass>
+     * @return mixed|array<int,\stdClass>
      */
     public function get_tags(
         bool $include_total_count = false,
@@ -863,7 +863,23 @@ trait ConvertKit_API_Traits
             ['email_address' => $email_address]
         );
 
+        if (!$subscribers instanceof \stdClass) {
+            return false;
+        }
+
+        if (!is_array($subscribers->subscribers)) {
+            return false;
+        }
+
         if (!count($subscribers->subscribers)) {
+            return false;
+        }
+
+        if (!$subscribers->subscribers[0] instanceof \stdClass) {
+            return false;
+        }
+
+        if (!is_int($subscribers->subscribers[0]->id)) {
             return false;
         }
 
@@ -878,7 +894,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#get-a-subscriber
      *
-     * @return false|integer
+     * @return mixed|integer
      */
     public function get_subscriber(int $subscriber_id)
     {
@@ -895,7 +911,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#update-a-subscriber
      *
-     * @return false|mixed
+     * @return mixed
      */
     public function update_subscriber(
         int $subscriber_id,
@@ -930,7 +946,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#unsubscribe-subscriber
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function unsubscribe_by_email(string $email_address)
     {
@@ -949,7 +965,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#unsubscribe-subscriber
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function unsubscribe(int $subscriber_id)
     {
@@ -967,7 +983,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#list-tags-for-a-subscriber
      *
-     * @return false|array<int,\stdClass>
+     * @return mixed|array<int,\stdClass>
      */
     public function get_subscriber_tags(
         int $subscriber_id,
@@ -1044,7 +1060,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#create-a-broadcast
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function create_broadcast(
         string $subject = '',
@@ -1103,7 +1119,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#get-a-broadcast
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function get_broadcast(int $id)
     {
@@ -1118,7 +1134,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#get-stats
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function get_broadcast_stats(int $id)
     {
@@ -1151,7 +1167,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/#create-a-broadcast
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function update_broadcast(
         int $id,
@@ -1213,7 +1229,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#delete-a-broadcast
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function delete_broadcast(int $id)
     {
@@ -1266,7 +1282,7 @@ trait ConvertKit_API_Traits
      *
      * @throws \InvalidArgumentException If the event is not supported.
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function create_webhook(string $url, string $event, string $parameter = '')
     {
@@ -1340,7 +1356,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#delete-a-webhook
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function delete_webhook(int $id)
     {
@@ -1389,7 +1405,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#create-a-custom-field
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function create_custom_field(string $label)
     {
@@ -1409,7 +1425,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#bulk-create-custom-fields
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function create_custom_fields(array $labels, string $callback_url = '')
     {
@@ -1444,7 +1460,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#update-a-custom-field
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function update_custom_field(int $id, string $label)
     {
@@ -1463,7 +1479,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/#destroy-field
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function delete_custom_field(int $id)
     {
@@ -1510,7 +1526,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#get-a-purchase
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function get_purchase(int $purchase_id)
     {
@@ -1535,7 +1551,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.convertkit.com/v4.html#create-a-purchase
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function create_purchase(
         string $email_address,

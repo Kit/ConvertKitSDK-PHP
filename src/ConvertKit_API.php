@@ -177,7 +177,7 @@ class ConvertKit_API
      * @param string $authCode    Authorization Code, returned from get_oauth_url() flow.
      * @param string $redirectURI Redirect URI.
      *
-     * @return array<string, int|string> API response
+     * @return mixed|array<string, int|string> API response
      */
     public function get_access_token(string $authCode, string $redirectURI)
     {
@@ -215,7 +215,7 @@ class ConvertKit_API
      * @param string $refreshToken Refresh Token.
      * @param string $redirectURI  Redirect URI.
      *
-     * @return array<string, int|string> API response
+     * @return mixed|array<string, int|string> API response
      */
     public function refresh_token(string $refreshToken, string $redirectURI)
     {
@@ -338,7 +338,7 @@ class ConvertKit_API
      *
      * @throws \Exception If JSON encoding arguments failed.
      *
-     * @return false|mixed
+     * @return mixed|object
      */
     public function request(string $endpoint, string $method, array $args = [])
     {
