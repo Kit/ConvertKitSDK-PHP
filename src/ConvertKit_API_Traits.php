@@ -232,7 +232,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.kit.com/v4.html#bulk-add-subscribers-to-forms
      *
-     * @return false|object
+     * @return mixed|object
      */
     public function add_subscribers_to_forms(array $forms_subscribers_ids, string $callback_url = '')
     {
