@@ -223,6 +223,33 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Adds subscribers to forms in bulk.
+     *
+     * @param array<array<string,string>> $forms_subscribers_ids Array of arrays comprising of `form_id`, `subscriber_id` and optional `referrer` URL.
+     * @param string                      $callback_url          URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.1.0
+     *
+     * @see https://developers.kit.com/v4.html#bulk-add-subscribers-to-forms
+     *
+     * @return false|object
+     */
+    public function add_subscribers_to_forms(array $forms_subscribers_ids, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = ['additions' => $forms_subscribers_ids];
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->post(
+            'bulk/forms/subscribers',
+            $options
+        );
+    }
+
+    /**
      * Adds a subscriber to a form by email address
      *
      * @param integer $form_id       Form ID.

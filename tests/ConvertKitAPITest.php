@@ -2703,6 +2703,261 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that add_subscribers_to_forms() returns the expected data.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToForms()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected data
+     * when a referrer URL is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrer()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+
+        // Assert referrer data set for subscribers.
+        foreach ($result->subscribers as $subscriber) {
+             $this->assertEquals(
+                 $subscriber->referrer,
+                 'https://mywebsite.com/bfpromo/'
+             );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected data
+     * when a referrer URL with UTM parameters is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+
+        // Assert referrer data set for subscribers.
+        foreach ($result->subscribers as $subscriber) {
+            $this->assertEquals(
+                $subscriber->referrer,
+                $referrer
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->source,
+                $referrerUTMParams['utm_source']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->medium,
+                $referrerUTMParams['utm_medium']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->campaign,
+                $referrerUTMParams['utm_campaign']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->term,
+                $referrerUTMParams['utm_term']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->content,
+                $referrerUTMParams['utm_content']
+            );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected errors
+     * when invalid Form IDs are specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidFormIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+        foreach ($result->failures as $failure) {
+            $this->assertEquals(
+                $failure->errors[0],
+                'Form does not exist'
+            );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected errors
+     * when invalid Subscriber IDs are specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidSubscriberIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => 999999,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => 999999,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+        foreach ($result->failures as $failure) {
+            $this->assertEquals(
+                $failure->errors[0],
+                'Subscriber does not exist'
+            );
+        }
+    }
+
+    /**
      * Test that add_subscriber_to_form_by_email() returns the expected data.
      *
      * @since   1.0.0
