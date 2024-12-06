@@ -95,6 +95,9 @@ class ConvertKitAPITest extends TestCase
             clientSecret: $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET'],
             accessToken: $_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN']
         );
+
+        // Wait a second to avoid hitting a 429 rate limit.
+        sleep(1);
     }
 
     /**
@@ -2732,6 +2735,118 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that add_subscriber_to_form_by_email() returns the expected data
+     * when a referrer is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithReferrer()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress,
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form_by_email(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            email_address: $emailAddress,
+            referrer: 'https://mywebsite.com/bfpromo/',
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form_by_email() returns the expected data
+     * when a referrer is specified that includes UTM parameters.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress,
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form_by_email(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            email_address: $emailAddress,
+            referrer: $referrer,
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
+        );
+    }
+
+    /**
      * Test that add_subscriber_to_form_by_email() throws a ClientException when an invalid
      * form ID is specified.
      *
@@ -2790,6 +2905,110 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('subscriber', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
         $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+    }
+
+    /**
+     * Test that add_subscriber_to_form() returns the expected data
+     * when a referrer is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithReferrer()
+    {
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_id: $subscriber->subscriber->id,
+            referrer: 'https://mywebsite.com/bfpromo/',
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form() returns the expected data
+     * when a referrer is specified that includes UTM parameters.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_id: $subscriber->subscriber->id,
+            referrer: $referrer,
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
+        );
     }
 
     /**
@@ -5086,11 +5305,11 @@ class ConvertKitAPITest extends TestCase
      *
      * @since   1.0.0
      *
-     * @param   string $domain     Domain (default: convertkit.com).
+     * @param   string $domain     Domain (default: kit.com).
      *
      * @return  string
      */
-    private function generateEmailAddress($domain = 'convertkit.com')
+    private function generateEmailAddress($domain = 'kit.com')
     {
         return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
     }
