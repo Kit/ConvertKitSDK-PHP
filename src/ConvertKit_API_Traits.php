@@ -137,7 +137,7 @@ trait ConvertKit_API_Traits
      *
      * @return false|mixed
      */
-    public function get_growth_stats(\DateTime $starting = null, \DateTime $ending = null)
+    public function get_growth_stats(\DateTime|null $starting = null, \DateTime|null $ending = null)
     {
         return $this->get(
             'account/growth_stats',
@@ -326,10 +326,10 @@ trait ConvertKit_API_Traits
     public function get_form_subscriptions(
         int $form_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $added_after = null,
-        \DateTime $added_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $added_after = null,
+        \DateTime|null $added_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -453,10 +453,10 @@ trait ConvertKit_API_Traits
     public function get_sequence_subscriptions(
         int $sequence_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $added_after = null,
-        \DateTime $added_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $added_after = null,
+        \DateTime|null $added_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -669,10 +669,10 @@ trait ConvertKit_API_Traits
     public function get_tag_subscriptions(
         int $tag_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $tagged_after = null,
-        \DateTime $tagged_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $tagged_after = null,
+        \DateTime|null $tagged_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -768,10 +768,10 @@ trait ConvertKit_API_Traits
     public function get_subscribers(
         string $subscriber_state = 'active',
         string $email_address = '',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $updated_after = null,
-        \DateTime $updated_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $updated_after = null,
+        \DateTime|null $updated_before = null,
         string $sort_field = 'id',
         string $sort_order = 'desc',
         bool $include_total_count = false,
@@ -1115,8 +1115,8 @@ trait ConvertKit_API_Traits
         string $content = '',
         string $description = '',
         bool $public = false,
-        \DateTime $published_at = null,
-        \DateTime $send_at = null,
+        \DateTime|null $published_at = null,
+        \DateTime|null $send_at = null,
         string $email_address = '',
         string $email_template_id = '',
         string $thumbnail_alt = '',
@@ -1223,8 +1223,8 @@ trait ConvertKit_API_Traits
         string $content = '',
         string $description = '',
         bool $public = false,
-        \DateTime $published_at = null,
-        \DateTime $send_at = null,
+        \DateTime|null $published_at = null,
+        \DateTime|null $send_at = null,
         string $email_address = '',
         string $email_template_id = '',
         string $thumbnail_alt = '',
@@ -1606,14 +1606,14 @@ trait ConvertKit_API_Traits
         string $transaction_id,
         array $products,
         string $currency = 'USD',
-        string $first_name = null,
-        string $status = null,
+        string|null $first_name = null,
+        string|null $status = null,
         float $subtotal = 0,
         float $tax = 0,
         float $shipping = 0,
         float $discount = 0,
         float $total = 0,
-        \DateTime $transaction_time = null
+        \DateTime|null $transaction_time = null
     ) {
         // Build parameters.
         $options = [
