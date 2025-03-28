@@ -1,6 +1,6 @@
-# ConvertKit SDK PHP
+# Kit SDK PHP
 
-The ConvertKit PHP SDK provides convinient access to the ConvertKit API from applications written in the PHP language.
+The Kit PHP SDK provides convinient access to the Kit API from applications written in the PHP language.
 
 It includes a pre-defined set of methods for interacting with the API.
 
@@ -10,6 +10,7 @@ It includes a pre-defined set of methods for interacting with the API.
 |-------------|-------------|--------------------|--------------|
 | 1.x         | v3          | API Key and Secret | 7.4+         |
 | 2.x         | v4          | OAuth              | 8.0+         |
+| 2.2+        | v4          | API Key            | 8.0+         |
 
 Refer to [this guide](MIGRATION.md) for changes when upgrading to the v2 SDK.
 
@@ -41,9 +42,9 @@ If you use Composer, these dependencies should be handled automatically.
 
 ### 2.x (v4 API, OAuth, PHP 8.0+)
 
-First, register your OAuth application in the `OAuth Applications` section at https://app.convertkit.com/account_settings/advanced_settings.
+First, register your OAuth application in the `OAuth Applications` section at https://app.kit.com/account_settings/advanced_settings.
 
-Using the supplied Client ID and secret, redirect the user to ConvertKit to grant your application access to their ConvertKit account.
+Using the supplied Client ID and secret, redirect the user to Kit to grant your application access to their Kit account.
 
 ```php
 // Require the autoloader (if you're using a PHP framework, this may already be done for you).
@@ -59,7 +60,7 @@ $api = new \ConvertKit_API\ConvertKit_API(
 header('Location: '.$api->get_oauth_url('<your_redirect_uri>'));
 ```
 
-Once the user grants your application access to their ConvertKit account, they'll be redirected to your Redirect URI with an authorization code. For example:
+Once the user grants your application access to their Kit account, they'll be redirected to your Redirect URI with an authorization code. For example:
 
 `your-redirect-uri?code=<auth_code>`
 
@@ -118,26 +119,40 @@ $api = new \ConvertKit_API\ConvertKit_API(
 API requests may then be performed:
 
 ```php
-$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@convertkit.com');
+$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@kit.com');
 ```
 
 To determine whether a new entity / relationship was created, or an existing entity / relationship updated, inspect the HTTP code of the last request:
 
 ```php
-$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@convertkit.com');
+$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@kit.com');
 $code = $api->getResponseInterface()->getStatusCode(); // 200 OK if e.g. a subscriber already added to the specified form, 201 Created if the subscriber added to the specified form for the first time.
 ```
 
 The PSR-7 response can be fetched and further inspected, if required - for example, to check if a header exists:
 
 ```php
-$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@convertkit.com');
+$result = $api->add_subscriber_to_form(12345, 'joe.bloggs@kit.com');
 $api->getResponseInterface()->hasHeader('Content-Length'); // Check if the last API request included a `Content-Length` header
+```
+
+### 2.2+ (v4 API, API Key, PHP 8.0+)
+
+Get your Kit API Key and API Secret [here](https://app.kit.com/account_settings/developer_settings) and set it somewhere in your application.
+
+```php
+// Require the autoloader (if you're using a PHP framework, this may already be done for you).
+require_once 'vendor/autoload.php';
+
+// Initialize the API class.
+$api = new \ConvertKit_API\ConvertKit_API(
+    apiKey: '<your_v4_api_key>'
+);
 ```
 
 ### 1.x (v3 API, API Key and Secret, PHP 7.4+)
 
-Get your ConvertKit API Key and API Secret [here](https://app.convertkit.com/account/edit) and set it somewhere in your application.
+Get your Kit API Key and API Secret [here](https://app.kit.com/account_settings/developer_settings) and set it somewhere in your application.
 
 ```php
 // Require the autoloader (if you're using a PHP framework, this may already be done for you).
@@ -149,7 +164,7 @@ $api = new \ConvertKit_API\ConvertKit_API('<your_public_api_key>', '<your_secret
 
 ## Handling Errors
 
-The ConvertKit PHP SDK uses Guzzle for all HTTP API requests.  Errors will be thrown as Guzzle's `ClientException` (for 4xx errors),
+The Kit PHP SDK uses Guzzle for all HTTP API requests.  Errors will be thrown as Guzzle's `ClientException` (for 4xx errors),
 or `ServerException` (for 5xx errors).
 
 ```php
@@ -190,4 +205,4 @@ See the [PHP SDK docs](./docs/classes/ConvertKit_API/ConvertKit_API.md)
 
 See our [contributor guide](CONTRIBUTING.md) for setting up your development environment, testing and submitting a PR.
 
-For ConvertKit, refer to the [deployment guide](DEPLOYMENT.md) on how to publish a new release.
+For Kit, refer to the [deployment guide](DEPLOYMENT.md) on how to publish a new release.
