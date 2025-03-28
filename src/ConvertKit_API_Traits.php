@@ -34,6 +34,13 @@ trait ConvertKit_API_Traits
     protected $access_token = '';
 
     /**
+     * API Key
+     *
+     * @var string
+     */
+    protected $api_key = '';
+
+    /**
      * OAuth Authorization URL
      *
      * @var string

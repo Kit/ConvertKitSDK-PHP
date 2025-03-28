@@ -62,19 +62,22 @@ class ConvertKit_API
      * @param string  $clientID             OAuth Client ID.
      * @param string  $clientSecret         OAuth Client Secret.
      * @param string  $accessToken          OAuth Access Token.
+     * @param string  $apiKey               API Key.
      * @param boolean $debug                Log requests to debugger.
      * @param string  $debugLogFileLocation Path and filename of debug file to write to.
      */
     public function __construct(
-        string $clientID,
-        string $clientSecret,
+        string $clientID = '',
+        string $clientSecret = '',
         string $accessToken = '',
+        string $apiKey = '',
         bool $debug = false,
         string $debugLogFileLocation = ''
     ) {
         $this->client_id     = $clientID;
         $this->client_secret = $clientSecret;
         $this->access_token  = $accessToken;
+        $this->api_key       = $apiKey;
         $this->debug         = $debug;
 
         // Set the Guzzle client.
@@ -122,22 +125,35 @@ class ConvertKit_API
             return;
         }
 
-        // Mask the Client ID, Client Secret and Access Token.
-        $message = str_replace(
-            $this->client_id,
-            str_repeat('*', (strlen($this->client_id) - 4)) . substr($this->client_id, - 4),
-            $message
-        );
+        // Mask the Client ID, Client Secret, Access Token, and API Key.
+        if ($this->client_id) {
+            $message = str_replace(
+                $this->client_id,
+                str_repeat('*', (strlen($this->client_id) - 4)) . substr($this->client_id, - 4),
+                $message
+            );
+        }
+        if ($this->client_secret) {
         $message = str_replace(
             $this->client_secret,
             str_repeat('*', (strlen($this->client_secret) - 4)) . substr($this->client_secret, - 4),
             $message
-        );
-        $message = str_replace(
-            $this->access_token,
-            str_repeat('*', (strlen($this->access_token) - 4)) . substr($this->access_token, - 4),
-            $message
-        );
+            );
+        }
+        if ($this->access_token) {
+            $message = str_replace(
+                $this->access_token,
+                str_repeat('*', (strlen($this->access_token) - 4)) . substr($this->access_token, - 4),
+                $message
+            );
+        }
+        if ($this->api_key) {
+            $message = str_replace(
+                $this->api_key,
+                str_repeat('*', (strlen($this->api_key) - 4)) . substr($this->api_key, - 4),
+                $message
+            );
+        }
 
         // Mask email addresses that may be contained within the message.
         $message = preg_replace_callback(
@@ -427,7 +443,12 @@ class ConvertKit_API
         }
 
         // Add authorization header and return.
-        $headers['Authorization'] = 'Bearer ' . $this->access_token;
+        if ($this->api_key) {
+            $headers['X-Kit-Api-Key'] = $this->api_key;
+        } elseif ($this->access_token) {
+            $headers['Authorization'] = 'Bearer ' . $this->access_token;
+        }
+
         return $headers;
     }
 
