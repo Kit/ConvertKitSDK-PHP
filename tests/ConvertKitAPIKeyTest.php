@@ -1,5 +1,6 @@
 <?php
 
+use GuzzleHttp\Exception\ClientException;
 use Dotenv\Dotenv;
 use ConvertKit_API\ConvertKit_API;
 
@@ -229,4 +230,335 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         $this->assertEquals($headers['Content-Type'], 'text/html; charset=utf-8');
         $this->assertEquals($headers['User-Agent'], 'ConvertKitPHPSDK/' . $this->api::VERSION . ';PHP/' . phpversion());
     }
+
+    /**
+     * Test that create_tags() throws a ClientException when attempting
+     * to create tags, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateTags()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->create_tags([
+            'Tag Test ' . mt_rand(),
+            'Tag Test ' . mt_rand(),
+        ]);
+    }
+
+    /**
+     * Test that create_tags() throws a ClientException when attempting
+     * to create blank tags, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateTagsBlank()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->create_tags([
+            '',
+            '',
+        ]);
+    }
+
+    /**
+     * Test that create_tags() throws a ClientException when creating
+     * tags that already exists, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateTagsThatExist()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->create_tags(
+            [
+                $_ENV['CONVERTKIT_API_TAG_NAME'],
+                $_ENV['CONVERTKIT_API_TAG_NAME_2'],
+            ]
+        );
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() throws a ClientException when
+     * attempting to add subscribers to forms, as this is only supported
+     * using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToForms()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $this->expectException(ClientException::class);
+        
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns a ClientException
+     * when a referrer URL is specified, as this is only supported
+     * using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrer()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $this->expectException(ClientException::class);
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns a ClientException
+     * when a referrer URL with UTM parameters is specified, as this is only
+     * supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $this->expectException(ClientException::class);
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+            ]
+        );
+
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns a ClientException
+     * when invalid Form IDs are specified, as this is only supported
+     * using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidFormIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $this->expectException(ClientException::class);
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns a ClientException
+     * when invalid Subscriber IDs are specified, as this is only supported
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidSubscriberIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $this->expectException(ClientException::class);
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => 999999,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => 999999,
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that create_subscribers() returns a ClientException
+     * when no data is specified, as this is only supported
+     * using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribers()
+    {
+        $this->expectException(ClientException::class);
+        $subscribers = [
+            [
+                'email_address' => str_replace('@convertkit.com', '-1@convertkit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@convertkit.com', '-2@convertkit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+    }
+
+    /**
+     * Test that create_subscribers() throws a ClientException when no data is specified.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithBlankData()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->create_subscribers([
+            [],
+        ]);
+    }
+
+    /**
+     * Test that create_subscribers() throws a ClientException when invalid email addresses
+     * are specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithInvalidEmailAddresses()
+    {
+        $this->expectException(ClientException::class);
+        $subscribers = [
+            [
+                'email_address' => 'not-an-email-address',
+            ],
+            [
+                'email_address' => 'not-an-email-address-again',
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+    }
+
+    /**
+     * Test that create_custom_fields() throws a ClientException
+     * as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateCustomFields()
+    {
+        $this->expectException(ClientException::class);
+        $labels = [
+            'Custom Field ' . mt_rand(),
+            'Custom Field ' . mt_rand(),
+        ];
+        $result = $this->api->create_custom_fields($labels);
+    }
+    
 }

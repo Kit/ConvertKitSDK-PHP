@@ -5081,7 +5081,7 @@ class ConvertKitAPITest extends TestCase
      *
      * @return  void
      */
-    private function deleteLogFile()
+    public function deleteLogFile()
     {
         if (file_exists($this->logFile)) {
             unlink($this->logFile);
@@ -5095,7 +5095,7 @@ class ConvertKitAPITest extends TestCase
      *
      * @return  string
      */
-    private function getLogFileContents()
+    public function getLogFileContents()
     {
         // Return blank string if no log file.
         if (!file_exists($this->logFile)) {
@@ -5115,7 +5115,7 @@ class ConvertKitAPITest extends TestCase
      * @param   string $name Method Name.
      * @param   array  $args Method Arguments.
      */
-    private function callPrivateMethod($obj, $name, array $args)
+    public function callPrivateMethod($obj, $name, array $args)
     {
         $class = new \ReflectionClass($obj);
         $method = $class->getMethod($name);
@@ -5136,7 +5136,7 @@ class ConvertKitAPITest extends TestCase
      *
      * @return  string
      */
-    private function generateEmailAddress($domain = 'kit.com')
+    public function generateEmailAddress($domain = 'kit.com')
     {
         return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
     }
@@ -5149,7 +5149,7 @@ class ConvertKitAPITest extends TestCase
      * @param   $string Possible HTML.
      * @return  bool
      */
-    private function isHtml($string)
+    public function isHtml($string)
     {
         return preg_match("/<[^<]+>/", $string, $m) != 0;
     }
@@ -5163,7 +5163,7 @@ class ConvertKitAPITest extends TestCase
      * @param   null|array    $responseBody     Response to return when API call is made.
      * @param   int           $httpCode         HTTP Code to return when API call is made.
      */
-    private function mockResponse(ConvertKit_API $api, $responseBody = null, int $httpCode = 200)
+    public function mockResponse(ConvertKit_API $api, $responseBody = null, int $httpCode = 200)
     {
         // Setup API with a mock Guzzle client, returning the data
         // as if we successfully swapped an auth code for an access token.
@@ -5193,7 +5193,7 @@ class ConvertKitAPITest extends TestCase
      *
      * @param   array   $result     API Result.
      */
-    private function assertDataExists($result, $key)
+    public function assertDataExists($result, $key)
     {
         $result = get_object_vars($result);
         $this->assertArrayHasKey($key, $result);
@@ -5207,7 +5207,7 @@ class ConvertKitAPITest extends TestCase
      *
      * @param   array   $result     API Result.
      */
-    private function assertPaginationExists($result)
+    public function assertPaginationExists($result)
     {
         $result = get_object_vars($result);
         $this->assertArrayHasKey('pagination', $result);
