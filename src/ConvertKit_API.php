@@ -134,10 +134,10 @@ class ConvertKit_API
             );
         }
         if ($this->client_secret) {
-        $message = str_replace(
-            $this->client_secret,
-            str_repeat('*', (strlen($this->client_secret) - 4)) . substr($this->client_secret, - 4),
-            $message
+            $message = str_replace(
+                $this->client_secret,
+                str_repeat('*', (strlen($this->client_secret) - 4)) . substr($this->client_secret, - 4),
+                $message
             );
         }
         if ($this->access_token) {
@@ -445,7 +445,7 @@ class ConvertKit_API
         // Add authorization header and return.
         if ($this->api_key) {
             $headers['X-Kit-Api-Key'] = $this->api_key;
-        } elseif ($this->access_token) {
+        } else if ($this->access_token) {
             $headers['Authorization'] = 'Bearer ' . $this->access_token;
         }
 
