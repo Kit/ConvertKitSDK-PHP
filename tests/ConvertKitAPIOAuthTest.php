@@ -1,9 +1,9 @@
 <?php
 
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use Dotenv\Dotenv;
 use ConvertKit_API\ConvertKit_API;
-
-require_once __DIR__ . '/ConvertKitAPITest.php';
 
 /**
  * ConvertKit API OAuth Key class tests.

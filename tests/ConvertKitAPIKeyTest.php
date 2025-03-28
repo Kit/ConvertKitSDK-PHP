@@ -4,8 +4,6 @@ use GuzzleHttp\Exception\ClientException;
 use Dotenv\Dotenv;
 use ConvertKit_API\ConvertKit_API;
 
-require_once __DIR__ . '/ConvertKitAPITest.php';
-
 /**
  * ConvertKit API Key class tests.
  */
@@ -305,7 +303,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         $this->subscriber_ids[] = $subscriber->subscriber->id;
 
         $this->expectException(ClientException::class);
-        
+
         // Add subscribers to forms.
         $result = $this->api->add_subscribers_to_forms(
             forms_subscribers_ids: [
@@ -407,7 +405,6 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
                 ],
             ]
         );
-
     }
 
     /**
@@ -759,5 +756,4 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
             products: [],
         );
     }
-    
 }
