@@ -57,7 +57,6 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
             accessToken: $_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN'],
             debug: true
         );
-
         $result = $api->get_account();
 
         // Confirm that the log includes expected data.
@@ -114,17 +113,33 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
             debug: true
         );
 
-        // Create log entries with API Key and Email Address, as if an API method
+        // Create log entries with Client ID, Client Secret, Access Token and Email Address, as if an API method
         // were to log this sensitive data.
-        $this->callPrivateMethod($api, 'create_log', ['API Key: ' . $_ENV['CONVERTKIT_API_KEY']]);
+        $this->callPrivateMethod($api, 'create_log', ['Client ID: ' . $_ENV['CONVERTKIT_OAUTH_CLIENT_ID']]);
+        $this->callPrivateMethod($api, 'create_log', ['Client Secret: ' . $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET']]);
+        $this->callPrivateMethod($api, 'create_log', ['Access Token: ' . $_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN']]);
         $this->callPrivateMethod($api, 'create_log', ['Email: ' . $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']]);
 
-        // Confirm that the log includes the masked API Key and Email Address.
+        // Confirm that the log includes the masked Client ID, Secret, Access Token and Email Address.
         $this->assertStringContainsString(
             str_repeat(
                 '*',
-                (strlen($_ENV['CONVERTKIT_API_KEY']) - 4)
-            ) . substr($_ENV['CONVERTKIT_API_KEY'], -4),
+                (strlen($_ENV['CONVERTKIT_OAUTH_CLIENT_ID']) - 4)
+            ) . substr($_ENV['CONVERTKIT_OAUTH_CLIENT_ID'], -4),
+            $this->getLogFileContents()
+        );
+        $this->assertStringContainsString(
+            str_repeat(
+                '*',
+                (strlen($_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET']) - 4)
+            ) . substr($_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET'], -4),
+            $this->getLogFileContents()
+        );
+        $this->assertStringContainsString(
+            str_repeat(
+                '*',
+                (strlen($_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN']) - 4)
+            ) . substr($_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN'], -4),
             $this->getLogFileContents()
         );
         $this->assertStringContainsString(
@@ -132,8 +147,10 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
             $this->getLogFileContents()
         );
 
-        // Confirm that the log does not include the unmasked API Key or Email Address.
-        $this->assertStringNotContainsString($_ENV['CONVERTKIT_API_KEY'], $this->getLogFileContents());
+        // Confirm that the log does not include the unmasked Client ID, Secret, Access Token or Email Address.
+        $this->assertStringNotContainsString($_ENV['CONVERTKIT_OAUTH_CLIENT_ID'], $this->getLogFileContents());
+        $this->assertStringNotContainsString($_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET'], $this->getLogFileContents());
+        $this->assertStringNotContainsString($_ENV['CONVERTKIT_OAUTH_ACCESS_TOKEN'], $this->getLogFileContents());
         $this->assertStringNotContainsString($_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL'], $this->getLogFileContents());
     }
 
