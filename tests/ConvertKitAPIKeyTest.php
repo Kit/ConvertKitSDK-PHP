@@ -560,5 +560,204 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         ];
         $result = $this->api->create_custom_fields($labels);
     }
+
+    /**
+     * Test that get_purchases() throws a ClientException
+     * as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchases()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_purchases();
+    }
+
+    /**
+     * Test that get_purchases() throws a ClientException
+     * when the total count is included, as this is only
+     * supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesWithTotalCount()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_purchases(
+            include_total_count: true
+        );
+    }
+
+    /**
+     * Test that get_purchases() throws a ClientException
+     * when pagination parameters and per_page limits are specified,
+     * as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesPagination()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_purchases(
+            per_page: 1
+        );
+    }
+
+    /**
+     * Test that get_purchases() throws a ClientException
+     * when a purchase ID is specified, as this is only
+     * supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchase()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_purchase(12345);
+    }
+
+    /**
+     * Test that get_purchases() throws a ClientException when an invalid
+     * purchase ID is specified, as this is only supported
+     * using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchaseWithInvalidID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_purchase(12345);
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException
+     * as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchase()
+    {
+        $this->expectException(ClientException::class);
+        $purchase = $this->api->create_purchase(
+            // Required fields.
+            email_address: $this->generateEmailAddress(),
+            transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+            currency: 'usd',
+            products: [
+                [
+                    'name' => 'Floppy Disk (512k)',
+                    'sku' => '7890-ijkl',
+                    'pid' => 9999,
+                    'lid' => 7777,
+                    'quantity' => 2,
+                    'unit_price' => 5.00,
+                ],
+                [
+                    'name' => 'Telephone Cord (data)',
+                    'sku' => 'mnop-1234',
+                    'pid' => 5555,
+                    'lid' => 7778,
+                    'quantity' => 1,
+                    'unit_price' => 10.00,
+                ],
+            ],
+            // Optional fields.
+            first_name: 'Tim',
+            status: 'paid',
+            subtotal: 20.00,
+            tax: 2.00,
+            shipping: 2.00,
+            discount: 3.00,
+            total: 21.00,
+            transaction_time: new DateTime('now'),
+        );
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when an invalid
+     * email address is specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithInvalidEmailAddress()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->create_purchase(
+            email_address: 'not-an-email-address',
+            transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+            currency: 'usd',
+            products: [
+                [
+                    'name' => 'Floppy Disk (512k)',
+                    'sku' => '7890-ijkl',
+                    'pid' => 9999,
+                    'lid' => 7777,
+                    'quantity' => 2,
+                    'unit_price' => 5.00,
+                ],
+            ],
+        );
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when a blank
+     * transaction ID is specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithBlankTransactionID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->create_purchase(
+            email_address: $this->generateEmailAddress(),
+            transaction_id: '',
+            currency: 'usd',
+            products: [
+                [
+                    'name' => 'Floppy Disk (512k)',
+                    'sku' => '7890-ijkl',
+                    'pid' => 9999,
+                    'lid' => 7777,
+                    'quantity' => 2,
+                    'unit_price' => 5.00,
+                ],
+            ],
+        );
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when no products
+     * are specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithNoProducts()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->create_purchase(
+            email_address: $this->generateEmailAddress(),
+            transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+            currency: 'usd',
+            products: [],
+        );
+    }
     
 }

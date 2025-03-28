@@ -3,6 +3,7 @@
     <testsuites>
         <testsuite name="ConvertKit API Tests">
             <directory>tests</directory>
+            <exclude>tests/ConvertKitAPITest.php</exclude>
         </testsuite>
     </testsuites>
 </phpunit>
