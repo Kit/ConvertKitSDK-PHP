@@ -765,8 +765,10 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-05:00');
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-05:00');
+        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
+        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
     }
 
     /**
@@ -802,8 +804,10 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00-05:00');
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59-05:00');
+        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
+        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
     }
 
     /**
@@ -1186,7 +1190,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetFormSubscriptionsWithAddedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_form_subscriptions(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             added_after: $date
@@ -1242,7 +1246,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetFormSubscriptionsWithCreatedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_form_subscriptions(
             form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
             created_after: $date
@@ -1702,7 +1706,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetSequenceSubscriptionsWithAddedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_sequence_subscriptions(
             sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
             added_after: $date
@@ -1758,7 +1762,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetSequenceSubscriptionsWithCreatedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_sequence_subscriptions(
             sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
             created_after: $date
@@ -1846,7 +1850,7 @@ class ConvertKitAPITest extends TestCase
 
         // Assert has_previous_page and has_next_page are correct.
         $this->assertTrue($result->pagination->has_previous_page);
-        $this->assertTrue($result->pagination->has_next_page);
+        $this->assertFalse($result->pagination->has_next_page);
 
         // Use pagination to fetch previous page.
         $result = $this->api->get_sequence_subscriptions(
@@ -2058,7 +2062,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_tag() throws a ClientException when creating
+     * Test that create_tag() returns the expected data when creating
      * a tag that already exists.
      *
      * @since   1.0.0
@@ -2067,8 +2071,14 @@ class ConvertKitAPITest extends TestCase
      */
     public function testCreateTagThatExists()
     {
-        $this->expectException(ClientException::class);
         $result = $this->api->create_tag($_ENV['CONVERTKIT_API_TAG_NAME']);
+
+        // Assert response contains correct data.
+        $tag = get_object_vars($result->tag);
+        $this->assertArrayHasKey('id', $tag);
+        $this->assertArrayHasKey('name', $tag);
+        $this->assertArrayHasKey('created_at', $tag);
+        $this->assertEquals($tag['name'], $_ENV['CONVERTKIT_API_TAG_NAME']);
     }
 
     /**
@@ -2141,13 +2151,17 @@ class ConvertKitAPITest extends TestCase
      */
     public function testCreateTagsThatExist()
     {
-        $result = $this->api->create_tags([
-            $_ENV['CONVERTKIT_API_TAG_NAME'],
-            $_ENV['CONVERTKIT_API_TAG_NAME_2'],
-        ]);
+        $result = $this->api->create_tags(
+            [
+                $_ENV['CONVERTKIT_API_TAG_NAME'],
+                $_ENV['CONVERTKIT_API_TAG_NAME_2'],
+            ]
+        );
 
-        // Assert failures.
-        $this->assertCount(2, $result->failures);
+        // Assert existing tags are returned.
+        $this->assertCount(2, $result->tags);
+        $this->assertEquals($result->tags[1]->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
+        $this->assertEquals($result->tags[0]->name, $_ENV['CONVERTKIT_API_TAG_NAME_2']);
     }
 
     /**
@@ -2530,7 +2544,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetTagSubscriptionsWithTaggedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_tag_subscriptions(
             tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
             tagged_after: $date
@@ -2586,7 +2600,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetTagSubscriptionsWithCreatedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_tag_subscriptions(
             tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
             created_after: $date
@@ -3396,7 +3410,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetSubscribersWithCreatedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_subscribers(
             created_after: $date
         );
@@ -3448,7 +3462,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testGetSubscribersWithUpdatedAfterParam()
     {
-        $date = new \DateTime('2024-01-01');
+        $date = new \DateTime('2022-01-01');
         $result = $this->api->get_subscribers(
             updated_after: $date
         );
