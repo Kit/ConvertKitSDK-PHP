@@ -130,14 +130,14 @@ trait ConvertKit_API_Traits
     /**
      * Gets growth stats
      *
-     * @param \DateTime $starting Gets stats for time period beginning on this date. Defaults to 90 days ago.
-     * @param \DateTime $ending   Gets stats for time period ending on this date. Defaults to today.
+     * @param \DateTime|null $starting Gets stats for time period beginning on this date. Defaults to 90 days ago.
+     * @param \DateTime|null $ending   Gets stats for time period ending on this date. Defaults to today.
      *
      * @see https://developers.convertkit.com/v4.html#get-growth-stats
      *
      * @return false|mixed
      */
-    public function get_growth_stats(\DateTime $starting = null, \DateTime $ending = null)
+    public function get_growth_stats(\DateTime|null $starting = null, \DateTime|null $ending = null)
     {
         return $this->get(
             'account/growth_stats',
@@ -308,16 +308,16 @@ trait ConvertKit_API_Traits
     /**
      * List subscribers for a form
      *
-     * @param integer   $form_id             Form ID.
-     * @param string    $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
-     * @param \DateTime $created_after       Filter subscribers who have been created after this date.
-     * @param \DateTime $created_before      Filter subscribers who have been created before this date.
-     * @param \DateTime $added_after         Filter subscribers who have been added to the form after this date.
-     * @param \DateTime $added_before        Filter subscribers who have been added to the form before this date.
-     * @param boolean   $include_total_count To include the total count of records in the response, use true.
-     * @param string    $after_cursor        Return results after the given pagination cursor.
-     * @param string    $before_cursor       Return results before the given pagination cursor.
-     * @param integer   $per_page            Number of results to return.
+     * @param integer        $form_id             Form ID.
+     * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
+     * @param \DateTime|null $created_after       Filter subscribers who have been created after this date.
+     * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
+     * @param \DateTime|null $added_after         Filter subscribers who have been added to the form after this date.
+     * @param \DateTime|null $added_before        Filter subscribers who have been added to the form before this date.
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-form
      *
@@ -326,10 +326,10 @@ trait ConvertKit_API_Traits
     public function get_form_subscriptions(
         int $form_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $added_after = null,
-        \DateTime $added_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $added_after = null,
+        \DateTime|null $added_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -435,16 +435,16 @@ trait ConvertKit_API_Traits
     /**
      * List subscribers for a sequence
      *
-     * @param integer   $sequence_id         Sequence ID.
-     * @param string    $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
-     * @param \DateTime $created_after       Filter subscribers who have been created after this date.
-     * @param \DateTime $created_before      Filter subscribers who have been created before this date.
-     * @param \DateTime $added_after         Filter subscribers who have been added to the form after this date.
-     * @param \DateTime $added_before        Filter subscribers who have been added to the form before this date.
-     * @param boolean   $include_total_count To include the total count of records in the response, use true.
-     * @param string    $after_cursor        Return results after the given pagination cursor.
-     * @param string    $before_cursor       Return results before the given pagination cursor.
-     * @param integer   $per_page            Number of results to return.
+     * @param integer        $sequence_id         Sequence ID.
+     * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
+     * @param \DateTime|null $created_after       Filter subscribers who have been created after this date.
+     * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
+     * @param \DateTime|null $added_after         Filter subscribers who have been added to the form after this date.
+     * @param \DateTime|null $added_before        Filter subscribers who have been added to the form before this date.
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-sequence
      *
@@ -453,10 +453,10 @@ trait ConvertKit_API_Traits
     public function get_sequence_subscriptions(
         int $sequence_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $added_after = null,
-        \DateTime $added_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $added_after = null,
+        \DateTime|null $added_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -651,16 +651,16 @@ trait ConvertKit_API_Traits
     /**
      * List subscribers for a tag
      *
-     * @param integer   $tag_id              Tag ID.
-     * @param string    $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
-     * @param \DateTime $created_after       Filter subscribers who have been created after this date.
-     * @param \DateTime $created_before      Filter subscribers who have been created before this date.
-     * @param \DateTime $tagged_after        Filter subscribers who have been tagged after this date.
-     * @param \DateTime $tagged_before       Filter subscribers who have been tagged before this date.
-     * @param boolean   $include_total_count To include the total count of records in the response, use true.
-     * @param string    $after_cursor        Return results after the given pagination cursor.
-     * @param string    $before_cursor       Return results before the given pagination cursor.
-     * @param integer   $per_page            Number of results to return.
+     * @param integer        $tag_id              Tag ID.
+     * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
+     * @param \DateTime|null $created_after       Filter subscribers who have been created after this date.
+     * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
+     * @param \DateTime|null $tagged_after        Filter subscribers who have been tagged after this date.
+     * @param \DateTime|null $tagged_before       Filter subscribers who have been tagged before this date.
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-tag
      *
@@ -669,10 +669,10 @@ trait ConvertKit_API_Traits
     public function get_tag_subscriptions(
         int $tag_id,
         string $subscriber_state = 'active',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $tagged_after = null,
-        \DateTime $tagged_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $tagged_after = null,
+        \DateTime|null $tagged_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -746,18 +746,18 @@ trait ConvertKit_API_Traits
     /**
      * List subscribers.
      *
-     * @param string    $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
-     * @param string    $email_address       Search susbcribers by email address. This is an exact match search.
-     * @param \DateTime $created_after       Filter subscribers who have been created after this date.
-     * @param \DateTime $created_before      Filter subscribers who have been created before this date.
-     * @param \DateTime $updated_after       Filter subscribers who have been updated after this date.
-     * @param \DateTime $updated_before      Filter subscribers who have been updated before this date.
-     * @param string    $sort_field          Sort Field (id|updated_at|cancelled_at).
-     * @param string    $sort_order          Sort Order (asc|desc).
-     * @param boolean   $include_total_count To include the total count of records in the response, use true.
-     * @param string    $after_cursor        Return results after the given pagination cursor.
-     * @param string    $before_cursor       Return results before the given pagination cursor.
-     * @param integer   $per_page            Number of results to return.
+     * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
+     * @param string         $email_address       Search susbcribers by email address. This is an exact match search.
+     * @param \DateTime|null $created_after       Filter subscribers who have been created after this date.
+     * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
+     * @param \DateTime|null $updated_after       Filter subscribers who have been updated after this date.
+     * @param \DateTime|null $updated_before      Filter subscribers who have been updated before this date.
+     * @param string         $sort_field          Sort Field (id|updated_at|cancelled_at).
+     * @param string         $sort_order          Sort Order (asc|desc).
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @since 2.0.0
      *
@@ -768,10 +768,10 @@ trait ConvertKit_API_Traits
     public function get_subscribers(
         string $subscriber_state = 'active',
         string $email_address = '',
-        \DateTime $created_after = null,
-        \DateTime $created_before = null,
-        \DateTime $updated_after = null,
-        \DateTime $updated_before = null,
+        \DateTime|null $created_after = null,
+        \DateTime|null $created_before = null,
+        \DateTime|null $updated_after = null,
+        \DateTime|null $updated_before = null,
         string $sort_field = 'id',
         string $sort_order = 'desc',
         bool $include_total_count = false,
@@ -1090,9 +1090,9 @@ trait ConvertKit_API_Traits
      * @param string               $content           The broadcast's email HTML content.
      * @param string               $description       An internal description of this broadcast.
      * @param boolean              $public            Specifies whether or not this is a public post.
-     * @param \DateTime            $published_at      Specifies the time that this post was published (applicable
+     * @param \DateTime|null       $published_at      Specifies the time that this post was published (applicable
      *                                                only to public posts).
-     * @param \DateTime            $send_at           Time that this broadcast should be sent; leave blank to create
+     * @param \DateTime|null       $send_at           Time that this broadcast should be sent; leave blank to create
      *                                                a draft broadcast. If set to a future time, this is the time that
      *                                                the broadcast will be scheduled to send.
      * @param string               $email_address     Sending email address; leave blank to use your account's
@@ -1115,8 +1115,8 @@ trait ConvertKit_API_Traits
         string $content = '',
         string $description = '',
         bool $public = false,
-        \DateTime $published_at = null,
-        \DateTime $send_at = null,
+        \DateTime|null $published_at = null,
+        \DateTime|null $send_at = null,
         string $email_address = '',
         string $email_template_id = '',
         string $thumbnail_alt = '',
@@ -1197,9 +1197,9 @@ trait ConvertKit_API_Traits
      * @param string               $content           The broadcast's email HTML content.
      * @param string               $description       An internal description of this broadcast.
      * @param boolean              $public            Specifies whether or not this is a public post.
-     * @param \DateTime            $published_at      Specifies the time that this post was published (applicable
+     * @param \DateTime|null       $published_at      Specifies the time that this post was published (applicable
      *                                                only to public posts).
-     * @param \DateTime            $send_at           Time that this broadcast should be sent; leave blank to create
+     * @param \DateTime|null       $send_at           Time that this broadcast should be sent; leave blank to create
      *                                                a draft broadcast. If set to a future time, this is the time that
      *                                                the broadcast will be scheduled to send.
      * @param string               $email_address     Sending email address; leave blank to use your account's
@@ -1223,8 +1223,8 @@ trait ConvertKit_API_Traits
         string $content = '',
         string $description = '',
         bool $public = false,
-        \DateTime $published_at = null,
-        \DateTime $send_at = null,
+        \DateTime|null $published_at = null,
+        \DateTime|null $send_at = null,
         string $email_address = '',
         string $email_template_id = '',
         string $thumbnail_alt = '',
@@ -1588,14 +1588,14 @@ trait ConvertKit_API_Traits
      * @param string                         $transaction_id   Transaction ID.
      * @param array<string,int|float|string> $products         Products.
      * @param string                         $currency         ISO Currency Code.
-     * @param string                         $first_name       First Name.
-     * @param string                         $status           Order Status.
+     * @param string|null                    $first_name       First Name.
+     * @param string|null                    $status           Order Status.
      * @param float                          $subtotal         Subtotal.
      * @param float                          $tax              Tax.
      * @param float                          $shipping         Shipping.
      * @param float                          $discount         Discount.
      * @param float                          $total            Total.
-     * @param \DateTime                      $transaction_time Transaction date and time.
+     * @param \DateTime|null                 $transaction_time Transaction date and time.
      *
      * @see https://developers.convertkit.com/v4.html#create-a-purchase
      *
@@ -1606,14 +1606,14 @@ trait ConvertKit_API_Traits
         string $transaction_id,
         array $products,
         string $currency = 'USD',
-        string $first_name = null,
-        string $status = null,
+        string|null $first_name = null,
+        string|null $status = null,
         float $subtotal = 0,
         float $tax = 0,
         float $shipping = 0,
         float $discount = 0,
         float $total = 0,
-        \DateTime $transaction_time = null
+        \DateTime|null $transaction_time = null
     ) {
         // Build parameters.
         $options = [
