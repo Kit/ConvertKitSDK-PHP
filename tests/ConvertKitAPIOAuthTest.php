@@ -438,6 +438,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
         );
         $result = $api->get_account();
 
+        $this->expectException(ClientException::class);
         $api = new ConvertKit_API(
             clientID: $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
             clientSecret: 'fakeClientSecret',
@@ -445,6 +446,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
         );
         $result = $api->get_account();
 
+        $this->expectException(ClientException::class);
         $api = new ConvertKit_API(
             clientID: $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
             clientSecret: $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET'],

@@ -482,7 +482,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
 
     /**
      * Test that create_subscribers() returns a ClientException
-     * when no data is specified, as this is only supported
+     * when attempting to create subscribers, as this is only supported
      * using OAuth.
      *
      * @since   2.2.0
