@@ -586,6 +586,23 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Updates the name of a tag.
+     *
+     * @param integer $tag_id Tag ID.
+     * @param string  $name   New name.
+     *
+     * @since 2.2.1
+     *
+     * @see https://developers.kit.com/api-reference/tags/update-tag-name
+     *
+     * @return false|mixed
+     */
+    public function update_tag_name(int $tag_id, string $name)
+    {
+        return $this->put(sprintf('tags/%s', $tag_id), ['name' => $name]);
+    }
+
+    /**
      * Tags a subscriber with the given existing Tag.
      *
      * @param integer $tag_id        Tag ID.
