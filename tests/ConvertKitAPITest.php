@@ -4256,6 +4256,29 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithTotalCount()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            include_total_count: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
      * Test that update_broadcast() throws a ClientException when an invalid
      * broadcast ID is specified.
      *
