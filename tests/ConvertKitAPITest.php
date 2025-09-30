@@ -4191,6 +4191,101 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_broadcast_link_clicks() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicks()
+    {
+        // Get broadcast link clicks.
+        $result = $this->api->get_broadcast_link_clicks(
+            $_ENV['CONVERTKIT_API_BROADCAST_ID'],
+            per_page: 1
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcast');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcast');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicksWithTotalCount()
+    {
+        $result = $this->api->get_broadcast_link_clicks(
+            $_ENV['CONVERTKIT_API_BROADCAST_ID'],
+            include_total_count: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcast');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicksWithInvalidBroadcastID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_broadcast_link_clicks(12345);
+    }
+
+    /**
      * Test that update_broadcast() throws a ClientException when an invalid
      * broadcast ID is specified.
      *
