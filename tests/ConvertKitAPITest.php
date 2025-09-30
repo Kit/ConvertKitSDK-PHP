@@ -1735,6 +1735,10 @@ class ConvertKitAPITest extends TestCase
             tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
             name: $_ENV['CONVERTKIT_API_TAG_NAME'],
         );
+
+        // Assert existing tag is returned.
+        $this->assertEquals($result->tag->id, (int) $_ENV['CONVERTKIT_API_TAG_ID']);
+        $this->assertEquals($result->tag->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
     }
 
     /**
