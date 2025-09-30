@@ -586,6 +586,43 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Tags the given subscribers with the given existing Tags.
+     *
+     * @param array<int,array<string,int>> $taggings     Taggings, in the format:
+     *   [
+     *    [
+     *      "tag_id" => 0,
+     *      "subscriber_id" => 0
+     *    ],
+     *    [
+     *      "tag_id" => 1,
+     *      "subscriber_id" => 1
+     *    ],
+     *   ].
+     * @param string                       $callback_url URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.2.1
+     *
+     * @see https://developers.kit.com/api-reference/tags/bulk-tag-subscribers
+     *
+     * @return false|mixed
+     */
+    public function tag_subscribers(array $taggings, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = $taggings;
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->post(
+            'bulk/tags/subscribers',
+            $options
+        );
+    }
+
+    /**
      * Tags a subscriber with the given existing Tag.
      *
      * @param integer $tag_id        Tag ID.
