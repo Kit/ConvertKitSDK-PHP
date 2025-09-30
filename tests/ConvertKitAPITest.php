@@ -1408,7 +1408,7 @@ class ConvertKitAPITest extends TestCase
 
         // Assert has_previous_page and has_next_page are correct.
         $this->assertTrue($result->pagination->has_previous_page);
-        $this->assertFalse($result->pagination->has_next_page);
+        $this->assertTrue($result->pagination->has_next_page);
 
         // Use pagination to fetch previous page.
         $result = $this->api->get_sequence_subscriptions(

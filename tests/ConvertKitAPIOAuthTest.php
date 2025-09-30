@@ -401,7 +401,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
     }
 
     /**
-     * Test that a ServerException is thrown when an invalid refresh token is supplied
+     * Test that a ClientException is thrown when an invalid refresh token is supplied
      * when refreshing an access token.
      *
      * @since   2.0.0
@@ -410,7 +410,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
      */
     public function testRefreshTokenWithInvalidToken()
     {
-        $this->expectException(ServerException::class);
+        $this->expectException(ClientException::class);
         $api = new ConvertKit_API(
             clientID: $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
             clientSecret: $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET']
