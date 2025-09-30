@@ -1734,10 +1734,10 @@ class ConvertKitAPITest extends TestCase
         // Create subscribers.
         $subscribers = [
             [
-                'email_address' => str_replace('@convertkit.com', '-1@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
             ],
             [
-                'email_address' => str_replace('@convertkit.com', '-2@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
             ],
         ];
         $result = $this->api->create_subscribers($subscribers);
@@ -1770,7 +1770,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that tag_subscribers() throws a ClientException when an invalid
+     * Test that tag_subscribers() returns failures when an invalid
      * tag ID is specified.
      *
      * @since   2.2.1
@@ -1782,10 +1782,10 @@ class ConvertKitAPITest extends TestCase
         // Create subscribers.
         $subscribers = [
             [
-                'email_address' => str_replace('@convertkit.com', '-1@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
             ],
             [
-                'email_address' => str_replace('@convertkit.com', '-2@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
             ],
         ];
         $result = $this->api->create_subscribers($subscribers);
@@ -1814,7 +1814,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that tag_subscribers() throws a ClientException when an invalid
+     * Test that tag_subscribers() returns failures when an invalid
      * subscriber ID is specified.
      *
      * @since   2.2.1

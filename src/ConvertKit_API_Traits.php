@@ -610,7 +610,7 @@ trait ConvertKit_API_Traits
     public function tag_subscribers(array $taggings, string $callback_url = '')
     {
         // Build parameters.
-        $options = $taggings;
+        $options = ['taggings' => $taggings];
         if (!empty($callback_url)) {
             $options['callback_url'] = $callback_url;
         }

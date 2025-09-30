@@ -283,6 +283,73 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
+     * Test that tag_subscribers() throws a ClientException when attempting
+     * to tag subscribers, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testTagSubscribers()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that tag_subscribers() throws a ClientException when an invalid
+     * tag ID is specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidTagID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Test that tag_subscribers() throws a ClientException when an invalid
+     * subscriber ID is specified, as this is only supported using OAuth.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidSubscriberID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 12345,
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 67890,
+                ],
+            ]
+        );
+    }
+
+    /**
      * Test that add_subscribers_to_forms() throws a ClientException when
      * attempting to add subscribers to forms, as this is only supported
      * using OAuth.
