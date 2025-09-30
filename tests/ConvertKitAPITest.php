@@ -1723,6 +1723,49 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_subscriber_stats() returns the expected data
+     * when using a valid subscriber ID.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStats()
+    {
+        $result = $this->api->get_subscriber_stats(
+            id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+        );
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('stats', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('bounced', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('open_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('click_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_open', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_click', get_object_vars($result->subscriber->stats));
+    }
+
+    /**
+     * Test that get_subscriber_stats() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStatsWithInvalidSubscriberID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_subscriber_stats(12345);
+    }
+
+    /**
      * Test that tag_subscriber_by_email() returns the expected data.
      *
      * @since   1.0.0
