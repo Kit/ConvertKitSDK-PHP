@@ -1,17 +1,23 @@
 {
   "name": "convertkit/convertkitapi",
-  "description": "ConvertKit PHP SDK for the ConvertKit API",
+  "description": "Kit PHP SDK for the Kit API",
   "keywords": [
     "convertkit",
+    "kit",
     "api",
-    "forms"
+    "forms",
+    "tags",
+    "sequences",
+    "broadcasts",
+    "emails",
+    "subscribers"
   ],
-  "homepage": "https://convertkit.com/",
+  "homepage": "https://developers.kit.com/welcome",
   "license": "GPLv3",
   "authors": [
     {
-      "name": "ConvertKit and contributors",
-      "homepage": "https://github.com/convertkit/convertkitsdk-php/contributors"
+      "name": "Kit and contributors",
+      "homepage": "https://github.com/kit/convertkitsdk-php/contributors"
     }
   ],
   "require": {
@@ -38,6 +44,17 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "create-docs": "phpDocumentor --directory=src --target=docs --template='vendor/saggre/phpdocumentor-markdown/themes/markdown'"
+    "create-docs": "phpDocumentor --directory=src --target=docs --template='vendor/saggre/phpdocumentor-markdown/themes/markdown'",
+    "phpcs": "vendor/bin/phpcs ./ -s -v",
+    "phpcbf": "vendor/bin/phpcbf ./ -s -v",
+    "phpcs-tests": "vendor/bin/phpcs ./tests --standard=phpcs.tests.xml -s -v",
+    "phpcbf-tests": "vendor/bin/phpcbf ./tests --standard=phpcs.tests.xml -s -v",
+    "phpstan": "vendor/bin/phpstan analyse --memory-limit=1250M",
+    "php-coding-standards": "vendor/bin/phpcs ./ -s -v",
+    "fix-php-coding-standards": "vendor/bin/phpcbf ./ -s -v",
+    "php-coding-standards-on-tests": "vendor/bin/phpcs ./tests --standard=phpcs.tests.xml -s -v",
+    "fix-php-coding-standards-on-tests": "vendor/bin/phpcbf ./tests --standard=phpcs.tests.xml -s -v",
+    "php-static-analysis": "vendor/bin/phpstan analyse --memory-limit=1250M",
+    "test": "vendor/bin/phpunit"
   }
 }
