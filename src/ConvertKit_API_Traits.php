@@ -1197,6 +1197,39 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List stats for a list of broadcasts.
+     *
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @since 2.2.1
+     *
+     * @see https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts
+     *
+     * @return false|mixed
+     */
+    public function get_broadcasts_stats(
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Send request.
+        return $this->get(
+            'broadcasts/stats',
+            $this->build_total_count_and_pagination_params(
+                [],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
      * Updates a broadcast.
      *
      * @param integer              $id                Broadcast ID.
