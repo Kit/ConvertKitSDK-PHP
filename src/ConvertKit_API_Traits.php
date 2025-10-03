@@ -45,14 +45,14 @@ trait ConvertKit_API_Traits
      *
      * @var string
      */
-    protected $oauth_authorize_url = 'https://app.convertkit.com/oauth/authorize';
+    protected $oauth_authorize_url = 'https://app.kit.com/oauth/authorize';
 
     /**
      * OAuth Token URL
      *
      * @var string
      */
-    protected $oauth_token_url = 'https://api.convertkit.com/oauth/token';
+    protected $oauth_token_url = 'https://api.kit.com/oauth/token';
 
     /**
      * Version of ConvertKit API
@@ -66,13 +66,13 @@ trait ConvertKit_API_Traits
      *
      * @var string
      */
-    protected $api_url_base = 'https://api.convertkit.com/';
+    protected $api_url_base = 'https://api.kit.com/';
 
 
     /**
      * Gets the current account
      *
-     * @see https://developers.convertkit.com/v4.html#get-current-account
+     * @see https://developers.kit.com/api-reference/accounts/get-current-account
      *
      * @return false|mixed
      */
@@ -84,7 +84,7 @@ trait ConvertKit_API_Traits
     /**
      * Gets the account's colors
      *
-     * @see https://developers.convertkit.com/v4.html#list-colors
+     * @see https://developers.kit.com/api-reference/accounts/list-colors
      *
      * @return false|mixed
      */
@@ -94,11 +94,11 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Gets the account's colors
+     * Updates the account's colors
      *
      * @param array<string, string> $colors Hex colors.
      *
-     * @see https://developers.convertkit.com/v4.html#list-colors
+     * @see https://developers.kit.com/api-reference/accounts/update-colors
      *
      * @return false|mixed
      */
@@ -113,7 +113,7 @@ trait ConvertKit_API_Traits
     /**
      * Gets the Creator Profile
      *
-     * @see https://developers.convertkit.com/v4.html#get-creator-profile
+     * @see https://developers.kit.com/api-reference/accounts/get-creator-profile
      *
      * @return false|mixed
      */
@@ -125,7 +125,7 @@ trait ConvertKit_API_Traits
     /**
      * Gets email stats
      *
-     * @see https://developers.convertkit.com/v4.html#get-email-stats
+     * @see https://developers.kit.com/api-reference/accounts/get-email-stats
      *
      * @return false|mixed
      */
@@ -140,7 +140,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $starting Gets stats for time period beginning on this date. Defaults to 90 days ago.
      * @param \DateTime|null $ending   Gets stats for time period ending on this date. Defaults to today.
      *
-     * @see https://developers.convertkit.com/v4.html#get-growth-stats
+     * @see https://developers.kit.com/api-reference/accounts/get-growth-stats
      *
      * @return false|mixed
      */
@@ -166,7 +166,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#convertkit-api-forms
+     * @see https://developers.kit.com/api-reference/forms/list-forms
      *
      * @return mixed|array<int,\stdClass>
      */
@@ -203,7 +203,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#convertkit-api-forms
+     * @see https://developers.kit.com/api-reference/forms/list-forms
      *
      * @return mixed|array<int,\stdClass>
      */
@@ -237,7 +237,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.1.0
      *
-     * @see https://developers.kit.com/v4.html#bulk-add-subscribers-to-forms
+     * @see https://developers.kit.com/api-reference/forms/bulk-add-subscribers-to-forms
      *
      * @return mixed|object
      */
@@ -263,7 +263,7 @@ trait ConvertKit_API_Traits
      * @param string  $email_address Email Address.
      * @param string  $referrer      Referrer.
      *
-     * @see https://developers.convertkit.com/v4.html#add-subscriber-to-form-by-email-address
+     * @see https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address
      *
      * @return false|mixed
      */
@@ -290,7 +290,7 @@ trait ConvertKit_API_Traits
      * @param integer $subscriber_id Subscriber ID.
      * @param string  $referrer      Referrer URL.
      *
-     * @see https://developers.convertkit.com/v4.html#add-subscriber-to-form
+     * @see https://developers.kit.com/api-reference/forms/add-subscriber-to-form
      *
      * @since 2.0.0
      *
@@ -326,7 +326,7 @@ trait ConvertKit_API_Traits
      * @param string         $before_cursor       Return results before the given pagination cursor.
      * @param integer        $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-form
+     * @see https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form
      *
      * @return false|mixed
      */
@@ -382,7 +382,7 @@ trait ConvertKit_API_Traits
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-sequences
+     * @see https://developers.kit.com/api-reference/sequences/list-sequences
      *
      * @return false|mixed
      */
@@ -410,7 +410,7 @@ trait ConvertKit_API_Traits
      * @param integer $sequence_id   Sequence ID.
      * @param string  $email_address Email Address.
      *
-     * @see https://developers.convertkit.com/v4.html#add-subscriber-to-sequence-by-email-address
+     * @see https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence-by-email-address
      *
      * @return false|mixed
      */
@@ -428,7 +428,7 @@ trait ConvertKit_API_Traits
      * @param integer $sequence_id   Sequence ID.
      * @param integer $subscriber_id Subscriber ID.
      *
-     * @see https://developers.convertkit.com/v4.html#add-subscriber-to-sequence
+     * @see https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence
      *
      * @since 2.0.0
      *
@@ -453,7 +453,7 @@ trait ConvertKit_API_Traits
      * @param string         $before_cursor       Return results before the given pagination cursor.
      * @param integer        $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-sequence
+     * @see https://developers.kit.com/api-reference/sequences/list-subscribers-for-a-sequence
      *
      * @return false|mixed
      */
@@ -509,7 +509,7 @@ trait ConvertKit_API_Traits
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-tags
+     * @see https://developers.kit.com/api-reference/tags/list-tags
      *
      * @return mixed|array<int,\stdClass>
      */
@@ -538,7 +538,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-tag
+     * @see https://developers.kit.com/api-reference/tags/create-a-tag
      *
      * @return false|mixed
      */
@@ -558,7 +558,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.1.0
      *
-     * @see https://developers.convertkit.com/v4.html#bulk-create-tags
+     * @see https://developers.kit.com/api-reference/tags/bulk-create-tags
      *
      * @return false|mixed
      */
@@ -586,40 +586,20 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Tags the given subscribers with the given existing Tags.
+     * Updates the name of a tag.
      *
-     * @param array<int,array<string,int>> $taggings     Taggings, in the format:
-     *   [
-     *    [
-     *      "tag_id" => 0,
-     *      "subscriber_id" => 0
-     *    ],
-     *    [
-     *      "tag_id" => 1,
-     *      "subscriber_id" => 1
-     *    ],
-     *   ].
-     * @param string                       $callback_url URL to notify for large batch size when async processing complete.
+     * @param integer $tag_id Tag ID.
+     * @param string  $name   New name.
      *
      * @since 2.2.1
      *
-     * @see https://developers.kit.com/api-reference/tags/bulk-tag-subscribers
+     * @see https://developers.kit.com/api-reference/tags/update-tag-name
      *
      * @return false|mixed
      */
-    public function tag_subscribers(array $taggings, string $callback_url = '')
+    public function update_tag_name(int $tag_id, string $name)
     {
-        // Build parameters.
-        $options = ['taggings' => $taggings];
-        if (!empty($callback_url)) {
-            $options['callback_url'] = $callback_url;
-        }
-
-        // Send request.
-        return $this->post(
-            'bulk/tags/subscribers',
-            $options
-        );
+        return $this->put(sprintf('tags/%s', $tag_id), ['name' => $name]);
     }
 
     /**
@@ -628,7 +608,7 @@ trait ConvertKit_API_Traits
      * @param integer $tag_id        Tag ID.
      * @param string  $email_address Email Address.
      *
-     * @see https://developers.convertkit.com/v4.html#tag-a-subscriber-by-email-address
+     * @see https://developers.kit.com/api-reference/tags/tag-a-subscriber-by-email-address
      *
      * @return false|mixed
      */
@@ -646,7 +626,7 @@ trait ConvertKit_API_Traits
      * @param integer $tag_id        Tag ID.
      * @param integer $subscriber_id Subscriber ID.
      *
-     * @see https://developers.convertkit.com/v4.html#tag-a-subscriber
+     * @see https://developers.kit.com/api-reference/tags/tag-a-subscriber
      *
      * @return false|mixed
      */
@@ -663,7 +643,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#remove-tag-from-subscriber
+     * @see https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber
      *
      * @return false|mixed
      */
@@ -680,7 +660,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#remove-tag-from-subscriber-by-email-address
+     * @see https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address
      *
      * @return false|mixed
      */
@@ -706,7 +686,7 @@ trait ConvertKit_API_Traits
      * @param string         $before_cursor       Return results before the given pagination cursor.
      * @param integer        $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-subscribers-for-a-tag
+     * @see https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag
      *
      * @return false|mixed
      */
@@ -764,7 +744,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#convertkit-api-email-templates
+     * @see https://developers.kit.com/api-reference/email-templates/list-email-templates
      *
      * @return false|mixed
      */
@@ -805,7 +785,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#list-subscribers
+     * @see https://developers.kit.com/api-reference/subscribers/list-subscribers
      *
      * @return false|mixed
      */
@@ -878,7 +858,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/create-a-subscriber
      *
      * @return mixed
      */
@@ -916,7 +896,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#bulk-create-subscribers
+     * @see https://developers.kit.com/api-reference/subscribers/bulk-create-subscribers
      *
      * @return mixed
      */
@@ -944,7 +924,7 @@ trait ConvertKit_API_Traits
      *
      * @throws \InvalidArgumentException If the email address is not a valid email format.
      *
-     * @see https://developers.convertkit.com/v4.html#get-a-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/get-a-subscriber
      *
      * @return false|integer
      */
@@ -984,7 +964,7 @@ trait ConvertKit_API_Traits
      *
      * @param integer $subscriber_id Subscriber ID.
      *
-     * @see https://developers.convertkit.com/v4.html#get-a-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/get-a-subscriber
      *
      * @return mixed|integer
      */
@@ -1001,7 +981,7 @@ trait ConvertKit_API_Traits
      * @param string                $email_address New Email Address.
      * @param array<string, string> $fields        Updated Custom Fields.
      *
-     * @see https://developers.convertkit.com/v4.html#update-a-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/update-a-subscriber
      *
      * @return mixed
      */
@@ -1036,7 +1016,7 @@ trait ConvertKit_API_Traits
      *
      * @param string $email_address Email Address.
      *
-     * @see https://developers.convertkit.com/v4.html#unsubscribe-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber
      *
      * @return mixed|object
      */
@@ -1055,13 +1035,27 @@ trait ConvertKit_API_Traits
      *
      * @param integer $subscriber_id Subscriber ID.
      *
-     * @see https://developers.convertkit.com/v4.html#unsubscribe-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber
      *
      * @return mixed|object
      */
     public function unsubscribe(int $subscriber_id)
     {
         return $this->post(sprintf('subscribers/%s/unsubscribe', $subscriber_id));
+    }
+
+    /**
+     * Get the email statistics for a specific subscriber.
+     *
+     * @param integer $id Subscriber ID.
+     *
+     * @see https://developers.kit.com/api-reference/subscribers/list-stats-for-a-subscriber
+     *
+     * @return mixed|object
+     */
+    public function get_subscriber_stats(int $id)
+    {
+        return $this->get(sprintf('subscribers/%s/stats', $id));
     }
 
     /**
@@ -1073,7 +1067,7 @@ trait ConvertKit_API_Traits
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-tags-for-a-subscriber
+     * @see https://developers.kit.com/api-reference/subscribers/list-tags-for-a-subscriber
      *
      * @return mixed|array<int,\stdClass>
      */
@@ -1104,7 +1098,7 @@ trait ConvertKit_API_Traits
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
      *
-     * @see https://developers.convertkit.com/v4.html#list-broadcasts
+     * @see https://developers.kit.com/api-reference/broadcasts/list-broadcasts
      *
      * @return false|mixed
      */
@@ -1150,7 +1144,7 @@ trait ConvertKit_API_Traits
      * @param string               $preview_text      Specify the preview text of the email.
      * @param array<string,string> $subscriber_filter Filter subscriber(s) to send the email to.
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-broadcast
+     * @see https://developers.kit.com/api-reference/broadcasts/create-a-broadcast
      *
      * @return mixed|object
      */
@@ -1209,7 +1203,7 @@ trait ConvertKit_API_Traits
      *
      * @param integer $id Broadcast ID.
      *
-     * @see https://developers.convertkit.com/v4.html#get-a-broadcast
+     * @see https://developers.kit.com/api-reference/broadcasts/get-a-broadcast
      *
      * @return mixed|object
      */
@@ -1224,13 +1218,44 @@ trait ConvertKit_API_Traits
      *
      * @param integer $id Broadcast ID.
      *
-     * @see https://developers.convertkit.com/v4.html#get-stats
+     * @see https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-broadcast
      *
      * @return mixed|object
      */
     public function get_broadcast_stats(int $id)
     {
         return $this->get(sprintf('broadcasts/%s/stats', $id));
+    }
+
+    /**
+     * List link clicks for a specific broadcast.
+     *
+     * @param integer $id            Broadcast ID.
+     * @param string  $after_cursor  Return results after the given pagination cursor.
+     * @param string  $before_cursor Return results before the given pagination cursor.
+     * @param integer $per_page      Number of results to return.
+     *
+     * @since 2.2.1
+     *
+     * @see https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast
+     *
+     * @return false|mixed
+     */
+    public function get_broadcast_link_clicks(
+        int $id,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Send request.
+        return $this->get(
+            sprintf('broadcasts/%s/clicks', $id),
+            $this->build_total_count_and_pagination_params(
+                after_cursor: $after_cursor,
+                before_cursor: $before_cursor,
+                per_page: $per_page
+            )
+        );
     }
 
     /**
@@ -1257,7 +1282,7 @@ trait ConvertKit_API_Traits
      * @param string               $preview_text      Specify the preview text of the email.
      * @param array<string,string> $subscriber_filter Filter subscriber(s) to send the email to.
      *
-     * @see https://developers.convertkit.com/#create-a-broadcast
+     * @see https://developers.kit.com/api-reference/broadcasts/update-a-broadcast
      *
      * @return mixed|object
      */
@@ -1319,7 +1344,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#delete-a-broadcast
+     * @see https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast
      *
      * @return mixed|object
      */
@@ -1338,7 +1363,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#list-webhooks
+     * @see https://developers.kit.com/api-reference/webhooks/list-webhooks
      *
      * @return false|mixed
      */
@@ -1370,7 +1395,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-webhook
+     * @see https://developers.kit.com/api-reference/webhooks/create-a-webhook
      *
      * @throws \InvalidArgumentException If the event is not supported.
      *
@@ -1446,7 +1471,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#delete-a-webhook
+     * @see https://developers.kit.com/api-reference/webhooks/delete-a-webhook
      *
      * @return mixed|object
      */
@@ -1465,7 +1490,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#list-custom-fields
+     * @see https://developers.kit.com/api-reference/custom-fields/list-custom-fields
      *
      * @return false|mixed
      */
@@ -1495,7 +1520,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-custom-field
+     * @see https://developers.kit.com/api-reference/custom-fields/create-a-custom-field
      *
      * @return mixed|object
      */
@@ -1515,7 +1540,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#bulk-create-custom-fields
+     * @see https://developers.kit.com/api-reference/custom-fields/bulk-create-custom-fields
      *
      * @return mixed|object
      */
@@ -1550,7 +1575,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#update-a-custom-field
+     * @see https://developers.kit.com/api-reference/custom-fields/update-a-custom-field
      *
      * @return mixed|object
      */
@@ -1569,7 +1594,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/#destroy-field
+     * @see https://developers.kit.com/api-reference/custom-fields/delete-custom-field
      *
      * @return mixed|object
      */
@@ -1588,7 +1613,7 @@ trait ConvertKit_API_Traits
      *
      * @since 1.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#list-purchases
+     * @see https://developers.kit.com/api-reference/purchases/list-purchases
      *
      * @return false|mixed
      */
@@ -1616,7 +1641,7 @@ trait ConvertKit_API_Traits
      *
      * @param integer $purchase_id Purchase ID.
      *
-     * @see https://developers.convertkit.com/v4.html#get-a-purchase
+     * @see https://developers.kit.com/api-reference/purchases/get-a-purchase
      *
      * @return mixed|object
      */
@@ -1641,7 +1666,7 @@ trait ConvertKit_API_Traits
      * @param float                          $total            Total.
      * @param \DateTime|null                 $transaction_time Transaction date and time.
      *
-     * @see https://developers.convertkit.com/v4.html#create-a-purchase
+     * @see https://developers.kit.com/api-reference/purchases/create-a-purchase
      *
      * @return mixed|object
      */
@@ -1703,7 +1728,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.convertkit.com/v4.html#convertkit-api-segments
+     * @see https://developers.kit.com/api-reference/segments/list-segments
      *
      * @return false|mixed
      */
