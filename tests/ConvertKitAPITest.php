@@ -3455,10 +3455,10 @@ class ConvertKitAPITest extends TestCase
     {
         $subscribers = [
             [
-                'email_address' => str_replace('@convertkit.com', '-1@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
             ],
             [
-                'email_address' => str_replace('@convertkit.com', '-2@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
             ],
         ];
         $result = $this->api->create_subscribers($subscribers);
@@ -3759,7 +3759,7 @@ class ConvertKitAPITest extends TestCase
     public function testUnsubscribeByEmailWithNotSubscribedEmailAddress()
     {
         $this->expectException(ClientException::class);
-        $subscriber = $this->api->unsubscribe_by_email('not-subscribed@convertkit.com');
+        $subscriber = $this->api->unsubscribe_by_email('not-subscribed@kit.com');
     }
 
     /**
@@ -5165,7 +5165,7 @@ class ConvertKitAPITest extends TestCase
     public function testGetResourceInaccessibleURL()
     {
         $this->expectException(ClientException::class);
-        $markup = $this->api->get_resource('https://convertkit.com/a/url/that/does/not/exist');
+        $markup = $this->api->get_resource('https://kit.com/a/url/that/does/not/exist');
     }
 
     /**

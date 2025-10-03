@@ -35,7 +35,7 @@ Commit the updated files, which should comprise of:
 
 ## Create a New Release
 
-[Create a New Release](https://github.com/ConvertKit/convertkitsdk-php/releases/new), completing the following:
+[Create a New Release](https://github.com/kit/convertkitsdk-php/releases/new), completing the following:
 
 - Choose a tag: Click this button and enter the new version number (e.g. `1.0`)
 - Release title: The version number (e.g. `1.0`)
@@ -91,4 +91,4 @@ When you're happy with the above, click `Publish Release`.
 
 This will then make the release available to developers, who can include it manually or using composer.
 
-The release will also be available to view on the [Releases](https://github.com/ConvertKit/convertkitsdk-php/releases) section of this GitHub repository.
+The release will also be available to view on the [Releases](https://github.com/kit/convertkitsdk-php/releases) section of this GitHub repository.

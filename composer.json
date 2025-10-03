@@ -1,17 +1,23 @@
 {
   "name": "convertkit/convertkitapi",
-  "description": "ConvertKit PHP SDK for the ConvertKit API",
+  "description": "Kit PHP SDK for the Kit API",
   "keywords": [
     "convertkit",
+    "kit",
     "api",
-    "forms"
+    "forms",
+    "tags",
+    "sequences",
+    "broadcasts",
+    "emails",
+    "subscribers"
   ],
-  "homepage": "https://convertkit.com/",
+  "homepage": "https://developers.kit.com/welcome",
   "license": "GPLv3",
   "authors": [
     {
-      "name": "ConvertKit and contributors",
-      "homepage": "https://github.com/convertkit/convertkitsdk-php/contributors"
+      "name": "Kit and contributors",
+      "homepage": "https://github.com/kit/convertkitsdk-php/contributors"
     }
   ],
   "require": {
