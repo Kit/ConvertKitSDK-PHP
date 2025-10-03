@@ -1723,6 +1723,59 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that update_tag_name() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagName()
+    {
+        $result = $this->api->update_tag_name(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+        );
+
+        // Assert existing tag is returned.
+        $this->assertEquals($result->tag->id, (int) $_ENV['CONVERTKIT_API_TAG_ID']);
+        $this->assertEquals($result->tag->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithInvalidTagID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->update_tag_name(
+            tag_id: 12345,
+            name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+        );
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when a blank
+     * name is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithBlankName()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->update_tag_name(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            name: ''
+        );
+    }
+
+    /**
      * Test that tag_subscriber_by_email() returns the expected data.
      *
      * @since   1.0.0
