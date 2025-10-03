@@ -1045,6 +1045,20 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Get the email statistics for a specific subscriber.
+     *
+     * @param integer $id Subscriber ID.
+     *
+     * @see https://developers.kit.com/api-reference/subscribers/list-stats-for-a-subscriber
+     *
+     * @return mixed|object
+     */
+    public function get_subscriber_stats(int $id)
+    {
+        return $this->get(sprintf('subscribers/%s/stats', $id));
+    }
+
+    /**
      * Get a list of the tags for a subscriber.
      *
      * @param integer $subscriber_id       Subscriber ID.
