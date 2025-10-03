@@ -4328,6 +4328,94 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_broadcasts_stats() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStats()
+    {
+        // Get broadcasts stats.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Store the Broadcast ID to check it's different from the next broadcast.
+        $id = $result->broadcasts[0]->id;
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID is different from the previous broadcast.
+        $this->assertNotEquals($id, $result->broadcasts[0]->id);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID matches the first broadcast.
+        $this->assertEquals($id, $result->broadcasts[0]->id);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithTotalCount()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            include_total_count: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
      * Test that update_broadcast() throws a ClientException when an invalid
      * broadcast ID is specified.
      *
