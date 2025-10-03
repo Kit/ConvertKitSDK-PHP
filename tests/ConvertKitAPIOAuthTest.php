@@ -267,7 +267,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
         // Confirm the OAuth URL returned is correct.
         $this->assertEquals(
             $this->api->get_oauth_url($_ENV['CONVERTKIT_OAUTH_REDIRECT_URI']),
-            'https://app.convertkit.com/oauth/authorize?' . http_build_query([
+            'https://app.kit.com/oauth/authorize?' . http_build_query([
                 'client_id' => $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
                 'redirect_uri' => $_ENV['CONVERTKIT_OAUTH_REDIRECT_URI'],
                 'response_type' => 'code',
@@ -401,7 +401,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
     }
 
     /**
-     * Test that a ServerException is thrown when an invalid refresh token is supplied
+     * Test that a ClientException is thrown when an invalid refresh token is supplied
      * when refreshing an access token.
      *
      * @since   2.0.0
@@ -410,7 +410,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
      */
     public function testRefreshTokenWithInvalidToken()
     {
-        $this->expectException(ServerException::class);
+        $this->expectException(ClientException::class);
         $api = new ConvertKit_API(
             clientID: $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
             clientSecret: $_ENV['CONVERTKIT_OAUTH_CLIENT_SECRET']
