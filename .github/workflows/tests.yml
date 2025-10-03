@@ -38,6 +38,21 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: none
 
+      # Exchange API Keys and Secrets for OAuth Tokens.
+      - name: Exchange API Key and Secret for OAuth Tokens
+        id: get-oauth-tokens
+        run: |
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ env.CONVERTKIT_API_KEY }}&api_secret=${{ env.CONVERTKIT_API_SECRET }}&client_id=${{ env.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ env.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          access_token=$(echo "$response" | jq -r '.oauth.access_token')
+          refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
+          echo "CONVERTKIT_OAUTH_ACCESS_TOKEN=$access_token" >> $GITHUB_ENV
+          echo "CONVERTKIT_OAUTH_REFRESH_TOKEN=$refresh_token" >> $GITHUB_ENV
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ env.CONVERTKIT_API_KEY_NO_DATA }}&api_secret=${{ env.CONVERTKIT_API_SECRET_NO_DATA }}&client_id=${{ env.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ env.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          access_token=$(echo "$response" | jq -r '.oauth.access_token')
+          refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
+          echo "CONVERTKIT_OAUTH_ACCESS_TOKEN_NO_DATA=$access_token" >> $GITHUB_ENV
+          echo "CONVERTKIT_OAUTH_REFRESH_TOKEN_NO_DATA=$refresh_token" >> $GITHUB_ENV
+
       # Write any secrets, such as API keys, to the .env.dist.testing file now.
       # Make sure your committed .env.dist.testing file ends with a newline.
       # The formatting of the contents to include a blank newline is deliberate.
