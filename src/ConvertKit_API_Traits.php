@@ -605,7 +605,7 @@ trait ConvertKit_API_Traits
     /**
      * Tags the given subscribers with the given existing Tags.
      *
-     * @param array<int,array<string,int>> $taggings     Taggings, in the format:
+     * @param array<int,array<string>> $taggings     Taggings, in the format:
      *   [
      *    [
      *      "tag_id" => 0,
@@ -616,7 +616,7 @@ trait ConvertKit_API_Traits
      *      "subscriber_id" => 1
      *    ],
      *   ].
-     * @param string                       $callback_url URL to notify for large batch size when async processing complete.
+     * @param string                   $callback_url URL to notify for large batch size when async processing complete.
      *
      * @since 2.2.1
      *
