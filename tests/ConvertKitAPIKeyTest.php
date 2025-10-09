@@ -247,8 +247,8 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
-     * Test that create_tags() throws a ClientException when attempting
-     * to create blank tags, as this is only supported using OAuth.
+     * Skip this test from ConvertKitAPITest, as testCreateTags() above
+     * confirms a ClientException is thrown.
      *
      * @since   2.2.0
      *
@@ -256,16 +256,12 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
      */
     public function testCreateTagsBlank()
     {
-        $this->expectException(ClientException::class);
-        $result = $this->api->create_tags([
-            '',
-            '',
-        ]);
+        $this->markTestSkipped('testCreateTags() above confirms a ClientException is thrown.');
     }
 
     /**
-     * Test that create_tags() throws a ClientException when creating
-     * tags that already exists, as this is only supported using OAuth.
+     * Skip this test from ConvertKitAPITest, as testCreateTags() above
+     * confirms a ClientException is thrown.
      *
      * @since   2.2.0
      *
@@ -273,13 +269,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
      */
     public function testCreateTagsThatExist()
     {
-        $this->expectException(ClientException::class);
-        $result = $this->api->create_tags(
-            [
-                $_ENV['CONVERTKIT_API_TAG_NAME'],
-                $_ENV['CONVERTKIT_API_TAG_NAME_2'],
-            ]
-        );
+        $this->markTestSkipped('testCreateTags() above confirms a ClientException is thrown.');
     }
 
     /**
