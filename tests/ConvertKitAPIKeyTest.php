@@ -276,7 +276,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
      * Test that tag_subscribers() throws a ClientException when attempting
      * to tag subscribers, as this is only supported using OAuth.
      *
-     * @since   2.2.0
+     * @since   2.2.1
      *
      * @return void
      */
@@ -291,6 +291,32 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
                 ],
             ]
         );
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testTagSubscribers() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidTagID()
+    {
+        $this->markTestSkipped('testTagSubscribers() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testTagSubscribers() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidSubscriberID()
+    {
+        $this->markTestSkipped('testTagSubscribers() above confirms a ClientException is thrown.');
     }
 
     /**

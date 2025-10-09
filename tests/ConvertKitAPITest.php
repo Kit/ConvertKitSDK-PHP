@@ -1819,6 +1819,125 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that tag_subscribers() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribers()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+        $this->assertCount(2, $result->subscribers);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidTagID()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidSubscriberID()
+    {
+        // Tag subscribers that do not exist.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 12345,
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 67890,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
      * Test that tag_subscriber_by_email() returns the expected data.
      *
      * @since   1.0.0
