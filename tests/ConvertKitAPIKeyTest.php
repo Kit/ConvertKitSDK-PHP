@@ -247,6 +247,53 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
+     * Skip this test from ConvertKitAPITest, as testCreateTags() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateTagsBlank()
+    {
+        $this->markTestSkipped('testCreateTags() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreateTags() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateTagsThatExist()
+    {
+        $this->markTestSkipped('testCreateTags() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Test that tag_subscribers() throws a ClientException when attempting
+     * to tag subscribers, as this is only supported using OAuth.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testTagSubscribers()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+                ],
+            ]
+        );
+    }
+
+    /**
      * Test that add_subscribers_to_forms() throws a ClientException when
      * attempting to add subscribers to forms, as this is only supported
      * using OAuth.
@@ -284,6 +331,58 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
+     * Skip this test from ConvertKitAPITest, as testAddSubscribersToForms() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrer()
+    {
+        $this->markTestSkipped('testAddSubscribersToForms() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testAddSubscribersToForms() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrerUTMParams()
+    {
+        $this->markTestSkipped('testAddSubscribersToForms() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testAddSubscribersToForms() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidFormIDs()
+    {
+        $this->markTestSkipped('testAddSubscribersToForms() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testAddSubscribersToForms() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidSubscriberIDs()
+    {
+        $this->markTestSkipped('testAddSubscribersToForms() above confirms a ClientException is thrown.');
+    }
+
+    /**
      * Test that create_subscribers() returns a ClientException
      * when attempting to create subscribers, as this is only supported
      * using OAuth.
@@ -304,6 +403,32 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
             ],
         ];
         $result = $this->api->create_subscribers($subscribers);
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreateSubscribersWithBlankData() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithBlankData()
+    {
+        $this->markTestSkipped('testCreateSubscribers() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreateSubscribersWithBlankData() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithInvalidEmailAddresses()
+    {
+        $this->markTestSkipped('testCreateSubscribers() above confirms a ClientException is thrown.');
     }
 
     /**
@@ -339,6 +464,32 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
+     * Skip this test from ConvertKitAPITest, as testGetPurchases() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesWithTotalCount()
+    {
+        $this->markTestSkipped('testGetPurchases() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testGetPurchases() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesPagination()
+    {
+        $this->markTestSkipped('testGetPurchases() above confirms a ClientException is thrown.');
+    }
+
+    /**
      * Test that get_purchases() throws a ClientException
      * when a purchase ID is specified, as this is only
      * supported using OAuth.
@@ -351,6 +502,19 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     {
         $this->expectException(ClientException::class);
         $result = $this->api->get_purchase(12345);
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testGetPurchase() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testGetPurchaseWithInvalidID()
+    {
+        $this->markTestSkipped('testGetPurchase() above confirms a ClientException is thrown.');
     }
 
     /**
@@ -397,5 +561,44 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
             total: 21.00,
             transaction_time: new DateTime('now'),
         );
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreatePurchase() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithInvalidEmailAddress()
+    {
+        $this->markTestSkipped('testCreatePurchase() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreatePurchase() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithBlankTransactionID()
+    {
+        $this->markTestSkipped('testCreatePurchase() above confirms a ClientException is thrown.');
+    }
+
+    /**
+     * Skip this test from ConvertKitAPITest, as testCreatePurchase() above
+     * confirms a ClientException is thrown.
+     *
+     * @since   2.2.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithNoProducts()
+    {
+        $this->markTestSkipped('testCreatePurchase() above confirms a ClientException is thrown.');
     }
 }
