@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: ConvertKit support
-    url: https://convertkit.com/support/
+  - name: Kit support
+    url: https://kit.com/support/
     about: |
-      Please only file issues here that you believe represent actual bugs or feature requests for the ConvertKit PHP SDK.
+      Please only file issues here that you believe represent actual bugs or feature requests for the Kit PHP SDK.
 
-      If you're having general trouble with your ConvertKit integration, please reach out to support.
+      If you're having general trouble with your Kit integration, please reach out to support.

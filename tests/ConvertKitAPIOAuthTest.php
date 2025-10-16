@@ -267,7 +267,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
         // Confirm the OAuth URL returned is correct.
         $this->assertEquals(
             $this->api->get_oauth_url($_ENV['CONVERTKIT_OAUTH_REDIRECT_URI']),
-            'https://app.convertkit.com/oauth/authorize?' . http_build_query([
+            'https://app.kit.com/oauth/authorize?' . http_build_query([
                 'client_id' => $_ENV['CONVERTKIT_OAUTH_CLIENT_ID'],
                 'redirect_uri' => $_ENV['CONVERTKIT_OAUTH_REDIRECT_URI'],
                 'response_type' => 'code',

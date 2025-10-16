@@ -1,275 +1,86 @@
 
-ConvertKit API Class
+ConvertKit API Traits
 
 ***
 
-* Full name: `\ConvertKit_API\ConvertKit_API`
-
-## Constants
-
-| Constant  | Visibility | Type   | Value   |
-|-----------|------------|--------|---------|
-| `VERSION` | public     | string | '2.0.0' |
+* Full name: `\ConvertKit_API\ConvertKit_API_Traits`
 
 ## Properties
 
-### debug
+### client_id
 
-Debug
+ConvertKit OAuth Application Client ID
 
 ```php
-protected bool $debug
+protected string $client_id
 ```
 
 ***
+### client_secret
 
-### debug_logger
-
-Debug
+ConvertKit OAuth Application Client Secret
 
 ```php
-protected \Monolog\Logger $debug_logger
+protected string $client_secret
 ```
 
 ***
+### access_token
 
-### client
-
-Guzzle Http ClientInterface
+Access Token
 
 ```php
-protected \GuzzleHttp\ClientInterface $client
+protected string $access_token
 ```
 
 ***
+### api_key
 
-### response
-
-Guzzle Http Response
+API Key
 
 ```php
-protected \Psr\Http\Message\ResponseInterface $response
+protected string $api_key
+```
+
+***
+### oauth_authorize_url
+
+OAuth Authorization URL
+
+```php
+protected string $oauth_authorize_url
+```
+
+***
+### oauth_token_url
+
+OAuth Token URL
+
+```php
+protected string $oauth_token_url
+```
+
+***
+### api_version
+
+Version of ConvertKit API
+
+```php
+protected string $api_version
+```
+
+***
+### api_url_base
+
+ConvertKit API URL
+
+```php
+protected string $api_url_base
 ```
 
 ***
 
 ## Methods
-
-### __construct
-
-Constructor for ConvertKitAPI instance
-
-```php
-public __construct(string $clientID = '', string $clientSecret = '', string $accessToken = '', string $apiKey = '', bool $debug = false, string $debugLogFileLocation = ''): mixed
-```
-
-**Parameters:**
-
-| Parameter               | Type       | Description                                  |
-|-------------------------|------------|----------------------------------------------|
-| `$clientID`             | **string** | OAuth Client ID.                             |
-| `$clientSecret`         | **string** | OAuth Client Secret.                         |
-| `$accessToken`          | **string** | OAuth Access Token.                          |
-| `$apiKey`               | **string** | API Key.                                     |
-| `$debug`                | **bool**   | Log requests to debugger.                    |
-| `$debugLogFileLocation` | **string** | Path and filename of debug file to write to. |
-
-***
-
-### set_http_client
-
-Set the Guzzle client implementation to use for API requests.
-
-```php
-public set_http_client(\GuzzleHttp\ClientInterface $client): void
-```
-
-**Parameters:**
-
-| Parameter | Type                            | Description                   |
-|-----------|---------------------------------|-------------------------------|
-| `$client` | **\GuzzleHttp\ClientInterface** | Guzzle client implementation. |
-
-***
-
-### create_log
-
-Add an entry to monologger.
-
-```php
-private create_log(string $message): void
-```
-
-**Parameters:**
-
-| Parameter  | Type       | Description |
-|------------|------------|-------------|
-| `$message` | **string** | Message.    |
-
-***
-
-### get_oauth_url
-
-Returns the OAuth URL to begin the OAuth process.
-
-```php
-public get_oauth_url(string $redirectURI): string
-```
-
-**Parameters:**
-
-| Parameter      | Type       | Description   |
-|----------------|------------|---------------|
-| `$redirectURI` | **string** | Redirect URI. |
-
-***
-
-### get_access_token
-
-Exchanges the given authorization code for an access token and refresh token.
-
-```php
-public get_access_token(string $authCode, string $redirectURI): mixed|array<string,int|string>
-```
-
-**Parameters:**
-
-| Parameter      | Type       | Description                                             |
-|----------------|------------|---------------------------------------------------------|
-| `$authCode`    | **string** | Authorization Code, returned from get_oauth_url() flow. |
-| `$redirectURI` | **string** | Redirect URI.                                           |
-
-**Return Value:**
-
-API response
-
-***
-
-### refresh_token
-
-Fetches a new access token using the supplied refresh token.
-
-```php
-public refresh_token(string $refreshToken, string $redirectURI): mixed|array<string,int|string>
-```
-
-**Parameters:**
-
-| Parameter       | Type       | Description    |
-|-----------------|------------|----------------|
-| `$refreshToken` | **string** | Refresh Token. |
-| `$redirectURI`  | **string** | Redirect URI.  |
-
-**Return Value:**
-
-API response
-
-***
-
-### get_resource
-
-Get markup from ConvertKit for the provided $url.
-
-```php
-public get_resource(string $url): false|string
-```
-
-Supports legacy forms and legacy landing pages.
-
-Forms and Landing Pages should be embedded using the supplied JS embed script in
-the API response when using get_forms() or get_landing_pages().
-
-**Parameters:**
-
-| Parameter | Type       | Description       |
-|-----------|------------|-------------------|
-| `$url`    | **string** | URL of HTML page. |
-
-**Throws:**
-
-If the URL is not a valid URL format.
-- [`InvalidArgumentException`](../InvalidArgumentException)
-If parsing the legacy form or landing page failed.
-- [`Exception`](../Exception)
-
-***
-
-### request
-
-Performs an API request using Guzzle.
-
-```php
-public request(string $endpoint, string $method, array<string,bool|int|float|string|null|array<int|string,float|int|string|(string)[]>> $args = []): mixed|object
-```
-
-**Parameters:**
-
-| Parameter   | Type                                                                                                | Description        |
-|-------------|-----------------------------------------------------------------------------------------------------|--------------------|
-| `$endpoint` | **string**                                                                                          | API Endpoint.      |
-| `$method`   | **string**                                                                                          | Request method.    |
-| `$args`     | **array<string,bool\|int\|float\|string\|null\|array<int\|string,float\|int\|string\|(string)[]>>** | Request arguments. |
-
-**Throws:**
-
-If JSON encoding arguments failed.
-- [`Exception`](../Exception)
-
-***
-
-### getResponseInterface
-
-Returns the response interface used for the last API request.
-
-```php
-public getResponseInterface(): \Psr\Http\Message\ResponseInterface
-```
-
-***
-
-### get_request_headers
-
-Returns the headers to use in an API request.
-
-```php
-public get_request_headers(string $type = 'application/json', bool $auth = true): array<string,string>
-```
-
-**Parameters:**
-
-| Parameter | Type       | Description                      |
-|-----------|------------|----------------------------------|
-| `$type`   | **string** | Accept and Content-Type Headers. |
-| `$auth`   | **bool**   | Include authorization header.    |
-
-***
-
-### get_timeout
-
-Returns the maximum amount of time to wait for
-a response to the request before exiting.
-
-```php
-public get_timeout(): int
-```
-
-**Return Value:**
-
-Timeout, in seconds.
-
-***
-
-### get_user_agent
-
-Returns the user agent string to use in all HTTP requests.
-
-```php
-public get_user_agent(): string
-```
-
-***
-
-## Inherited methods
 
 ### get_account
 
@@ -284,7 +95,6 @@ public get_account(): false|mixed
 * https://developers.convertkit.com/v4.html#get-current-account
 
 ***
-
 ### get_account_colors
 
 Gets the account's colors
@@ -298,7 +108,6 @@ public get_account_colors(): false|mixed
 * https://developers.convertkit.com/v4.html#list-colors
 
 ***
-
 ### update_account_colors
 
 Gets the account's colors
@@ -318,7 +127,6 @@ public update_account_colors(array<string,string> $colors): false|mixed
 * https://developers.convertkit.com/v4.html#list-colors
 
 ***
-
 ### get_creator_profile
 
 Gets the Creator Profile
@@ -332,7 +140,6 @@ public get_creator_profile(): false|mixed
 * https://developers.convertkit.com/v4.html#get-creator-profile
 
 ***
-
 ### get_email_stats
 
 Gets email stats
@@ -346,7 +153,6 @@ public get_email_stats(): false|mixed
 * https://developers.convertkit.com/v4.html#get-email-stats
 
 ***
-
 ### get_growth_stats
 
 Gets growth stats
@@ -367,7 +173,6 @@ public get_growth_stats(\DateTime|null $starting = null, \DateTime|null $ending 
 * https://developers.convertkit.com/v4.html#get-growth-stats
 
 ***
-
 ### get_forms
 
 Get forms.
@@ -391,7 +196,6 @@ public get_forms(string $status = 'active', bool $include_total_count = false, s
 * https://developers.convertkit.com/v4.html#convertkit-api-forms
 
 ***
-
 ### get_landing_pages
 
 Get landing pages.
@@ -415,7 +219,6 @@ public get_landing_pages(string $status = 'active', bool $include_total_count = 
 * https://developers.convertkit.com/v4.html#convertkit-api-forms
 
 ***
-
 ### add_subscribers_to_forms
 
 Adds subscribers to forms in bulk.
@@ -436,7 +239,6 @@ public add_subscribers_to_forms(array<string,string>[] $forms_subscribers_ids, s
 * https://developers.kit.com/v4.html#bulk-add-subscribers-to-forms
 
 ***
-
 ### add_subscriber_to_form_by_email
 
 Adds a subscriber to a form by email address
@@ -458,7 +260,6 @@ public add_subscriber_to_form_by_email(int $form_id, string $email_address, stri
 * https://developers.convertkit.com/v4.html#add-subscriber-to-form-by-email-address
 
 ***
-
 ### add_subscriber_to_form
 
 Adds a subscriber to a form by subscriber ID
@@ -480,7 +281,6 @@ public add_subscriber_to_form(int $form_id, int $subscriber_id, string $referrer
 * https://developers.convertkit.com/v4.html#add-subscriber-to-form
 
 ***
-
 ### get_form_subscriptions
 
 List subscribers for a form
@@ -509,7 +309,6 @@ public get_form_subscriptions(int $form_id, string $subscriber_state = 'active',
 * https://developers.convertkit.com/v4.html#list-subscribers-for-a-form
 
 ***
-
 ### get_sequences
 
 Gets sequences
@@ -532,7 +331,6 @@ public get_sequences(bool $include_total_count = false, string $after_cursor = '
 * https://developers.convertkit.com/v4.html#list-sequences
 
 ***
-
 ### add_subscriber_to_sequence_by_email
 
 Adds a subscriber to a sequence by email address
@@ -553,7 +351,6 @@ public add_subscriber_to_sequence_by_email(int $sequence_id, string $email_addre
 * https://developers.convertkit.com/v4.html#add-subscriber-to-sequence-by-email-address
 
 ***
-
 ### add_subscriber_to_sequence
 
 Adds a subscriber to a sequence by subscriber ID
@@ -574,7 +371,6 @@ public add_subscriber_to_sequence(int $sequence_id, int $subscriber_id): false|m
 * https://developers.convertkit.com/v4.html#add-subscriber-to-sequence
 
 ***
-
 ### get_sequence_subscriptions
 
 List subscribers for a sequence
@@ -603,7 +399,6 @@ public get_sequence_subscriptions(int $sequence_id, string $subscriber_state = '
 * https://developers.convertkit.com/v4.html#list-subscribers-for-a-sequence
 
 ***
-
 ### get_tags
 
 List tags.
@@ -626,7 +421,6 @@ public get_tags(bool $include_total_count = false, string $after_cursor = '', st
 * https://developers.convertkit.com/v4.html#list-tags
 
 ***
-
 ### create_tag
 
 Creates a tag.
@@ -646,7 +440,6 @@ public create_tag(string $tag): false|mixed
 * https://developers.convertkit.com/v4.html#create-a-tag
 
 ***
-
 ### create_tags
 
 Creates multiple tags.
@@ -667,7 +460,6 @@ public create_tags(array<int,string> $tags, string $callback_url = ''): false|mi
 * https://developers.convertkit.com/v4.html#bulk-create-tags
 
 ***
-
 ### tag_subscriber_by_email
 
 Tags a subscriber with the given existing Tag.
@@ -688,7 +480,6 @@ public tag_subscriber_by_email(int $tag_id, string $email_address): false|mixed
 * https://developers.convertkit.com/v4.html#tag-a-subscriber-by-email-address
 
 ***
-
 ### tag_subscriber
 
 Tags a subscriber by subscriber ID with the given existing Tag.
@@ -709,7 +500,6 @@ public tag_subscriber(int $tag_id, int $subscriber_id): false|mixed
 * https://developers.convertkit.com/v4.html#tag-a-subscriber
 
 ***
-
 ### remove_tag_from_subscriber
 
 Removes a tag from a subscriber.
@@ -730,7 +520,6 @@ public remove_tag_from_subscriber(int $tag_id, int $subscriber_id): false|mixed
 * https://developers.convertkit.com/v4.html#remove-tag-from-subscriber
 
 ***
-
 ### remove_tag_from_subscriber_by_email
 
 Removes a tag from a subscriber by email address.
@@ -751,7 +540,6 @@ public remove_tag_from_subscriber_by_email(int $tag_id, string $email_address): 
 * https://developers.convertkit.com/v4.html#remove-tag-from-subscriber-by-email-address
 
 ***
-
 ### get_tag_subscriptions
 
 List subscribers for a tag
@@ -780,7 +568,6 @@ public get_tag_subscriptions(int $tag_id, string $subscriber_state = 'active', \
 * https://developers.convertkit.com/v4.html#list-subscribers-for-a-tag
 
 ***
-
 ### get_email_templates
 
 List email templates.
@@ -803,7 +590,6 @@ public get_email_templates(bool $include_total_count = false, string $after_curs
 * https://developers.convertkit.com/v4.html#convertkit-api-email-templates
 
 ***
-
 ### get_subscribers
 
 List subscribers.
@@ -834,7 +620,6 @@ public get_subscribers(string $subscriber_state = 'active', string $email_addres
 * https://developers.convertkit.com/v4.html#list-subscribers
 
 ***
-
 ### create_subscriber
 
 Create a subscriber.
@@ -861,7 +646,6 @@ email address already exists, it updates the first name.
 * https://developers.convertkit.com/v4.html#create-a-subscriber
 
 ***
-
 ### create_subscribers
 
 Create multiple subscribers.
@@ -882,7 +666,6 @@ public create_subscribers(array<int,array<string,string>> $subscribers, string $
 * https://developers.convertkit.com/v4.html#bulk-create-subscribers
 
 ***
-
 ### get_subscriber_id
 
 Get the ConvertKit subscriber ID associated with email address if it exists.
@@ -909,7 +692,6 @@ If the email address is not a valid email format.
 * https://developers.convertkit.com/v4.html#get-a-subscriber
 
 ***
-
 ### get_subscriber
 
 Get subscriber by id
@@ -929,7 +711,6 @@ public get_subscriber(int $subscriber_id): mixed|int
 * https://developers.convertkit.com/v4.html#get-a-subscriber
 
 ***
-
 ### update_subscriber
 
 Updates the information for a single subscriber.
@@ -952,7 +733,6 @@ public update_subscriber(int $subscriber_id, string $first_name = '', string $em
 * https://developers.convertkit.com/v4.html#update-a-subscriber
 
 ***
-
 ### unsubscribe_by_email
 
 Unsubscribe an email address.
@@ -972,7 +752,6 @@ public unsubscribe_by_email(string $email_address): mixed|object
 * https://developers.convertkit.com/v4.html#unsubscribe-subscriber
 
 ***
-
 ### unsubscribe
 
 Unsubscribe the given subscriber ID.
@@ -992,7 +771,6 @@ public unsubscribe(int $subscriber_id): mixed|object
 * https://developers.convertkit.com/v4.html#unsubscribe-subscriber
 
 ***
-
 ### get_subscriber_tags
 
 Get a list of the tags for a subscriber.
@@ -1016,7 +794,6 @@ public get_subscriber_tags(int $subscriber_id, bool $include_total_count = false
 * https://developers.convertkit.com/v4.html#list-tags-for-a-subscriber
 
 ***
-
 ### get_broadcasts
 
 List broadcasts.
@@ -1039,7 +816,6 @@ public get_broadcasts(bool $include_total_count = false, string $after_cursor = 
 * https://developers.convertkit.com/v4.html#list-broadcasts
 
 ***
-
 ### create_broadcast
 
 Creates a broadcast.
@@ -1077,7 +853,6 @@ post (applicable only to public posts).                                         
 * https://developers.convertkit.com/v4.html#create-a-broadcast
 
 ***
-
 ### get_broadcast
 
 Retrieve a specific broadcast.
@@ -1097,7 +872,6 @@ public get_broadcast(int $id): mixed|object
 * https://developers.convertkit.com/v4.html#get-a-broadcast
 
 ***
-
 ### get_broadcast_stats
 
 Get the statistics (recipient count, open rate, click rate, unsubscribe count,
@@ -1118,7 +892,6 @@ public get_broadcast_stats(int $id): mixed|object
 * https://developers.convertkit.com/v4.html#get-stats
 
 ***
-
 ### update_broadcast
 
 Updates a broadcast.
@@ -1157,7 +930,6 @@ post (applicable only to public posts).                                         
 * https://developers.convertkit.com/#create-a-broadcast
 
 ***
-
 ### delete_broadcast
 
 Deletes an existing broadcast.
@@ -1177,7 +949,6 @@ public delete_broadcast(int $id): mixed|object
 * https://developers.convertkit.com/v4.html#delete-a-broadcast
 
 ***
-
 ### get_webhooks
 
 List webhooks.
@@ -1200,7 +971,6 @@ public get_webhooks(bool $include_total_count = false, string $after_cursor = ''
 * https://developers.convertkit.com/v4.html#list-webhooks
 
 ***
-
 ### create_webhook
 
 Creates a webhook that will be called based on the chosen event types.
@@ -1227,7 +997,6 @@ If the event is not supported.
 * https://developers.convertkit.com/v4.html#create-a-webhook
 
 ***
-
 ### delete_webhook
 
 Deletes an existing webhook.
@@ -1247,7 +1016,6 @@ public delete_webhook(int $id): mixed|object
 * https://developers.convertkit.com/v4.html#delete-a-webhook
 
 ***
-
 ### get_custom_fields
 
 List custom fields.
@@ -1270,7 +1038,6 @@ public get_custom_fields(bool $include_total_count = false, string $after_cursor
 * https://developers.convertkit.com/v4.html#list-custom-fields
 
 ***
-
 ### create_custom_field
 
 Creates a custom field.
@@ -1290,7 +1057,6 @@ public create_custom_field(string $label): mixed|object
 * https://developers.convertkit.com/v4.html#create-a-custom-field
 
 ***
-
 ### create_custom_fields
 
 Creates multiple custom fields.
@@ -1311,7 +1077,6 @@ public create_custom_fields(string[] $labels, string $callback_url = ''): mixed|
 * https://developers.convertkit.com/v4.html#bulk-create-custom-fields
 
 ***
-
 ### update_custom_field
 
 Updates an existing custom field.
@@ -1332,7 +1097,6 @@ public update_custom_field(int $id, string $label): mixed|object
 * https://developers.convertkit.com/v4.html#update-a-custom-field
 
 ***
-
 ### delete_custom_field
 
 Deletes an existing custom field.
@@ -1352,7 +1116,6 @@ public delete_custom_field(int $id): mixed|object
 * https://developers.convertkit.com/#destroy-field
 
 ***
-
 ### get_purchases
 
 List purchases.
@@ -1375,7 +1138,6 @@ public get_purchases(bool $include_total_count = false, string $after_cursor = '
 * https://developers.convertkit.com/v4.html#list-purchases
 
 ***
-
 ### get_purchase
 
 Retuns a specific purchase.
@@ -1395,7 +1157,6 @@ public get_purchase(int $purchase_id): mixed|object
 * https://developers.convertkit.com/v4.html#get-a-purchase
 
 ***
-
 ### create_purchase
 
 Creates a purchase.
@@ -1426,7 +1187,6 @@ public create_purchase(string $email_address, string $transaction_id, array<stri
 * https://developers.convertkit.com/v4.html#create-a-purchase
 
 ***
-
 ### get_segments
 
 List segments.
@@ -1449,7 +1209,6 @@ public get_segments(bool $include_total_count = false, string $after_cursor = ''
 * https://developers.convertkit.com/v4.html#convertkit-api-segments
 
 ***
-
 ### convert_relative_to_absolute_urls
 
 Converts any relative URls to absolute, fully qualified HTTP(s) URLs for the given
@@ -1468,7 +1227,6 @@ public convert_relative_to_absolute_urls(\DOMNodeList<\DOMElement> $elements, st
 | `$url`       | **string**                    | Absolute URL to prepend to relative URLs. |
 
 ***
-
 ### strip_html_head_body_tags
 
 Strips <html>, <head> and <body> opening and closing tags from the given markup,
@@ -1489,7 +1247,6 @@ public strip_html_head_body_tags(string $markup): string
 HTML Markup
 
 ***
-
 ### build_total_count_and_pagination_params
 
 Adds total count and pagination parameters to the given array of existing API parameters.
@@ -1509,7 +1266,6 @@ private build_total_count_and_pagination_params(array<string,string|int|bool> $p
 | `$per_page`            | **int**                             | Number of results to return.                       |
 
 ***
-
 ### get
 
 Performs a GET request to the API.
@@ -1526,7 +1282,6 @@ public get(string $endpoint, array<string,int|string|bool|array<string,int|strin
 | `$args`     | **array<string,int\|string\|bool\|array<string,int\|string>>** | Request arguments. |
 
 ***
-
 ### post
 
 Performs a POST request to the API.
@@ -1543,7 +1298,6 @@ public post(string $endpoint, array<string,bool|int|float|string|null|array<int|
 | `$args`     | **array<string,bool\|int\|float\|string\|null\|array<int\|string,float\|int\|string\|(string)[]>>** | Request arguments. |
 
 ***
-
 ### put
 
 Performs a PUT request to the API.
@@ -1560,7 +1314,6 @@ public put(string $endpoint, array<string,bool|int|string|array<string,int|strin
 | `$args`     | **array<string,bool\|int\|string\|array<string,int\|string>>** | Request arguments. |
 
 ***
-
 ### delete
 
 Performs a DELETE request to the API.
@@ -1577,7 +1330,6 @@ public delete(string $endpoint, array<string,int|string|array<string,int|string>
 | `$args`     | **array<string,int\|string\|array<string,int\|string>>** | Request arguments. |
 
 ***
-
 ### request
 
 Performs an API request.
@@ -1601,7 +1353,6 @@ If JSON encoding arguments failed.
 - [`Exception`](../Exception)
 
 ***
-
 ### get_request_headers
 
 Returns the headers to use in an API request.
@@ -1619,7 +1370,6 @@ public get_request_headers(string $type = 'application/json', bool $auth = true)
 | `$auth`   | **bool**   | Include authorization header.    |
 
 ***
-
 ### get_timeout
 
 Returns the maximum amount of time to wait for
@@ -1635,7 +1385,6 @@ public get_timeout(): int
 Timeout, in seconds.
 
 ***
-
 ### get_user_agent
 
 Returns the user agent string to use in all HTTP requests.

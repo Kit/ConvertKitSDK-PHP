@@ -14,6 +14,19 @@ If you haven't yet set up your local development environment, refer to the [Setu
 
 If you haven't yet created a branch and made any code changes, refer to the [Development Guide](DEVELOPMENT.md)
 
+### Familiar with PHP Coding Standards, PHPStan and PHPUnit?
+
+The following Composer commands can be used:
+
+| Command | Short Command | Description |
+|---------|---------------|-------------|
+| `composer php-coding-standards` | `composer phpcs` | Runs PHP Coding Standards on the `/src` folder |
+| `composer fix-php-coding-standards` | `composer phpcbf` | Fix PHP files to meet PHP Coding Standards on the `/src` folder |
+| `composer php-coding-standards-on-tests` | `composer phpcs-tests` | Runs PHP Coding Standards on the `/tests` folder |
+| `composer fix-php-coding-standards-on-tests` | `composer phpcbf-tests` | Fix PHP files to meet PHP Coding Standards on the `/tests` folder |
+| `composer static-analysis` | `composer phpstan` | Runs PHPStan static analysis with increased memory limit |
+| `composer test` | `composer test` | Builds and runs WPUnit tests |
+
 ## Write (or modify) a test
 
 If your work creates new functionality, write a test.

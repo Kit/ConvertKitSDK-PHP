@@ -1,6 +1,6 @@
 # Setup Guide
 
-This document describes how to setup your development environment, so that it is ready to run, develop and test the ConvertKit PHP SDK.
+This document describes how to setup your development environment, so that it is ready to run, develop and test the Kit PHP SDK.
 
 Suggestions are provided for the LAMP/LEMP stack and Git client are for those who prefer the UI over a command line and/or are less familiar with 
 PHP, MySQL and Git - but you're free to use your preferred software.

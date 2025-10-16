@@ -1723,6 +1723,221 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that update_tag_name() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagName()
+    {
+        $result = $this->api->update_tag_name(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+        );
+
+        // Assert existing tag is returned.
+        $this->assertEquals($result->tag->id, (int) $_ENV['CONVERTKIT_API_TAG_ID']);
+        $this->assertEquals($result->tag->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithInvalidTagID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->update_tag_name(
+            tag_id: 12345,
+            name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+        );
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when a blank
+     * name is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithBlankName()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->update_tag_name(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            name: ''
+        );
+    }
+
+    /**
+     * Test that get_subscriber_stats() returns the expected data
+     * when using a valid subscriber ID.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStats()
+    {
+        $result = $this->api->get_subscriber_stats(
+            id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+        );
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('stats', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('bounced', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('open_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('click_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_open', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_click', get_object_vars($result->subscriber->stats));
+    }
+
+    /**
+     * Test that get_subscriber_stats() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStatsWithInvalidSubscriberID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_subscriber_stats(12345);
+    }
+
+    /**
+     * Test that tag_subscribers() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribers()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+        $this->assertCount(2, $result->subscribers);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidTagID()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidSubscriberID()
+    {
+        // Tag subscribers that do not exist.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 12345,
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 67890,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
      * Test that tag_subscriber_by_email() returns the expected data.
      *
      * @since   1.0.0
@@ -3402,10 +3617,10 @@ class ConvertKitAPITest extends TestCase
     {
         $subscribers = [
             [
-                'email_address' => str_replace('@convertkit.com', '-1@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
             ],
             [
-                'email_address' => str_replace('@convertkit.com', '-2@convertkit.com', $this->generateEmailAddress()),
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
             ],
         ];
         $result = $this->api->create_subscribers($subscribers);
@@ -3706,7 +3921,7 @@ class ConvertKitAPITest extends TestCase
     public function testUnsubscribeByEmailWithNotSubscribedEmailAddress()
     {
         $this->expectException(ClientException::class);
-        $subscriber = $this->api->unsubscribe_by_email('not-subscribed@convertkit.com');
+        $subscriber = $this->api->unsubscribe_by_email('not-subscribed@kit.com');
     }
 
     /**
@@ -4188,6 +4403,135 @@ class ConvertKitAPITest extends TestCase
     {
         $this->expectException(ClientException::class);
         $this->api->get_broadcast_stats(12345);
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicks()
+    {
+        // Get broadcast link clicks.
+        $result = $this->api->get_broadcast_link_clicks(
+            $_ENV['CONVERTKIT_API_BROADCAST_ID'],
+            per_page: 1
+        );
+
+        // Assert clicks and pagination exist.
+        $this->assertDataExists($result->broadcast, 'clicks');
+        $this->assertPaginationExists($result);
+
+        // Assert a single click was returned.
+        $this->assertCount(1, $result->broadcast->clicks);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicksWithInvalidBroadcastID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_broadcast_link_clicks(12345);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStats()
+    {
+        // Get broadcasts stats.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Store the Broadcast ID to check it's different from the next broadcast.
+        $id = $result->broadcasts[0]->id;
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID is different from the previous broadcast.
+        $this->assertNotEquals($id, $result->broadcasts[0]->id);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID matches the first broadcast.
+        $this->assertEquals($id, $result->broadcasts[0]->id);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithTotalCount()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            include_total_count: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
     }
 
     /**
@@ -5071,7 +5415,7 @@ class ConvertKitAPITest extends TestCase
     public function testGetResourceInaccessibleURL()
     {
         $this->expectException(ClientException::class);
-        $markup = $this->api->get_resource('https://convertkit.com/a/url/that/does/not/exist');
+        $markup = $this->api->get_resource('https://kit.com/a/url/that/does/not/exist');
     }
 
     /**
