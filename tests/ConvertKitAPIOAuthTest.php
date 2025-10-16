@@ -21,7 +21,7 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
     protected function setUp(): void
     {
         var_dump($_ENV);
-        
+
         // Load environment credentials from root folder.
         $dotenv = Dotenv::createImmutable(dirname(dirname(__FILE__)));
         $dotenv->load();
