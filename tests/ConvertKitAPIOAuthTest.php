@@ -20,9 +20,14 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
      */
     protected function setUp(): void
     {
+        var_dump($_ENV);
+        
         // Load environment credentials from root folder.
         $dotenv = Dotenv::createImmutable(dirname(dirname(__FILE__)));
         $dotenv->load();
+
+        var_dump($_ENV);
+        die();
 
         // Set location where API class will create/write the log file.
         $this->logFile = dirname(dirname(__FILE__)) . '/src/logs/debug.log';
