@@ -42,12 +42,12 @@ jobs:
       - name: Exchange API Key and Secret for OAuth Tokens
         id: get-oauth-tokens
         run: |
-          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ env.CONVERTKIT_V3_API_KEY }}&api_secret=${{ env.CONVERTKIT_V3_API_SECRET }}&client_id=${{ env.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ env.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ secrets.CONVERTKIT_V3_API_KEY }}&api_secret=${{ secrets.CONVERTKIT_V3_API_SECRET }}&client_id=${{ secrets.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ secrets.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
           access_token=$(echo "$response" | jq -r '.oauth.access_token')
           refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
           echo "CONVERTKIT_OAUTH_ACCESS_TOKEN=$access_token" >> $GITHUB_ENV
           echo "CONVERTKIT_OAUTH_REFRESH_TOKEN=$refresh_token" >> $GITHUB_ENV
-          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ env.CONVERTKIT_V3_API_KEY_NO_DATA }}&api_secret=${{ env.CONVERTKIT_V3_API_SECRET_NO_DATA }}&client_id=${{ env.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ env.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ secrets.CONVERTKIT_V3_API_KEY_NO_DATA }}&api_secret=${{ secrets.CONVERTKIT_V3_API_SECRET_NO_DATA }}&client_id=${{ secrets.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ secrets.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
           access_token=$(echo "$response" | jq -r '.oauth.access_token')
           refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
           echo "CONVERTKIT_OAUTH_ACCESS_TOKEN_NO_DATA=$access_token" >> $GITHUB_ENV
@@ -86,7 +86,6 @@ jobs:
 
       # Run PHPStan for static analysis.
       - name: Run PHPStan Static Analysis
-        working-directory: ${{ env.PLUGIN_DIR }}
         run: php vendor/bin/phpstan analyse --memory-limit=1250M
 
       # Run Coding Standards.
