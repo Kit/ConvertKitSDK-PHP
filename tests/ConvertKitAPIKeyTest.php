@@ -31,7 +31,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
 
         // Setup API instances.
         $this->api = new ConvertKit_API(
-            apiKey: $_ENV['CONVERTKIT_API_KEY']
+            apiKey: $_ENV['CONVERTKIT_V4_API_KEY']
         );
 
         // Wait a second to avoid hitting a 429 rate limit.
@@ -49,7 +49,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     {
         // Setup API with debugging enabled.
         $api = new ConvertKit_API(
-            apiKey: $_ENV['CONVERTKIT_API_KEY'],
+            apiKey: $_ENV['CONVERTKIT_V4_API_KEY'],
             debug: true
         );
 
@@ -75,7 +75,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
 
         // Setup API with debugging enabled.
         $api = new ConvertKit_API(
-            apiKey: $_ENV['CONVERTKIT_API_KEY'],
+            apiKey: $_ENV['CONVERTKIT_V4_API_KEY'],
             debug: true,
             debugLogFileLocation: $this->logFile
         );
@@ -101,21 +101,21 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     {
         // Setup API with debugging enabled.
         $api = new ConvertKit_API(
-            apiKey: $_ENV['CONVERTKIT_API_KEY'],
+            apiKey: $_ENV['CONVERTKIT_V4_API_KEY'],
             debug: true
         );
 
         // Create log entries with API Key and Email Address, as if an API method
         // were to log this sensitive data.
-        $this->callPrivateMethod($api, 'create_log', ['API Key: ' . $_ENV['CONVERTKIT_API_KEY']]);
+        $this->callPrivateMethod($api, 'create_log', ['API Key: ' . $_ENV['CONVERTKIT_V4_API_KEY']]);
         $this->callPrivateMethod($api, 'create_log', ['Email: ' . $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']]);
 
         // Confirm that the log includes the masked API Key and Email Address.
         $this->assertStringContainsString(
             str_repeat(
                 '*',
-                (strlen($_ENV['CONVERTKIT_API_KEY']) - 4)
-            ) . substr($_ENV['CONVERTKIT_API_KEY'], -4),
+                (strlen($_ENV['CONVERTKIT_V4_API_KEY']) - 4)
+            ) . substr($_ENV['CONVERTKIT_V4_API_KEY'], -4),
             $this->getLogFileContents()
         );
         $this->assertStringContainsString(
@@ -124,7 +124,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         );
 
         // Confirm that the log does not include the unmasked API Key or Email Address.
-        $this->assertStringNotContainsString($_ENV['CONVERTKIT_API_KEY'], $this->getLogFileContents());
+        $this->assertStringNotContainsString($_ENV['CONVERTKIT_V4_API_KEY'], $this->getLogFileContents());
         $this->assertStringNotContainsString($_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL'], $this->getLogFileContents());
     }
 
@@ -158,7 +158,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         $this->assertEquals($headers['Accept'], 'application/json');
         $this->assertEquals($headers['Content-Type'], 'application/json; charset=utf-8');
         $this->assertEquals($headers['User-Agent'], 'ConvertKitPHPSDK/' . $this->api::VERSION . ';PHP/' . phpversion());
-        $this->assertEquals($headers['X-Kit-Api-Key'], $_ENV['CONVERTKIT_API_KEY']);
+        $this->assertEquals($headers['X-Kit-Api-Key'], $_ENV['CONVERTKIT_V4_API_KEY']);
     }
 
     /**
@@ -181,7 +181,7 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
         $this->assertEquals($headers['Accept'], 'text/html');
         $this->assertEquals($headers['Content-Type'], 'text/html; charset=utf-8');
         $this->assertEquals($headers['User-Agent'], 'ConvertKitPHPSDK/' . $this->api::VERSION . ';PHP/' . phpversion());
-        $this->assertEquals($headers['X-Kit-Api-Key'], $_ENV['CONVERTKIT_API_KEY']);
+        $this->assertEquals($headers['X-Kit-Api-Key'], $_ENV['CONVERTKIT_V4_API_KEY']);
     }
 
     /**
