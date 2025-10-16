@@ -24,9 +24,6 @@ class ConvertKitAPIOAuthTest extends ConvertKitAPITest
         $dotenv = Dotenv::createImmutable(dirname(dirname(__FILE__)));
         $dotenv->load();
 
-        var_dump($_ENV);
-        die();
-
         // Set location where API class will create/write the log file.
         $this->logFile = dirname(dirname(__FILE__)) . '/src/logs/debug.log';
 
