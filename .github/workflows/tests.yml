@@ -38,6 +38,21 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: none
 
+      # Exchange API Keys and Secrets for OAuth Tokens.
+      - name: Exchange API Key and Secret for OAuth Tokens
+        id: get-oauth-tokens
+        run: |
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ secrets.CONVERTKIT_V3_API_KEY }}&api_secret=${{ secrets.CONVERTKIT_V3_API_SECRET }}&client_id=${{ secrets.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ secrets.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          access_token=$(echo "$response" | jq -r '.oauth.access_token')
+          refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
+          echo "KIT_OAUTH_ACCESS_TOKEN=$access_token" >> $GITHUB_ENV
+          echo "KIT_OAUTH_REFRESH_TOKEN=$refresh_token" >> $GITHUB_ENV
+          response=$(curl -s -X POST "${{ secrets.CONVERTKIT_EXCHANGE_API_KEYS_ENDPOINT }}?api_key=${{ secrets.CONVERTKIT_V3_API_KEY_NO_DATA }}&api_secret=${{ secrets.CONVERTKIT_V3_API_SECRET_NO_DATA }}&client_id=${{ secrets.CONVERTKIT_OAUTH_CLIENT_ID }}&redirect_uri=${{ secrets.CONVERTKIT_OAUTH_REDIRECT_URI }}&tenant_name=github-actions-${{ steps.test-group.outputs.value }}-${{ matrix.php-versions }}")
+          access_token=$(echo "$response" | jq -r '.oauth.access_token')
+          refresh_token=$(echo "$response" | jq -r '.oauth.refresh_token')
+          echo "KIT_OAUTH_ACCESS_TOKEN_NO_DATA=$access_token" >> $GITHUB_ENV
+          echo "KIT_OAUTH_REFRESH_TOKEN_NO_DATA=$refresh_token" >> $GITHUB_ENV
+
       # Write any secrets, such as API keys, to the .env.dist.testing file now.
       # Make sure your committed .env.dist.testing file ends with a newline.
       # The formatting of the contents to include a blank newline is deliberate.
@@ -47,11 +62,11 @@ jobs:
           path: .env.dist.testing
           contents: |
 
-            CONVERTKIT_OAUTH_ACCESS_TOKEN=${{ secrets.CONVERTKIT_OAUTH_ACCESS_TOKEN }}
-            CONVERTKIT_OAUTH_REFRESH_TOKEN=${{ secrets.CONVERTKIT_OAUTH_REFRESH_TOKEN }}
-            CONVERTKIT_OAUTH_ACCESS_TOKEN_NO_DATA=${{ secrets.CONVERTKIT_OAUTH_ACCESS_TOKEN_NO_DATA }}
-            CONVERTKIT_OAUTH_REFRESH_TOKEN_NO_DATA=${{ secrets.CONVERTKIT_OAUTH_REFRESH_TOKEN_NO_DATA }}
-            CONVERTKIT_API_KEY=${{ secrets.CONVERTKIT_API_KEY }}
+            CONVERTKIT_OAUTH_ACCESS_TOKEN=${{ env.KIT_OAUTH_ACCESS_TOKEN }}
+            CONVERTKIT_OAUTH_REFRESH_TOKEN=${{ env.KIT_OAUTH_REFRESH_TOKEN }}
+            CONVERTKIT_OAUTH_ACCESS_TOKEN_NO_DATA=${{ env.KIT_OAUTH_ACCESS_TOKEN_NO_DATA }}
+            CONVERTKIT_OAUTH_REFRESH_TOKEN_NO_DATA=${{ env.KIT_OAUTH_REFRESH_TOKEN_NO_DATA }}
+            CONVERTKIT_V4_API_KEY=${{ secrets.CONVERTKIT_V4_API_KEY }}
             CONVERTKIT_OAUTH_CLIENT_ID=${{ secrets.CONVERTKIT_OAUTH_CLIENT_ID }}
             CONVERTKIT_OAUTH_CLIENT_SECRET=${{ secrets.CONVERTKIT_OAUTH_CLIENT_SECRET }}
             CONVERTKIT_OAUTH_REDIRECT_URI=${{ secrets.CONVERTKIT_OAUTH_REDIRECT_URI }}
@@ -71,7 +86,6 @@ jobs:
 
       # Run PHPStan for static analysis.
       - name: Run PHPStan Static Analysis
-        working-directory: ${{ env.PLUGIN_DIR }}
         run: php vendor/bin/phpstan analyse --memory-limit=1250M
 
       # Run Coding Standards.

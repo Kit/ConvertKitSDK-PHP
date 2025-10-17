@@ -38,24 +38,7 @@ If you're new to this, use [GitHub Desktop](https://desktop.github.com/) or [Tow
 
 ### Configure Testing Environment
 
-Copy the `.env.example` file to `.env` in the root of this repository, adding your ConvertKit API keys.
-
-```
-CONVERTKIT_API_KEY_NO_DATA=
-CONVERTKIT_API_SECRET_NO_DATA=
-CONVERTKIT_API_KEY=
-CONVERTKIT_API_SECRET=
-CONVERTKIT_API_BROADCAST_ID="8697158"
-CONVERTKIT_API_FORM_ID="2765139"
-CONVERTKIT_API_LEGACY_FORM_URL="https://app.convertkit.com/landing_pages/470099"
-CONVERTKIT_API_LANDING_PAGE_URL="https://cheerful-architect-3237.ck.page/cc5eb21744"
-CONVERTKIT_API_LEGACY_LANDING_PAGE_URL="https://app.convertkit.com/landing_pages/470103"
-CONVERTKIT_API_SEQUENCE_ID="1030824"
-CONVERTKIT_API_TAG_NAME="wordpress"
-CONVERTKIT_API_TAG_ID="2744672"
-CONVERTKIT_API_SUBSCRIBER_EMAIL="optin@n7studios.com"
-CONVERTKIT_API_SUBSCRIBER_ID="1579118532"
-```
+Copy the `.env.example` file to `.env` in the root of this repository, adding your Kit API keys.
 
 #### PHPStan
 
