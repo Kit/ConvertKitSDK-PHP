@@ -4853,17 +4853,19 @@ class ConvertKitAPITest extends TestCase
         $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
         $result = $this->api->create_webhook(
             url: $url,
-            event: 'subscriber.form_subscribe',
-            parameter: $_ENV['CONVERTKIT_API_FORM_ID']
+            event: 'custom_field.field_value_updated',
+            parameter: $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']
         );
 
         // Confirm webhook created with correct data.
         $this->assertArrayHasKey('webhook', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('account_id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('event', get_object_vars($result->webhook));
         $this->assertArrayHasKey('target_url', get_object_vars($result->webhook));
         $this->assertEquals($result->webhook->target_url, $url);
-        $this->assertEquals($result->webhook->event->name, 'form_subscribe');
-        $this->assertEquals($result->webhook->event->form_id, $_ENV['CONVERTKIT_API_FORM_ID']);
+        $this->assertEquals($result->webhook->event->name, 'field_value_updated');
+        $this->assertEquals($result->webhook->event->custom_field_id, $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']);
 
         // Delete the webhook.
         $result = $this->api->delete_webhook($result->webhook->id);
