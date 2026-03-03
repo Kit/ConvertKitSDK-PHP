@@ -948,17 +948,17 @@ trait ConvertKit_API_Traits
     /**
      * Filter subscribers based on engagement.
      *
-     * @param array<array<string,string|integer|null>> $all                 Array of filter conditions where ALL must be met (AND logic)
-     * - 'type' (string)                  Type of filter condition ('opens', 'clicks', 'sent', 'delivered', 'subscribed').
-     * - 'count_greater_than' (int)       Minimum count (exclusive). Not applicable for 'subscribed' type.
-     * - 'count_less_than' (int)          Maximum count (exclusive). Not applicable for 'subscribed' type.
-     * - 'after' (\DateTime|null)         Start date. For 'subscribed' type, filters by subscriber_created_at. For other types, filters by event date.
-     * - 'before' (\DateTime|null)        End date. For 'subscribed' type, filters by subscriber_created_at. For other types, filters by event date.
-     * - 'any' (array)                    Array of OR conditions for filtering by specific broadcasts or URLs.
-     * @param boolean                                  $include_total_count To include the total count of records in the response, use true.
-     * @param string                                   $after_cursor        Return results after the given pagination cursor.
-     * @param string                                   $before_cursor       Return results before the given pagination cursor.
-     * @param integer                                  $per_page            Number of results to return.
+     * @param array<int, array<string, mixed>> $all                 Array of filter conditions where ALL must be met (AND logic). Each condition can have.
+     *                                                              - 'type' (string).
+     *                                                              - 'count_greater_than' (int|null).
+     *                                                              - 'count_less_than' (int|null).
+     *                                                              - 'after' (\DateTime|null).
+     *                                                              - 'before' (\DateTime|null).
+     *                                                              - 'any' (array<int|string, mixed>|null).
+     * @param boolean                          $include_total_count To include the total count of records in the response, use true.
+     * @param string                           $after_cursor        Return results after the given pagination cursor.
+     * @param string                           $before_cursor       Return results before the given pagination cursor.
+     * @param integer                          $per_page            Number of results to return.
      *
      * @since 2.4.0
      *
@@ -973,32 +973,34 @@ trait ConvertKit_API_Traits
         string $before_cursor = '',
         int $per_page = 100
     ) {
-        // Build parameters.
         $options = [];
 
         foreach ($all as $condition) {
             $option = [];
-            if (!is_null($condition['count_greater_than'])) {
-                $option['count_greater_than'] = (int) $condition['count_greater_than'];
+
+            if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
+                $option['count_greater_than'] = $condition['count_greater_than'];
             }
-            if (!is_null($condition['count_less_than'])) {
-                $option['count_less_than'] = (int) $condition['count_less_than'];
+
+            if (array_key_exists('count_less_than', $condition) && $condition['count_less_than'] !== null) {
+                $option['count_less_than'] = $condition['count_less_than'];
             }
-            if (!is_null($condition['after'])) {
+
+            if (array_key_exists('after', $condition) && $condition['after'] instanceof \DateTime) {
                 $option['after'] = $condition['after']->format('Y-m-d');
             }
-            if (!is_null($condition['before'])) {
+
+            if (array_key_exists('before', $condition) && $condition['before'] instanceof \DateTime) {
                 $option['before'] = $condition['before']->format('Y-m-d');
             }
-            if (!empty($condition['any'])) {
+
+            if (array_key_exists('any', $condition) && !empty($condition['any'])) {
                 $option['any'] = (array) $condition['any'];
             }
 
-            // Add to options array.
             $options[] = $option;
         }//end foreach
 
-        // Send request.
         return $this->post(
             'subscribers/filter',
             $this->build_total_count_and_pagination_params(
@@ -1950,15 +1952,15 @@ trait ConvertKit_API_Traits
     /**
      * Adds total count and pagination parameters to the given array of existing API parameters.
      *
-     * @param array<string, string|integer|bool> $params              API parameters.
-     * @param boolean                            $include_total_count Return total count of records.
-     * @param string                             $after_cursor        Return results after the given pagination cursor.
-     * @param string                             $before_cursor       Return results before the given pagination cursor.
-     * @param integer                            $per_page            Number of results to return.
+     * @param array<string, string|integer|boolean|list<array<string, mixed>>> $params              API parameters.
+     * @param boolean                                                          $include_total_count Return total count of records.
+     * @param string                                                           $after_cursor        Return results after the given pagination cursor.
+     * @param string                                                           $before_cursor       Return results before the given pagination cursor.
+     * @param integer                                                          $per_page            Number of results to return.
      *
      * @since 2.0.0
      *
-     * @return array<string, string|integer|bool>
+     * @return array<string, string|int|bool|list<array<string, mixed>>>
      */
     private function build_total_count_and_pagination_params(
         array $params = [],
@@ -1984,8 +1986,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a GET request to the API.
      *
-     * @param string                                                             $endpoint API Endpoint.
-     * @param array<string, int|string|boolean|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                 $endpoint API Endpoint.
+     * @param array<string, int|string|boolean|array<string, int|string>|list<array<string, mixed>>> $args     Request arguments.
      *
      * @return false|mixed
      */
@@ -1997,8 +1999,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a POST request to the API.
      *
-     * @param string                                                                                                     $endpoint API Endpoint.
-     * @param array<string, bool|integer|float|string|null|array<int|string, float|integer|string|array<string|string>>> $args     Request arguments.
+     * @param string                                                                                                            $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<string|mixed>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */
@@ -2036,9 +2038,9 @@ trait ConvertKit_API_Traits
     /**
      * Performs an API request.
      *
-     * @param string                                                                                                     $endpoint API Endpoint.
-     * @param string                                                                                                     $method   Request method.
-     * @param array<string, bool|integer|float|string|null|array<int|string, float|integer|string|array<string|string>>> $args     Request arguments.
+     * @param string                                                                                                          $endpoint API Endpoint.
+     * @param string                                                                                                          $method   Request method.
+     * @param array<string, bool|integer|float|string|null|array<int|string, bool|integer|float|string|array<string, mixed>>> $args     Request arguments.
      *
      * @throws \Exception If JSON encoding arguments failed.
      *
