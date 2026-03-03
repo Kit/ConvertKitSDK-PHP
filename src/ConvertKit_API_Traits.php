@@ -82,7 +82,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Gets the account's colors
+     * List the account's colors
      *
      * @see https://developers.kit.com/api-reference/accounts/list-colors
      *
@@ -135,7 +135,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Gets growth stats
+     * Get growth stats
      *
      * @param \DateTime|null $starting Gets stats for time period beginning on this date. Defaults to 90 days ago.
      * @param \DateTime|null $ending   Gets stats for time period ending on this date. Defaults to today.
@@ -156,15 +156,13 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Get forms.
+     * List forms.
      *
      * @param string  $status              Form status (active|archived|trashed|all).
      * @param boolean $include_total_count To include the total count of records in the response, use true.
      * @param string  $after_cursor        Return results after the given pagination cursor.
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/forms/list-forms
      *
@@ -193,15 +191,13 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Get landing pages.
+     * List landing pages.
      *
      * @param string  $status              Form status (active|archived|trashed|all).
      * @param boolean $include_total_count To include the total count of records in the response, use true.
      * @param string  $after_cursor        Return results after the given pagination cursor.
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/forms/list-forms
      *
@@ -230,7 +226,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Adds subscribers to forms in bulk.
+     * Bulk add subscribers to forms
      *
      * @param array<array<string,string>> $forms_subscribers_ids Array of arrays comprising of `form_id`, `subscriber_id` and optional `referrer` URL.
      * @param string                      $callback_url          URL to notify for large batch size when async processing complete.
@@ -257,7 +253,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Adds a subscriber to a form by email address
+     * Add subscriber to form by email address
      *
      * @param integer $form_id       Form ID.
      * @param string  $email_address Email Address.
@@ -284,7 +280,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Adds a subscriber to a form by subscriber ID
+     * Add subscriber to form
      *
      * @param integer $form_id       Form ID.
      * @param integer $subscriber_id Subscriber ID.
@@ -375,7 +371,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Gets sequences
+     * List sequences
      *
      * @param boolean $include_total_count To include the total count of records in the response, use true.
      * @param string  $after_cursor        Return results after the given pagination cursor.
@@ -405,7 +401,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Adds a subscriber to a sequence by email address
+     * Adds subscriber to sequence by email address
      *
      * @param integer $sequence_id   Sequence ID.
      * @param string  $email_address Email Address.
@@ -423,7 +419,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Adds a subscriber to a sequence by subscriber ID
+     * Adds subscriber to sequence
      *
      * @param integer $sequence_id   Sequence ID.
      * @param integer $subscriber_id Subscriber ID.
@@ -511,6 +507,8 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.kit.com/api-reference/tags/list-tags
      *
+     * @since 2.0.0
+     *
      * @return mixed|array<int,\stdClass>
      */
     public function get_tags(
@@ -532,11 +530,9 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates a tag.
+     * Create a tag.
      *
      * @param string $tag Tag Name.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/tags/create-a-tag
      *
@@ -551,7 +547,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates multiple tags.
+     * Bulk create tags.
      *
      * @param array<int,string> $tags         Tag Names.
      * @param string            $callback_url URL to notify for large batch size when async processing complete.
@@ -640,7 +636,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Tags a subscriber with the given existing Tag.
+     * Tag a subscriber by email address.
      *
      * @param integer $tag_id        Tag ID.
      * @param string  $email_address Email Address.
@@ -658,7 +654,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Tags a subscriber by subscriber ID with the given existing Tag.
+     * Tag a subscriber.
      *
      * @param integer $tag_id        Tag ID.
      * @param integer $subscriber_id Subscriber ID.
@@ -673,12 +669,10 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Removes a tag from a subscriber.
+     * Remove tag from subscriber.
      *
      * @param integer $tag_id        Tag ID.
      * @param integer $subscriber_id Subscriber ID.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber
      *
@@ -690,12 +684,10 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Removes a tag from a subscriber by email address.
+     * Remove tag from subscriber by email address.
      *
      * @param integer $tag_id        Tag ID.
      * @param string  $email_address Subscriber email address.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address
      *
@@ -926,7 +918,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Create multiple subscribers.
+     * Bulk create subscribers.
      *
      * @param array<int,array<string,string>> $subscribers  Subscribers.
      * @param string                          $callback_url URL to notify for large batch size when async processing complete.
@@ -997,7 +989,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Get subscriber by id
+     * Get a subscriber.
      *
      * @param integer $subscriber_id Subscriber ID.
      *
@@ -1011,7 +1003,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Updates the information for a single subscriber.
+     * Update a subscriber.
      *
      * @param integer               $subscriber_id Existing Subscriber ID.
      * @param string                $first_name    New First Name.
@@ -1049,7 +1041,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Unsubscribe an email address.
+     * Unsubscribe subscriber by email address.
      *
      * @param string $email_address Email Address.
      *
@@ -1068,7 +1060,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Unsubscribe the given subscriber ID.
+     * Unsubscribe subscriber.
      *
      * @param integer $subscriber_id Subscriber ID.
      *
@@ -1096,7 +1088,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Get a list of the tags for a subscriber.
+     * List tags for a subscriber.
      *
      * @param integer $subscriber_id       Subscriber ID.
      * @param boolean $include_total_count To include the total count of records in the response, use true.
@@ -1159,7 +1151,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates a broadcast.
+     * Create a broadcast.
      *
      * @param string               $subject           The broadcast email's subject.
      * @param string               $content           The broadcast's email HTML content.
@@ -1236,7 +1228,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Retrieve a specific broadcast.
+     * Get a broadcast.
      *
      * @param integer $id Broadcast ID.
      *
@@ -1250,8 +1242,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Get the statistics (recipient count, open rate, click rate, unsubscribe count,
-     * total clicks, status, and send progress) for a specific broadcast.
+     * Get stats for a broadcast.
      *
      * @param integer $id Broadcast ID.
      *
@@ -1328,8 +1319,9 @@ trait ConvertKit_API_Traits
         );
     }
 
+
     /**
-     * Updates a broadcast.
+     * Update a broadcast.
      *
      * @param integer              $id                Broadcast ID.
      * @param string               $subject           The broadcast email's subject.
@@ -1408,11 +1400,9 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Deletes an existing broadcast.
+     * Deletes a broadcast.
      *
      * @param integer $id Broadcast ID.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast
      *
@@ -1457,13 +1447,11 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates a webhook that will be called based on the chosen event types.
+     * Create a webhook.
      *
      * @param string $url       URL to receive event.
      * @param string $event     Event to subscribe to.
      * @param string $parameter Optional parameter depending on the event.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/webhooks/create-a-webhook
      *
@@ -1535,11 +1523,9 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Deletes an existing webhook.
+     * Delete a webhook.
      *
      * @param integer $id Webhook ID.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/webhooks/delete-a-webhook
      *
@@ -1557,8 +1543,6 @@ trait ConvertKit_API_Traits
      * @param string  $after_cursor        Return results after the given pagination cursor.
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/custom-fields/list-custom-fields
      *
@@ -1584,11 +1568,9 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates a custom field.
+     * Create a custom field.
      *
      * @param string $label Custom Field label.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/custom-fields/create-a-custom-field
      *
@@ -1603,12 +1585,10 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates multiple custom fields.
+     * Bulk create custom fields.
      *
      * @param array<string> $labels       Custom Fields labels.
      * @param string        $callback_url URL to notify for large batch size when async processing complete.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/custom-fields/bulk-create-custom-fields
      *
@@ -1638,12 +1618,10 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Updates an existing custom field.
+     * Update a custom field.
      *
      * @param integer $id    Custom Field ID.
      * @param string  $label Updated Custom Field label.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/custom-fields/update-a-custom-field
      *
@@ -1658,11 +1636,9 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Deletes an existing custom field.
+     * Delete custom field.
      *
      * @param integer $id Custom Field ID.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/custom-fields/delete-custom-field
      *
@@ -1680,8 +1656,6 @@ trait ConvertKit_API_Traits
      * @param string  $after_cursor        Return results after the given pagination cursor.
      * @param string  $before_cursor       Return results before the given pagination cursor.
      * @param integer $per_page            Number of results to return.
-     *
-     * @since 1.0.0
      *
      * @see https://developers.kit.com/api-reference/purchases/list-purchases
      *
@@ -1707,7 +1681,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Retuns a specific purchase.
+     * Get a purchase.
      *
      * @param integer $purchase_id Purchase ID.
      *
@@ -1721,7 +1695,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Creates a purchase.
+     * Create a purchase.
      *
      * @param string                         $email_address    Email Address.
      * @param string                         $transaction_id   Transaction ID.
@@ -1829,8 +1803,6 @@ trait ConvertKit_API_Traits
      * @param string                    $attribute HTML Attribute.
      * @param string                    $url       Absolute URL to prepend to relative URLs.
      *
-     * @since 1.0.0
-     *
      * @return void
      */
     public function convert_relative_to_absolute_urls(\DOMNodeList $elements, string $attribute, string $url) // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint, Generic.Files.LineLength.TooLong
@@ -1863,8 +1835,6 @@ trait ConvertKit_API_Traits
      * as well as the Content-Type meta tag we might have added in get_html().
      *
      * @param string $markup HTML Markup.
-     *
-     * @since 1.0.0
      *
      * @return string              HTML Markup
      */
