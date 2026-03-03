@@ -946,6 +946,72 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Filter subscribers based on engagement.
+     *
+     * @param array<array<string,string|integer|null>> $all                 Array of filter conditions where ALL must be met (AND logic)
+     * - 'type' (string)                  Type of filter condition ('opens', 'clicks', 'sent', 'delivered', 'subscribed').
+     * - 'count_greater_than' (int)       Minimum count (exclusive). Not applicable for 'subscribed' type.
+     * - 'count_less_than' (int)          Maximum count (exclusive). Not applicable for 'subscribed' type.
+     * - 'after' (\DateTime|null)         Start date. For 'subscribed' type, filters by subscriber_created_at. For other types, filters by event date.
+     * - 'before' (\DateTime|null)        End date. For 'subscribed' type, filters by subscriber_created_at. For other types, filters by event date.
+     * - 'any' (array)                    Array of OR conditions for filtering by specific broadcasts or URLs.
+     * @param boolean                                  $include_total_count To include the total count of records in the response, use true.
+     * @param string                                   $after_cursor        Return results after the given pagination cursor.
+     * @param string                                   $before_cursor       Return results before the given pagination cursor.
+     * @param integer                                  $per_page            Number of results to return.
+     *
+     * @since 2.4.0
+     *
+     * @see https://developers.kit.com/api-reference/subscribers/filter-subscribers-based-on-engagement
+     *
+     * @return mixed
+     */
+    public function filter_subscribers(
+        array $all = [],
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Build parameters.
+        $options = [];
+
+        foreach ($all as $condition) {
+            $option = [];
+            if (!is_null($condition['count_greater_than'])) {
+                $option['count_greater_than'] = (int) $condition['count_greater_than'];
+            }
+            if (!is_null($condition['count_less_than'])) {
+                $option['count_less_than'] = (int) $condition['count_less_than'];
+            }
+            if (!is_null($condition['after'])) {
+                $option['after'] = $condition['after']->format('Y-m-d');
+            }
+            if (!is_null($condition['before'])) {
+                $option['before'] = $condition['before']->format('Y-m-d');
+            }
+            if (!empty($condition['any'])) {
+                $option['any'] = (array) $condition['any'];
+            }
+
+            // Add to options array.
+            $options[] = $option;
+        }//end foreach
+
+        // Send request.
+        return $this->post(
+            'subscribers/filter',
+            $this->build_total_count_and_pagination_params(
+                ['all' => $options],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
      * Get the ConvertKit subscriber ID associated with email address if it exists.
      * Return false if subscriber not found.
      *

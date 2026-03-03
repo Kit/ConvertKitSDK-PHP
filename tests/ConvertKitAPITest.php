@@ -3680,6 +3680,166 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that filter_subscribers() returns the expected data.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribers()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when multiple all conditions are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithMultipleConditions()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ],
+                [
+                    'type' => 'clicks',
+                    'count_greater_than' => 1,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when multiple any conditions are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithNoParameters()
+    {
+        $result = $this->api->filter_subscribers();
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithTotalCount()
+    {
+        $result = $this->api->filter_subscribers(
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersPagination()
+    {
+        $result = $this->api->filter_subscribers(
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+    }
+
+    /**
      * Test that get_subscriber_id() returns the expected data.
      *
      * @since   1.0.0
