@@ -1684,6 +1684,36 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Bulk update subscriber custom field values
+     *
+     * @param array<array<string,string|integer>> $custom_field_values Array of custom field values to update.
+     * - 'subscriber_id' (int)    Subscriber ID.
+     * - 'subscriber_custom_field_id' (int)  Custom Field ID.
+     * - 'value' (string|integer) Value to update.
+     * @param string                              $callback_url        URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.4.0
+     *
+     * @see https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values
+     *
+     * @return mixed|object
+     */
+    public function update_subscriber_custom_field_values(array $custom_field_values, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = ['custom_field_values' => $custom_field_values];
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->post(
+            'bulk/custom_fields/subscribers',
+            $options
+        );
+    }
+
+    /**
      * Update a custom field.
      *
      * @param integer $id    Custom Field ID.

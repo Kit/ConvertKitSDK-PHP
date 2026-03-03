@@ -5060,6 +5060,55 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that update_subscriber_custom_field_values() works.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFieldValues()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Bulk update subscriber custom field values.
+        $result = $this->api->update_subscriber_custom_field_values(
+            [
+                [
+                    'subscriber_id' => $this->subscriber_ids[0],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '100',
+                ],
+                [
+                    'subscriber_id' => $this->subscriber_ids[1],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '200',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each custom field value that was updated.
+        $this->assertIsArray($result->custom_field_values);
+        $this->assertCount(2, $result->custom_field_values);
+    }
+
+    /**
      * Test that update_custom_field() works.
      *
      * @since   1.0.0
