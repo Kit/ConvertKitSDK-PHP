@@ -4853,17 +4853,19 @@ class ConvertKitAPITest extends TestCase
         $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
         $result = $this->api->create_webhook(
             url: $url,
-            event: 'subscriber.form_subscribe',
-            parameter: $_ENV['CONVERTKIT_API_FORM_ID']
+            event: 'custom_field.field_value_updated',
+            parameter: $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']
         );
 
         // Confirm webhook created with correct data.
         $this->assertArrayHasKey('webhook', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('account_id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('event', get_object_vars($result->webhook));
         $this->assertArrayHasKey('target_url', get_object_vars($result->webhook));
         $this->assertEquals($result->webhook->target_url, $url);
-        $this->assertEquals($result->webhook->event->name, 'form_subscribe');
-        $this->assertEquals($result->webhook->event->form_id, $_ENV['CONVERTKIT_API_FORM_ID']);
+        $this->assertEquals($result->webhook->event->name, 'field_value_updated');
+        $this->assertEquals($result->webhook->event->custom_field_id, $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']);
 
         // Delete the webhook.
         $result = $this->api->delete_webhook($result->webhook->id);
@@ -5057,6 +5059,55 @@ class ConvertKitAPITest extends TestCase
 
         // Confirm result is an array comprising of each custom field that was created.
         $this->assertIsArray($result->custom_fields);
+    }
+
+    /**
+     * Test that update_subscriber_custom_field_values() works.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFieldValues()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Bulk update subscriber custom field values.
+        $result = $this->api->update_subscriber_custom_field_values(
+            [
+                [
+                    'subscriber_id' => $this->subscriber_ids[0],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '100',
+                ],
+                [
+                    'subscriber_id' => $this->subscriber_ids[1],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '200',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each custom field value that was updated.
+        $this->assertIsArray($result->custom_field_values);
+        $this->assertCount(2, $result->custom_field_values);
     }
 
     /**
