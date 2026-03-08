@@ -946,6 +946,74 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Filter subscribers based on engagement.
+     *
+     * @param array<int, array<string, mixed>> $all                 Array of filter conditions where ALL must be met (AND logic). Each condition can have.
+     *                                                              - 'type' (string).
+     *                                                              - 'count_greater_than' (int|null).
+     *                                                              - 'count_less_than' (int|null).
+     *                                                              - 'after' (\DateTime|null).
+     *                                                              - 'before' (\DateTime|null).
+     *                                                              - 'any' (array<int|string, mixed>|null).
+     * @param boolean                          $include_total_count To include the total count of records in the response, use true.
+     * @param string                           $after_cursor        Return results after the given pagination cursor.
+     * @param string                           $before_cursor       Return results before the given pagination cursor.
+     * @param integer                          $per_page            Number of results to return.
+     *
+     * @since 2.4.0
+     *
+     * @see https://developers.kit.com/api-reference/subscribers/filter-subscribers-based-on-engagement
+     *
+     * @return mixed
+     */
+    public function filter_subscribers(
+        array $all = [],
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        $options = [];
+
+        foreach ($all as $condition) {
+            $option = [];
+
+            if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
+                $option['count_greater_than'] = $condition['count_greater_than'];
+            }
+
+            if (array_key_exists('count_less_than', $condition) && $condition['count_less_than'] !== null) {
+                $option['count_less_than'] = $condition['count_less_than'];
+            }
+
+            if (array_key_exists('after', $condition) && $condition['after'] instanceof \DateTime) {
+                $option['after'] = $condition['after']->format('Y-m-d');
+            }
+
+            if (array_key_exists('before', $condition) && $condition['before'] instanceof \DateTime) {
+                $option['before'] = $condition['before']->format('Y-m-d');
+            }
+
+            if (array_key_exists('any', $condition) && !empty($condition['any'])) {
+                $option['any'] = (array) $condition['any'];
+            }
+
+            $options[] = $option;
+        }//end foreach
+
+        return $this->post(
+            'subscribers/filter',
+            $this->build_total_count_and_pagination_params(
+                ['all' => $options],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
      * Get the ConvertKit subscriber ID associated with email address if it exists.
      * Return false if subscriber not found.
      *
@@ -1468,6 +1536,8 @@ trait ConvertKit_API_Traits
             case 'subscriber.subscriber_bounce':
             case 'subscriber.subscriber_complain':
             case 'purchase.purchase_create':
+            case 'custom_field.field_created':
+            case 'custom_field.field_deleted':
                 $eventData = ['name' => $event];
                 break;
 
@@ -1505,6 +1575,13 @@ trait ConvertKit_API_Traits
                 $eventData = [
                     'name'   => $event,
                     'tag_id' => $parameter,
+                ];
+                break;
+
+            case 'custom_field.field_value_updated':
+                $eventData = [
+                    'name'            => $event,
+                    'custom_field_id' => $parameter,
                 ];
                 break;
 
@@ -1613,6 +1690,36 @@ trait ConvertKit_API_Traits
         // Send request.
         return $this->post(
             'bulk/custom_fields',
+            $options
+        );
+    }
+
+    /**
+     * Bulk update subscriber custom field values
+     *
+     * @param array<array<string,string|integer>> $custom_field_values Array of custom field values to update.
+     * - 'subscriber_id' (int)    Subscriber ID.
+     * - 'subscriber_custom_field_id' (int)  Custom Field ID.
+     * - 'value' (string|integer) Value to update.
+     * @param string                              $callback_url        URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.4.0
+     *
+     * @see https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values
+     *
+     * @return mixed|object
+     */
+    public function update_subscriber_custom_field_values(array $custom_field_values, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = ['custom_field_values' => $custom_field_values];
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->post(
+            'bulk/custom_fields/subscribers',
             $options
         );
     }
@@ -1854,15 +1961,15 @@ trait ConvertKit_API_Traits
     /**
      * Adds total count and pagination parameters to the given array of existing API parameters.
      *
-     * @param array<string, string|integer|bool> $params              API parameters.
-     * @param boolean                            $include_total_count Return total count of records.
-     * @param string                             $after_cursor        Return results after the given pagination cursor.
-     * @param string                             $before_cursor       Return results before the given pagination cursor.
-     * @param integer                            $per_page            Number of results to return.
+     * @param array<string, string|integer|boolean|list<array<string, mixed>>> $params              API parameters.
+     * @param boolean                                                          $include_total_count Return total count of records.
+     * @param string                                                           $after_cursor        Return results after the given pagination cursor.
+     * @param string                                                           $before_cursor       Return results before the given pagination cursor.
+     * @param integer                                                          $per_page            Number of results to return.
      *
      * @since 2.0.0
      *
-     * @return array<string, string|integer|bool>
+     * @return array<string, string|int|bool|list<array<string, mixed>>>
      */
     private function build_total_count_and_pagination_params(
         array $params = [],
@@ -1888,8 +1995,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a GET request to the API.
      *
-     * @param string                                                             $endpoint API Endpoint.
-     * @param array<string, int|string|boolean|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                 $endpoint API Endpoint.
+     * @param array<string, int|string|boolean|array<string, int|string>|list<array<string, mixed>>> $args     Request arguments.
      *
      * @return false|mixed
      */
@@ -1901,8 +2008,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a POST request to the API.
      *
-     * @param string                                                                                                     $endpoint API Endpoint.
-     * @param array<string, bool|integer|float|string|null|array<int|string, float|integer|string|array<string|string>>> $args     Request arguments.
+     * @param string                                                                                                            $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<string|mixed>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */
@@ -1940,9 +2047,9 @@ trait ConvertKit_API_Traits
     /**
      * Performs an API request.
      *
-     * @param string                                                                                                     $endpoint API Endpoint.
-     * @param string                                                                                                     $method   Request method.
-     * @param array<string, bool|integer|float|string|null|array<int|string, float|integer|string|array<string|string>>> $args     Request arguments.
+     * @param string                                                                                                          $endpoint API Endpoint.
+     * @param string                                                                                                          $method   Request method.
+     * @param array<string, bool|integer|float|string|null|array<int|string, bool|integer|float|string|array<string, mixed>>> $args     Request arguments.
      *
      * @throws \Exception If JSON encoding arguments failed.
      *

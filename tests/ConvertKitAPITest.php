@@ -3680,6 +3680,166 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that filter_subscribers() returns the expected data.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribers()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when multiple all conditions are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithMultipleConditions()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ],
+                [
+                    'type' => 'clicks',
+                    'count_greater_than' => 1,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when multiple any conditions are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithNoParameters()
+    {
+        $result = $this->api->filter_subscribers();
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithTotalCount()
+    {
+        $result = $this->api->filter_subscribers(
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersPagination()
+    {
+        $result = $this->api->filter_subscribers(
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+    }
+
+    /**
      * Test that get_subscriber_id() returns the expected data.
      *
      * @since   1.0.0
@@ -4693,17 +4853,19 @@ class ConvertKitAPITest extends TestCase
         $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
         $result = $this->api->create_webhook(
             url: $url,
-            event: 'subscriber.form_subscribe',
-            parameter: $_ENV['CONVERTKIT_API_FORM_ID']
+            event: 'custom_field.field_value_updated',
+            parameter: $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']
         );
 
         // Confirm webhook created with correct data.
         $this->assertArrayHasKey('webhook', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('account_id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('event', get_object_vars($result->webhook));
         $this->assertArrayHasKey('target_url', get_object_vars($result->webhook));
         $this->assertEquals($result->webhook->target_url, $url);
-        $this->assertEquals($result->webhook->event->name, 'form_subscribe');
-        $this->assertEquals($result->webhook->event->form_id, $_ENV['CONVERTKIT_API_FORM_ID']);
+        $this->assertEquals($result->webhook->event->name, 'field_value_updated');
+        $this->assertEquals($result->webhook->event->custom_field_id, $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']);
 
         // Delete the webhook.
         $result = $this->api->delete_webhook($result->webhook->id);
@@ -4897,6 +5059,55 @@ class ConvertKitAPITest extends TestCase
 
         // Confirm result is an array comprising of each custom field that was created.
         $this->assertIsArray($result->custom_fields);
+    }
+
+    /**
+     * Test that update_subscriber_custom_field_values() works.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFieldValues()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Bulk update subscriber custom field values.
+        $result = $this->api->update_subscriber_custom_field_values(
+            [
+                [
+                    'subscriber_id' => $this->subscriber_ids[0],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '100',
+                ],
+                [
+                    'subscriber_id' => $this->subscriber_ids[1],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '200',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each custom field value that was updated.
+        $this->assertIsArray($result->custom_field_values);
+        $this->assertCount(2, $result->custom_field_values);
     }
 
     /**

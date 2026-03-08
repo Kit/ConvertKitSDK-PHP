@@ -476,6 +476,33 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
     }
 
     /**
+     * Test that update_subscriber_custom_field_values() throws a ClientException
+     * as this is only supported using OAuth.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFieldValues()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->update_subscriber_custom_field_values(
+            [
+                [
+                    'subscriber_id' => 1,
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '100',
+                ],
+                [
+                    'subscriber_id' => 2,
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '200',
+                ],
+            ]
+        );
+    }
+
+    /**
      * Test that get_purchases() throws a ClientException
      * as this is only supported using OAuth.
      *
