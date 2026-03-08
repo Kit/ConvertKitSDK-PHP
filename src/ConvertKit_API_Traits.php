@@ -1536,6 +1536,8 @@ trait ConvertKit_API_Traits
             case 'subscriber.subscriber_bounce':
             case 'subscriber.subscriber_complain':
             case 'purchase.purchase_create':
+            case 'custom_field.field_created':
+            case 'custom_field.field_deleted':
                 $eventData = ['name' => $event];
                 break;
 
@@ -1573,6 +1575,13 @@ trait ConvertKit_API_Traits
                 $eventData = [
                     'name'   => $event,
                     'tag_id' => $parameter,
+                ];
+                break;
+
+            case 'custom_field.field_value_updated':
+                $eventData = [
+                    'name'            => $event,
+                    'custom_field_id' => $parameter,
                 ];
                 break;
 
