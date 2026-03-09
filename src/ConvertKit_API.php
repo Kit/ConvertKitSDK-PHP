@@ -348,13 +348,13 @@ class ConvertKit_API
     /**
      * Performs an API request using Guzzle.
      *
-     * @param string                                                                                                     $endpoint API Endpoint.
-     * @param string                                                                                                     $method   Request method.
-     * @param array<string, bool|integer|float|string|null|array<int|string, float|integer|string|array<string|string>>> $args     Request arguments.
+     * @param string                                                                                                  $endpoint API Endpoint.
+     * @param string                                                                                                  $method   Request method.
+     * @param array<string, bool|integer|float|string|null|array<int|string, bool|integer|float|string|array<mixed>>> $args     Request arguments.
      *
      * @throws \Exception If JSON encoding arguments failed.
      *
-     * @return mixed|object
+     * @return false|mixed
      */
     public function request(string $endpoint, string $method, array $args = [])
     {
