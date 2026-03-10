@@ -316,7 +316,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @return WP_Error|array
+     * @return false|mixed
      */
     public function add_subscriber_to_legacy_form(int $form_id, int $subscriber_id)
     {
@@ -1952,7 +1952,9 @@ trait ConvertKit_API_Traits
 
             // Remove element if it's rocket-loader.min.js. Including it prevents landing page redirects from working.
             if (strpos($element->getAttribute($attribute), 'rocket-loader.min.js') !== false) {
-                $element->parentNode->removeChild($element);
+                if ($element->parentNode instanceof \DOMNode) {
+                    $element->parentNode->removeChild($element);
+                }
                 continue;
             }
 
@@ -1974,6 +1976,10 @@ trait ConvertKit_API_Traits
     public function get_body_html(\DOMDocument $dom)
     {
         $body = $dom->getElementsByTagName('body')->item(0);
+
+        if (! $body instanceof \DOMElement) {
+            return '';
+        }
 
         $html = '';
         foreach ($body->childNodes as $child) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

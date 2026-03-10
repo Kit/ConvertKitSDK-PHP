@@ -274,7 +274,6 @@ class ConvertKit_API
      * @param string $url URL of HTML page.
      *
      * @throws \InvalidArgumentException If the URL is not a valid URL format.
-     * @throws \Exception If parsing the legacy form or landing page failed.
      *
      * @return false|string
      */
