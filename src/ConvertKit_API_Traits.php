@@ -1914,8 +1914,12 @@ trait ConvertKit_API_Traits
      */
     public function convert_relative_to_absolute_urls(\DOMNodeList $elements, string $attribute, string $url) // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint, Generic.Files.LineLength.TooLong
     {
-        // Anchor hrefs.
+        $nodes = [];
         foreach ($elements as $element) {
+            $nodes[] = $element;
+        }
+
+        foreach ($nodes as $element) {
             // Skip if the attribute's value is empty.
             if (empty($element->getAttribute($attribute))) {
                 continue;
@@ -1941,19 +1945,6 @@ trait ConvertKit_API_Traits
             // Prepend the URL to the attribute's value.
             $element->setAttribute($attribute, $url . $element->getAttribute($attribute));
         }
-    }
-
-    /**
-     * Strips <html>, <head> and <body> opening and closing tags from the given markup,
-     * as well as the Content-Type meta tag we might have added in get_html().
-     *
-     * @param string $markup HTML Markup.
-     *
-     * @return string              HTML Markup
-     */
-    public function strip_html_head_body_tags(string $markup)
-    {
-        return $this->get_body_html($markup);
     }
 
     /**
