@@ -309,6 +309,21 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Adds a subscriber to a legacy form by subscriber ID
+     *
+     * @param integer $form_id       Legacy Form ID.
+     * @param integer $subscriber_id Subscriber ID.
+     *
+     * @since 2.0.0
+     *
+     * @return WP_Error|array
+     */
+    public function add_subscriber_to_legacy_form(int $form_id, int $subscriber_id)
+    {
+        return $this->post(sprintf('landing_pages/%s/subscribers/%s', $form_id, $subscriber_id));
+    }
+
+    /**
      * List subscribers for a form
      *
      * @param integer        $form_id             Form ID.
@@ -1944,29 +1959,28 @@ trait ConvertKit_API_Traits
             // If here, the attribute's value is a relative URL, missing the http(s) and domain.
             // Prepend the URL to the attribute's value.
             $element->setAttribute($attribute, $url . $element->getAttribute($attribute));
-        }
+        }//end foreach
     }
 
     /**
      * Returns the HTML within the DOMDocument's <body> tag as a string.
      *
      * @param \DOMDocument $dom DOM Document.
-     * 
-     * @since   2.1.0
      *
-     * @return  string
+     * @since 2.1.0
+     *
+     * @return string
      */
-    public function get_body_html(\DOMDocument $dom) {
-
-        $body = $dom->getElementsByTagName( 'body' )->item( 0 );
+    public function get_body_html(\DOMDocument $dom)
+    {
+        $body = $dom->getElementsByTagName('body')->item(0);
 
         $html = '';
-        foreach ( $body->childNodes as $child ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-            $html .= $dom->saveHTML( $child );
+        foreach ($body->childNodes as $child) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+            $html .= $dom->saveHTML($child);
         }
 
         return $html;
-
     }
 
     /**
