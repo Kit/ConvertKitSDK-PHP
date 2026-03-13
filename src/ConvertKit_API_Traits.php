@@ -1929,6 +1929,7 @@ trait ConvertKit_API_Traits
      */
     public function convert_relative_to_absolute_urls(\DOMNodeList $elements, string $attribute, string $url) // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint, Generic.Files.LineLength.TooLong
     {
+        // Store DOMNodeList in array, as iteration stops if a node is modified.
         $nodes = [];
         foreach ($elements as $element) {
             $nodes[] = $element;
