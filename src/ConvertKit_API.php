@@ -274,7 +274,6 @@ class ConvertKit_API
      * @param string $url URL of HTML page.
      *
      * @throws \InvalidArgumentException If the URL is not a valid URL format.
-     * @throws \Exception If parsing the legacy form or landing page failed.
      *
      * @return false|string
      */
@@ -328,21 +327,11 @@ class ConvertKit_API
         $this->convert_relative_to_absolute_urls($html->getElementsByTagName('script'), 'src', $url_scheme_host_only);
         $this->convert_relative_to_absolute_urls($html->getElementsByTagName('form'), 'action', $url_scheme_host_only);
 
-        // Save HTML.
-        $resource = $html->saveHTML();
-
-        // If the result is false, return a blank string.
-        if (!$resource) {
-            throw new \Exception(sprintf('Could not parse %s', $url));
-        }
-
         // Remove some HTML tags that DOMDocument adds, returning the output.
         // We do this instead of using LIBXML_HTML_NOIMPLIED in loadHTML(), because Legacy Forms
         // are not always contained in a single root / outer element, which is required for
         // LIBXML_HTML_NOIMPLIED to correctly work.
-        $resource = $this->strip_html_head_body_tags($resource);
-
-        return $resource;
+        return $this->get_body_html($html);
     }
 
     /**

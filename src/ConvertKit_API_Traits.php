@@ -309,6 +309,21 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Adds a subscriber to a legacy form by subscriber ID
+     *
+     * @param integer $form_id       Legacy Form ID.
+     * @param integer $subscriber_id Subscriber ID.
+     *
+     * @since 2.0.0
+     *
+     * @return false|mixed
+     */
+    public function add_subscriber_to_legacy_form(int $form_id, int $subscriber_id)
+    {
+        return $this->post(sprintf('landing_pages/%s/subscribers/%s', $form_id, $subscriber_id));
+    }
+
+    /**
      * List subscribers for a form
      *
      * @param integer        $form_id             Form ID.
@@ -1914,8 +1929,13 @@ trait ConvertKit_API_Traits
      */
     public function convert_relative_to_absolute_urls(\DOMNodeList $elements, string $attribute, string $url) // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint, Generic.Files.LineLength.TooLong
     {
-        // Anchor hrefs.
+        // Store DOMNodeList in array, as iteration stops if a node is modified.
+        $nodes = [];
         foreach ($elements as $element) {
+            $nodes[] = $element;
+        }
+
+        foreach ($nodes as $element) {
             // Skip if the attribute's value is empty.
             if (empty($element->getAttribute($attribute))) {
                 continue;
@@ -1931,31 +1951,43 @@ trait ConvertKit_API_Traits
                 continue;
             }
 
+            // Remove element if it's rocket-loader.min.js. Including it prevents landing page redirects from working.
+            if (strpos($element->getAttribute($attribute), 'rocket-loader.min.js') !== false) {
+                if ($element->parentNode instanceof \DOMNode) {
+                    $element->parentNode->removeChild($element);
+                }
+                continue;
+            }
+
             // If here, the attribute's value is a relative URL, missing the http(s) and domain.
             // Prepend the URL to the attribute's value.
             $element->setAttribute($attribute, $url . $element->getAttribute($attribute));
-        }
+        }//end foreach
     }
 
     /**
-     * Strips <html>, <head> and <body> opening and closing tags from the given markup,
-     * as well as the Content-Type meta tag we might have added in get_html().
+     * Returns the HTML within the DOMDocument's <body> tag as a string.
      *
-     * @param string $markup HTML Markup.
+     * @param \DOMDocument $dom DOM Document.
      *
-     * @return string              HTML Markup
+     * @since 2.1.0
+     *
+     * @return string
      */
-    public function strip_html_head_body_tags(string $markup)
+    public function get_body_html(\DOMDocument $dom)
     {
-        $markup = str_replace('<html>', '', $markup);
-        $markup = str_replace('</html>', '', $markup);
-        $markup = str_replace('<head>', '', $markup);
-        $markup = str_replace('</head>', '', $markup);
-        $markup = str_replace('<body>', '', $markup);
-        $markup = str_replace('</body>', '', $markup);
-        $markup = str_replace('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">', '', $markup);
+        $body = $dom->getElementsByTagName('body')->item(0);
 
-        return $markup;
+        if (! $body instanceof \DOMElement) {
+            return '';
+        }
+
+        $html = '';
+        foreach ($body->childNodes as $child) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+            $html .= $dom->saveHTML($child);
+        }
+
+        return $html;
     }
 
     /**
