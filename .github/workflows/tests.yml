@@ -19,6 +19,11 @@ jobs:
     # @see: https://github.com/actions/virtual-environments
     runs-on: ubuntu-latest
 
+    # Don't run if the PR is from Dependabot, as it doesn't have access to the repository's secrets.
+    # Dependabot also only checks for GitHub action dependencies, so it's not necessary to run
+    # Plugin tests.
+    if: github.actor != 'dependabot[bot]'
+
     # Defines PHP Versions matrix to run tests on
     strategy:
       fail-fast: false
