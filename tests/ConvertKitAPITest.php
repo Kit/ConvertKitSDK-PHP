@@ -3581,8 +3581,8 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_subscriber() returns the expected data
-     * when an invalid custom field is included.
+     * Test that create_subscriber() throws a ClientException when an invalid
+     * custom field is included.
      *
      * @since   2.0.0
      *
@@ -3590,7 +3590,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testCreateSubscriberWithInvalidCustomFields()
     {
-
+        $this->expectException(ClientException::class);
         $emailAddress = $this->generateEmailAddress();
         $result = $this->api->create_subscriber(
             email_address: $emailAddress,
@@ -3598,12 +3598,6 @@ class ConvertKitAPITest extends TestCase
                 'not_a_custom_field' => 'value'
             ]
         );
-
-        // Set subscriber_id to ensure subscriber is unsubscribed after test.
-        $this->subscriber_ids[] = $result->subscriber->id;
-
-        // Assert subscriber exists with correct data.
-        $this->assertEquals($result->subscriber->email_address, $emailAddress);
     }
 
     /**
