@@ -416,6 +416,154 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Create a sequence
+     *
+     * @param string                              $name                       The name of the sequence.
+     * @param string                              $email_address              The sending email address to use. Uses the account's sending email address if not provided.
+     * @param integer                             $email_template_id          Id of the email template to use.
+     * @param array<string>                       $send_days                  The days of the week to send the sequence on. Must be one of: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`.
+     * @param integer                             $send_hour                  The hour of the day to send the sequence at. Must be an integer between 0 and 23.
+     * @param string                              $time_zone                  The timezone to use for the sequence. Must be a valid IANA timezone string.
+     * @param boolean                             $active                     Use `true` to activate the sequence, `false` to deactivate it.
+     * @param boolean                             $repeat                     When `true`, subscribers can restart the sequence multiple times.
+     * @param boolean                             $hold                       When `true`, subscribers added via Visual Automations stay in the sequence after receiving the last email.
+     * @param array<string,string|array<integer>> $exclude_subscriber_sources The subscriber sources to exclude from the sequence. Uses the account's default exclude subscriber sources if not provided.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return object
+     */
+    public function create_sequence(
+        string $name = '',
+        string $email_address = '',
+        int $email_template_id = 0,
+        array $send_days = [],
+        int $send_hour = 0,
+        string $time_zone = 'UTC',
+        bool $active = true,
+        bool $repeat = false,
+        bool $hold = false,
+        array $exclude_subscriber_sources = []
+    ) {
+        $options = [
+            'name'              => $name,
+            'email_address'     => $email_address,
+            'email_template_id' => $email_template_id,
+            'send_days'         => $send_days,
+            'send_hour'         => $send_hour,
+            'timezone'          => $timezone,
+            'active'            => $active,
+            'repeat'            => $repeat,
+            'hold'              => $hold,
+        ];
+        if (count($exclude_subscriber_sources)) {
+            $options['exclude_subscriber_sources'] = $exclude_subscriber_sources;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->post(
+            'sequences',
+            $options
+        );
+    }
+
+    /**
+     * Get a sequence.
+     *
+     * @param integer $id Sequence ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/get-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function get_sequence(int $id)
+    {
+        return $this->get(sprintf('sequences/%s', $id));
+    }
+
+    /**
+     * Create a sequence
+     *
+     * @param integer                             $sequence_id                Sequence ID.
+     * @param string                              $name                       The name of the sequence.
+     * @param string                              $email_address              The sending email address to use. Uses the account's sending email address if not provided.
+     * @param integer                             $email_template_id          Id of the email template to use.
+     * @param array<string>                       $send_days                  The days of the week to send the sequence on. Must be one of: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`.
+     * @param integer                             $send_hour                  The hour of the day to send the sequence at. Must be an integer between 0 and 23.
+     * @param string                              $time_zone                  The timezone to use for the sequence. Must be a valid IANA timezone string.
+     * @param boolean                             $active                     Use `true` to activate the sequence, `false` to deactivate it.
+     * @param boolean                             $repeat                     When `true`, subscribers can restart the sequence multiple times.
+     * @param boolean                             $hold                       When `true`, subscribers added via Visual Automations stay in the sequence after receiving the last email.
+     * @param array<string,string|array<integer>> $exclude_subscriber_sources The subscriber sources to exclude from the sequence. Uses the account's default exclude subscriber sources if not provided.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return object
+     */
+    public function update_sequence(
+        int $sequence_id,
+        string $name = '',
+        string $email_address = '',
+        int $email_template_id = 0,
+        array $send_days = [],
+        int $send_hour = 0,
+        string $time_zone = 'UTC',
+        bool $active = true,
+        bool $repeat = false,
+        bool $hold = false,
+        array $exclude_subscriber_sources = []
+    ) {
+        $options = [
+            'name'              => $name,
+            'email_address'     => $email_address,
+            'email_template_id' => $email_template_id,
+            'send_days'         => $send_days,
+            'send_hour'         => $send_hour,
+            'timezone'          => $timezone,
+            'active'            => $active,
+            'repeat'            => $repeat,
+            'hold'              => $hold,
+        ];
+        if (count($exclude_subscriber_sources)) {
+            $options['exclude_subscriber_sources'] = $exclude_subscriber_sources;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('sequences/%s', $sequence_id),
+            $options
+        );
+    }
+
+    /**
+     * Deletes a sequence.
+     *
+     * @param integer $id Sequence ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/delete-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function delete_sequence(int $id)
+    {
+        return $this->delete(sprintf('sequences/%s', $id));
+    }
+
+    /**
      * Adds subscriber to sequence by email address
      *
      * @param integer $sequence_id   Sequence ID.
