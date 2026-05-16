@@ -4468,6 +4468,131 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_posts() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPosts()
+    {
+        $result = $this->api->get_posts();
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is not included.
+        $this->assertArrayNotHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the post content is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithIncludeContent()
+    {
+        $result = $this->api->get_posts(
+            include_content: true,
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is included.
+        $this->assertArrayHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithTotalCount()
+    {
+        $result = $this->api->get_posts(
+            include_total_count: true
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsPagination()
+    {
+        $result = $this->api->get_posts(
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
      * Test that get_broadcasts() returns the expected data
      * when a valid sent_after date is specified.
      *
