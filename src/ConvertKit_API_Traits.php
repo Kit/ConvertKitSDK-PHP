@@ -434,12 +434,12 @@ trait ConvertKit_API_Traits
      * @return object
      */
     public function create_sequence(
-        string $name = '',
+        string $name,
         string $email_address = '',
         int $email_template_id = 0,
         array $send_days = [],
         int $send_hour = 0,
-        string $time_zone = 'UTC',
+        string $time_zone = '',
         bool $active = true,
         bool $repeat = false,
         bool $hold = false,
@@ -449,13 +449,15 @@ trait ConvertKit_API_Traits
             'name'              => $name,
             'email_address'     => $email_address,
             'email_template_id' => $email_template_id,
-            'send_days'         => $send_days,
             'send_hour'         => $send_hour,
-            'timezone'          => $timezone,
+            'time_zone'         => $time_zone,
             'active'            => $active,
             'repeat'            => $repeat,
             'hold'              => $hold,
         ];
+        if (count($send_days)) {
+            $options['send_days'] = $send_days;
+        }
         if (count($exclude_subscriber_sources)) {
             $options['exclude_subscriber_sources'] = $exclude_subscriber_sources;
         }
@@ -489,7 +491,7 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Create a sequence
+     * Updates a sequence
      *
      * @param integer                             $sequence_id                Sequence ID.
      * @param string                              $name                       The name of the sequence.
@@ -514,7 +516,7 @@ trait ConvertKit_API_Traits
         int $email_template_id = 0,
         array $send_days = [],
         int $send_hour = 0,
-        string $time_zone = 'UTC',
+        string $time_zone = '',
         bool $active = true,
         bool $repeat = false,
         bool $hold = false,
@@ -526,7 +528,7 @@ trait ConvertKit_API_Traits
             'email_template_id' => $email_template_id,
             'send_days'         => $send_days,
             'send_hour'         => $send_hour,
-            'timezone'          => $timezone,
+            'time_zone'         => $time_zone,
             'active'            => $active,
             'repeat'            => $repeat,
             'hold'              => $hold,

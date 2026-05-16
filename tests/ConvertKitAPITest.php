@@ -1060,6 +1060,106 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that create_sequence(), update_sequence() and delete_sequence() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequences remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequences.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateUpdateAndDeleteSequence()
+    {
+        // Create a sequence.
+        $result = $this->api->create_sequence(
+            name: 'Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            send_hour: 12,
+            time_zone: 'America/Los_Angeles',
+            active: false,
+            repeat: false,
+            hold: false
+        );
+        $sequenceID = $result->sequence->id;
+
+        // Confirm the Sequence saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(12, $result['send_hour']);
+        $this->assertEquals('America/Los_Angeles', $result['time_zone']);
+        $this->assertEquals(false, $result['active']);
+        $this->assertEquals(false, $result['repeat']);
+        $this->assertEquals(false, $result['hold']);
+
+        // Update the existing sequence.
+        $result = $this->api->update_sequence(
+            sequence_id: $sequenceID,
+            name: 'Edited Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['saturday', 'sunday'],
+            send_hour: 13,
+            time_zone: 'America/New_York',
+            active: true,
+            repeat: true,
+            hold: true
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(13, $result['send_hour']);
+        $this->assertEquals('America/New_York', $result['time_zone']);
+        $this->assertEquals(true, $result['active']);
+        $this->assertEquals(true, $result['repeat']);
+        $this->assertEquals(true, $result['hold']);
+
+        // Delete Sequence.
+        $this->api->delete_sequence($sequenceID);
+        $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
+    }
+
+    /**
+     * Test that update_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence(12345);
+    }
+
+    /**
+     * Test that delete_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence(12345);
+    }
+
+    /**
      * Test that add_subscriber_to_sequence_by_email() returns the expected data.
      *
      * @since   1.0.0
