@@ -431,7 +431,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
      *
-     * @return object
+     * @return mixed|object
      */
     public function create_sequence(
         string $name,
@@ -507,7 +507,7 @@ trait ConvertKit_API_Traits
      *
      * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
      *
-     * @return object
+     * @return mixed|object
      */
     public function update_sequence(
         int $sequence_id,
@@ -2217,8 +2217,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a PUT request to the API.
      *
-     * @param string                                                              $endpoint API Endpoint.
-     * @param array<string, bool|integer|string|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                                   $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<int>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */
