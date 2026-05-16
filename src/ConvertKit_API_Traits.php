@@ -962,6 +962,57 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List posts.
+     *
+     * @param boolean $include_content     To include the content field on each post in the response, use true.
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @since 2.5.0
+     *
+     * @see https://developers.kit.com/api-reference/posts/list-posts
+     *
+     * @return false|mixed
+     */
+    public function get_posts(
+        bool $include_content = false,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Send request.
+        return $this->get(
+            'posts',
+            $this->build_total_count_and_pagination_params(
+                ['include_content' => $include_content],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Get a post.
+     *
+     * @param integer $id Post ID.
+     *
+     * @since 2.5.0
+     *
+     * @see https://developers.kit.com/api-reference/posts/get-a-post
+     *
+     * @return mixed|object
+     */
+    public function get_post(int $id)
+    {
+        return $this->get(sprintf('posts/%s', $id));
+    }
+
+    /**
      * List subscribers.
      *
      * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
