@@ -4060,6 +4060,9 @@ class ConvertKitAPITest extends TestCase
             email_address: $emailAddress
         );
 
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
+
         // Unsubscribe.
         $this->assertNull($this->api->unsubscribe_by_email($emailAddress));
     }
@@ -4106,6 +4109,9 @@ class ConvertKitAPITest extends TestCase
         $result = $this->api->create_subscriber(
             email_address: $emailAddress
         );
+
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
 
         // Unsubscribe.
         $this->assertNull($this->api->unsubscribe($result->subscriber->id));
