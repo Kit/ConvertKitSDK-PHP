@@ -4593,6 +4593,34 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_post() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPost()
+    {
+        $result = $this->api->get_post($_ENV['CONVERTKIT_API_POST_ID']);
+        $result = get_object_vars($result->post);
+        $this->assertEquals($result['id'], $_ENV['CONVERTKIT_API_POST_ID']);
+    }
+
+    /**
+     * Test that get_post() throws a ClientException when an invalid
+     * post ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostWithInvalidPostID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_post(12345);
+    }
+
+    /**
      * Test that get_broadcasts() returns the expected data
      * when a valid sent_after date is specified.
      *
