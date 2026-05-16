@@ -1132,6 +1132,35 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_sequence() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequence()
+    {
+        $result = $this->api->get_sequence((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('sequence', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+    }
+
+    /**
+     * Test that get_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence(12345);
+    }
+
+    /**
      * Test that update_sequence() throws a ClientException when an invalid
      * sequence ID is specified.
      *
