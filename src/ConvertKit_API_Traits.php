@@ -662,6 +662,196 @@ trait ConvertKit_API_Traits
         );
     }
 
+    /**
+     * List sequence emails
+     *
+     * @param integer $sequence_id         Sequence ID.
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails
+     *
+     * @return false|mixed
+     */
+    public function get_sequence_emails(
+        int $sequence_id,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        return $this->get(
+            sprintf('sequences/%s/emails', $sequence_id),
+            $this->build_total_count_and_pagination_params(
+                [],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Create a sequence email
+     *
+     * @param integer            $sequence_id       Sequence ID.
+     * @param string             $subject           Subject line of the email.
+     * @param integer            $delay_value       Number of days or hours to wait before sending this email after the previous one.
+     * @param string             $delay_unit        Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
+     * @param string|null        $preview_text      Preview text shown in email clients before the email is opened.
+     * @param string|null        $content           HTML body content of the email.
+     * @param integer|null       $email_template_id ID of the email template to use for layout and styling.
+     * @param boolean            $published         Whether the email is active and will be sent to subscribers.
+     * @param array<string>|null $send_days         Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param integer|null       $position          Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function create_sequence_email(
+        int $sequence_id,
+        string $subject,
+        int $delay_value,
+        string $delay_unit,
+        string|null $preview_text = null,
+        string|null $content = null,
+        int|null $email_template_id = null,
+        bool $published = false,
+        array|null $send_days = null,
+        int|null $position = null,
+    ) {
+        $options = [
+            'subject'     => $subject,
+            'delay_value' => $delay_value,
+            'delay_unit'  => $delay_unit,
+            'published'   => $published,
+            'send_days'   => $send_days,
+        ];
+
+        if (!empty($preview_text)) {
+            $options['preview_text'] = $preview_text;
+        }
+        if (!empty($content)) {
+            $options['content'] = $content;
+        }
+        if (!empty($email_template_id)) {
+            $options['email_template_id'] = $email_template_id;
+        }
+        if (!empty($position)) {
+            $options['position'] = $position;
+        }
+
+        // Send request.
+        return $this->post(
+            sprintf('sequences/%s/emails', $sequence_id),
+            $options
+        );
+    }
+
+    /**
+     * Get a sequence email.
+     *
+     * @param integer $sequence_id Sequence ID.
+     * @param integer $email_id    Email ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function get_sequence_email(int $sequence_id, int $email_id)
+    {
+        return $this->get(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id));
+    }
+
+    /**
+     * Updates a sequence
+     *
+     * @param integer            $sequence_id       Sequence ID.
+     * @param integer            $email_id          Sequence Email ID.
+     * @param string|null        $subject           Subject line of the email.
+     * @param integer|null       $delay_value       Number of days or hours to wait before sending this email after the previous one.
+     * @param string|null        $delay_unit        Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
+     * @param string|null        $preview_text      Preview text shown in email clients before the email is opened.
+     * @param string|null        $content           HTML body content of the email.
+     * @param integer|null       $email_template_id ID of the email template to use for layout and styling.
+     * @param boolean|null       $published         Whether the email is active and will be sent to subscribers.
+     * @param array<string>|null $send_days         Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param integer|null       $position          Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function update_sequence_email(
+        int $sequence_id,
+        int $email_id,
+        string|null $subject = null,
+        int|null $delay_value = null,
+        string|null $delay_unit = null,
+        string|null $preview_text = null,
+        string|null $content = null,
+        int|null $email_template_id = null,
+        bool|null $published = null,
+        array|null $send_days = null,
+        int|null $position = null,
+    ) {
+        // Build parameters.
+        $options = ['send_days' => $send_days];
+
+        if (!is_null($subject)) {
+            $options['subject'] = $subject;
+        }
+        if (!is_null($delay_value)) {
+            $options['delay_value'] = $delay_value;
+        }
+        if (!is_null($delay_unit)) {
+            $options['delay_unit'] = $delay_unit;
+        }
+        if (!is_null($preview_text)) {
+            $options['preview_text'] = $preview_text;
+        }
+        if (!is_null($content)) {
+            $options['content'] = $content;
+        }
+        if (!is_null($email_template_id)) {
+            $options['email_template_id'] = $email_template_id;
+        }
+        if (!is_null($published)) {
+            $options['published'] = $published;
+        }
+        if (!is_null($send_days)) {
+            $options['send_days'] = $send_days;
+        }
+        if (!is_null($position)) {
+            $options['position'] = $position;
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('sequences/%s/emails/%s', $sequence_id, $email_id),
+            $options
+        );
+    }
+
+    /**
+     * Deletes a sequence email.
+     *
+     * @param integer $sequence_id Sequence ID.
+     * @param integer $email_id    Email ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function delete_sequence_email(int $sequence_id, int $email_id)
+    {
+        return $this->delete(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id));
+    }
+
    /**
     * List snippets
     *
