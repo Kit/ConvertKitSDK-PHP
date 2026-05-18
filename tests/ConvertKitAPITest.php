@@ -3692,6 +3692,28 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_subscribers() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithIncludeParam()
+    {
+        $result = $this->api->get_subscribers(
+            include: ['tags']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert fields are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
      * when pagination parameters and per_page limits are specified.
      *
      * @since   2.0.0

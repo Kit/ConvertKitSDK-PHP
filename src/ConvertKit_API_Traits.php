@@ -1167,6 +1167,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $updated_before      Filter subscribers who have been updated before this date.
      * @param string         $sort_field          Sort Field (id|updated_at|cancelled_at).
      * @param string         $sort_order          Sort Order (asc|desc).
+     * @param array          $include             Additional fields to include: attribution, tags, location, canceled_at.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1187,6 +1188,7 @@ trait ConvertKit_API_Traits
         \DateTime|null $updated_before = null,
         string $sort_field = 'id',
         string $sort_order = 'desc',
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -1218,6 +1220,9 @@ trait ConvertKit_API_Traits
         }
         if (!empty($sort_order)) {
             $options['sort_order'] = $sort_order;
+        }
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
         }
 
         // Send request.
