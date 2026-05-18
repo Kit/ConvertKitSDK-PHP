@@ -686,14 +686,17 @@ trait ConvertKit_API_Traits
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        $options = [
+            'archived'        => $archived,
+            'include_content' => $include_content,
+        ];
+        if (!is_null($snippet_type)) {
+            $options['snippet_type'] = $snippet_type;
+        }
         return $this->get(
             'snippets',
             $this->build_total_count_and_pagination_params(
-                [
-                    'archived'        => $archived,
-                    'include_content' => $include_content,
-                    'snippet_type'    => $snippet_type,
-                ],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
