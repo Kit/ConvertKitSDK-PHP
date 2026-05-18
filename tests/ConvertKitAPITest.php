@@ -1602,6 +1602,303 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_sequence_emails() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmails()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Check first sequence in resultset has expected data.
+        $sequence = get_object_vars($result->sequences[0]);
+        $this->assertArrayHasKey('id', $sequence);
+        $this->assertArrayHasKey('sequence_id', $sequence);
+        $this->assertArrayHasKey('subject', $email);
+        $this->assertArrayHasKey('preview_text', $email);
+        $this->assertArrayHasKey('email_address', $email);
+        $this->assertArrayHasKey('email_template_id', $email);
+        $this->assertArrayHasKey('published', $email);
+        $this->assertArrayHasKey('position', $email);
+        $this->assertArrayHasKey('delay_value', $email);
+        $this->assertArrayHasKey('delay_unit', $email);
+        $this->assertArrayHasKey('send_days', $email); 
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithTotalCount()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsPagination()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+    }
+
+    /**
+     * Test that get_sequence_emails() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_sequence_emails(
+            sequence_id: 12345
+        );
+    }
+
+    /**
+     * Test that create_sequence_email(), get_sequence_email(), update_sequence_email()
+     * and delete_sequence_email() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequence Emails remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequence Emails.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateGetUpdateAndDeleteSequenceEmail()
+    {
+        // Create a sequence email.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            preview_text: 'Test Preview Text',
+            content: 'Test Content',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: false,
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            position: 0
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Confirm the Sequence Email saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence Email', $result['subject']);
+        $this->assertEquals(1, $result['delay_value']);
+        $this->assertEquals('days', $result['delay_unit']);
+        $this->assertEquals('Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(false, $result['published']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(0, $result['position']);
+
+        // Get the sequence email.
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID
+        );
+        var_dump($result);
+        die();
+
+        // Update the existing sequence email.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            subject: 'Edited Test Sequence Email',
+            preview_text: 'Edited Test Preview Text',
+            content: 'Edited Test Content',
+            delay_value: 2,
+            delay_unit: 'hours',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: true,
+            send_days: ['saturday', 'sunday'],
+            position: 1,
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence Email', $result['subject']);
+        $this->assertEquals(2, $result['delay_value']);
+        $this->assertEquals('hours', $result['delay_unit']);
+        $this->assertEquals('Edited Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(true, $result['published']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(1, $result['position']);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email($sequenceID, $sequenceEmailID);
+        $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
+    }
+
+    /**
+     * Test that get_sequence_email() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
+     * Test that update_sequence() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that update_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
      * Test that get_snippets() returns the expected data.
      *
      * @since   2.5.0
