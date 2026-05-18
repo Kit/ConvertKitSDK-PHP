@@ -662,6 +662,165 @@ trait ConvertKit_API_Traits
         );
     }
 
+   /**
+    * List snippets
+    *
+    * @param boolean $archived            When `true`, returns only archived snippets. Defaults to `false`.
+    * @param boolean $include_content     When `true`, includes both the content and document fields for each snippet in the response. Defaults to `false`.
+    * @param string  $snippet_type        Filter snippets by type. Use inline for text snippets or block for rich-text block snippets.
+    * @param boolean $include_total_count To include the total count of records in the response, use true.
+    * @param string  $after_cursor        Return results after the given pagination cursor.
+    * @param string  $before_cursor       Return results before the given pagination cursor.
+    * @param integer $per_page            Number of results to return.
+    *
+    * @see https://developers.kit.com/api-reference/snippets/list-snippets
+    *
+    * @return false|mixed
+    */
+    public function get_snippets(
+        bool $archived = false,
+        bool $include_content = false,
+        string $snippet_type = null,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        return $this->get(
+            'snippets',
+            $this->build_total_count_and_pagination_params(
+                [
+                    'archived'        => $archived,
+                    'include_content' => $include_content,
+                    'snippet_type'    => $snippet_type,
+                ],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Create a snippet
+     *
+     * @param string $name         Name of the snippet.
+     * @param string $snippet_type Type of snippet. Must be one of: `inline`, `block`.
+     * @param string $content      Content of the snippet.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/create-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function create_snippet(
+        string $name,
+        string $snippet_type,
+        string $content
+    ) {
+        $options = [
+            'name'         => $name,
+            'snippet_type' => $snippet_type,
+        ];
+
+        switch ($snippet_type) {
+            case 'inline':
+                $options['content'] = $content;
+                break;
+
+            case 'block':
+            default:
+                $options['document_attributes'] = ['value_html' => $content];
+                break;
+        }
+
+        // Send request.
+        return $this->post(
+            'snippets',
+            $options
+        );
+    }
+
+    /**
+     * Get a snippet.
+     *
+     * @param integer $id Snippet ID.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/get-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function get_snippet(int $id)
+    {
+        return $this->get(sprintf('snippets/%s', $id));
+    }
+
+    /**
+     * Updates a snippet
+     *
+     * @param integer $snippet_id   Snippet ID.
+     * @param string  $name         Name of the snippet.
+     * @param string  $snippet_type Type of snippet. Must be one of: `inline`, `block`.
+     * @param boolean $archived     Pass `true` to archive or `false` to restore the snippet.
+     * @param string  $content      Content of the snippet.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/update-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function update_snippet(
+        int $snippet_id,
+        string $name = '',
+        string $snippet_type = '',
+        bool $archived = false,
+        string $content = ''
+    ) {
+        $options = [
+            'name'         => $name,
+            'snippet_type' => $snippet_type,
+            'archived'     => $archived,
+        ];
+
+        switch ($snippet_type) {
+            case 'inline':
+                $options['content'] = $content;
+                break;
+
+            case 'block':
+            default:
+                $options['document_attributes'] = ['value_html' => $content];
+                break;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('snippets/%s', $snippet_id),
+            $options
+        );
+    }
+
+    /**
+     * Deletes a snippet.
+     *
+     * @param integer $id Snippet ID.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/delete-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function delete_snippet(int $id)
+    {
+        return $this->delete(sprintf('snippets/%s', $id));
+    }
+
+
     /**
      * List tags.
      *
