@@ -1684,7 +1684,7 @@ class ConvertKitAPITest extends TestCase
         $result = $this->api->get_snippets(
             archived: true
         );
-        
+
         // Assert snippets and pagination exist.
         $this->assertDataExists($result, 'snippets');
         $this->assertPaginationExists($result);
