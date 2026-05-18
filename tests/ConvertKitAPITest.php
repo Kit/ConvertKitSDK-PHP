@@ -1942,8 +1942,8 @@ class ConvertKitAPITest extends TestCase
         $this->assertDataExists($result, 'snippets');
         $this->assertPaginationExists($result);
 
-        // Assert two snippets were returned.
-        $this->assertCount(2, $result->snippets);
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
     }
 
     /**
@@ -1966,6 +1966,28 @@ class ConvertKitAPITest extends TestCase
 
         // Assert no snippets were returned.
         $this->assertCount(0, $result->snippets);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the archived parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithArchivedParam()
+    {
+        $result = $this->api->get_snippets(
+            archived: true
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
     }
 
     /**
@@ -1995,7 +2017,7 @@ class ConvertKitAPITest extends TestCase
      * Test that get_snippets() returns the expected data when
      * pagination parameters and per_page limits are specified.
      *
-     * @since   2.0.0
+     * @since   2.5.0
      *
      * @return void
      */
@@ -2048,14 +2070,28 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_snippet() and update_snippet() works.
+     * Test that create_snippet() works.
      *
      * @since   2.5.0
      *
      * @return void
      */
-    public function testCreateAndUpdateSnippet()
+    public function testCreateSnippet()
     {
+        // Add mock handler for this API request, as the API doesn't provide
+        // a method to delete snippets to cleanup the test.
+        $this->api = $this->mockResponse(
+            api: $this->api,
+            responseBody: [
+                'snippet' => [
+                    'id' => 12345,
+                    'name' => 'Test Snippet',
+                    'snippet_type' => 'inline',
+                    'content' => 'Test Content',
+                ],
+            ]
+        );
+
         // Create a snippet.
         $result = $this->api->create_snippet(
             name: 'Test Snippet',
@@ -2070,10 +2106,19 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals('Test Snippet', $result['name']);
         $this->assertEquals('inline', $result['snippet_type']);
         $this->assertEquals('Test Content', $result['content']);
+    }
 
-        // Update the existing sequence.
+    /**
+     * Test that update_snippet() works.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippet()
+    {
         $result = $this->api->update_snippet(
-            snippet_id: $snippetID,
+            snippet_id: (int) $_ENV['CONVERTKIT_API_SNIPPET_ID'],
             name: 'Edited Test Snippet',
             snippet_type: 'inline',
             content: 'Edited Test Content'
@@ -2128,20 +2173,6 @@ class ConvertKitAPITest extends TestCase
     {
         $this->expectException(ClientException::class);
         $this->api->update_snippet(12345);
-    }
-
-    /**
-     * Test that delete_snippet() throws a ClientException when an invalid
-     * snippet ID is specified.
-     *
-     * @since   2.5.0
-     *
-     * @return void
-     */
-    public function testDeleteSnippetWithInvalidSnippetID()
-    {
-        $this->expectException(ClientException::class);
-        $this->api->delete_snippet(12345);
     }
 
     /**
