@@ -665,13 +665,13 @@ trait ConvertKit_API_Traits
    /**
     * List snippets
     *
-    * @param boolean $archived            When `true`, returns only archived snippets. Defaults to `false`.
-    * @param boolean $include_content     When `true`, includes both the content and document fields for each snippet in the response. Defaults to `false`.
-    * @param string  $snippet_type        Filter snippets by type. Use inline for text snippets or block for rich-text block snippets.
-    * @param boolean $include_total_count To include the total count of records in the response, use true.
-    * @param string  $after_cursor        Return results after the given pagination cursor.
-    * @param string  $before_cursor       Return results before the given pagination cursor.
-    * @param integer $per_page            Number of results to return.
+    * @param boolean     $archived            When `true`, returns only archived snippets. Defaults to `false`.
+    * @param boolean     $include_content     When `true`, includes both the content and document fields for each snippet in the response. Defaults to `false`.
+    * @param string|null $snippet_type        Filter snippets by type. Use inline for text snippets or block for rich-text block snippets.
+    * @param boolean     $include_total_count To include the total count of records in the response, use true.
+    * @param string      $after_cursor        Return results after the given pagination cursor.
+    * @param string      $before_cursor       Return results before the given pagination cursor.
+    * @param integer     $per_page            Number of results to return.
     *
     * @see https://developers.kit.com/api-reference/snippets/list-snippets
     *
@@ -680,7 +680,7 @@ trait ConvertKit_API_Traits
     public function get_snippets(
         bool $archived = false,
         bool $include_content = false,
-        string $snippet_type = null,
+        string|null $snippet_type = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -805,21 +805,6 @@ trait ConvertKit_API_Traits
             $options
         );
     }
-
-    /**
-     * Deletes a snippet.
-     *
-     * @param integer $id Snippet ID.
-     *
-     * @see https://developers.kit.com/api-reference/snippets/delete-a-snippet
-     *
-     * @return mixed|object
-     */
-    public function delete_snippet(int $id)
-    {
-        return $this->delete(sprintf('snippets/%s', $id));
-    }
-
 
     /**
      * List tags.
