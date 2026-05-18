@@ -1630,7 +1630,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('position', $email);
         $this->assertArrayHasKey('delay_value', $email);
         $this->assertArrayHasKey('delay_unit', $email);
-        $this->assertArrayHasKey('send_days', $email); 
+        $this->assertArrayHasKey('send_days', $email);
     }
 
     /**
@@ -1816,7 +1816,8 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that get_sequence_email() returns the expected data.
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * sequence ID is specified.
      *
      * @since   2.5.0
      *
@@ -1843,7 +1844,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that update_sequence() throws a ClientException when an invalid
+     * Test that update_sequence_email() throws a ClientException when an invalid
      * sequence email ID is specified.
      *
      * @since   2.5.0
