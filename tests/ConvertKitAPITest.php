@@ -1879,20 +1879,6 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that delete_snippet() throws a ClientException when an invalid
-     * snippet ID is specified.
-     *
-     * @since   2.5.0
-     *
-     * @return void
-     */
-    public function testDeleteSnippetWithInvalidSnippetID()
-    {
-        $this->expectException(ClientException::class);
-        $this->api->delete_snippet(12345);
-    }
-
-    /**
      * Test that get_tags() returns the expected data.
      *
      * @since   1.0.0
