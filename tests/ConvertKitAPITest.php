@@ -1602,6 +1602,252 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_snippets() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippets()
+    {
+        $result = $this->api->get_snippets();
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Check first snippet in resultset has expected data.
+        $snippet = get_object_vars($result->snippets[0]);
+        $this->assertArrayHasKey('id', $snippet);
+        $this->assertArrayHasKey('name', $snippet);
+        $this->assertArrayHasKey('snippet_type', $snippet);
+        $this->assertArrayHasKey('archived', $snippet);
+        $this->assertArrayHasKey('key', $snippet);
+        $this->assertArrayHasKey('created_at', $snippet);
+        $this->assertArrayHasKey('updated_at', $snippet);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is inline.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetInlineSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'inline'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert two snippets were returned.
+        $this->assertCount(2, $result->snippets);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is block.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetBlockSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'block'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert no snippets were returned.
+        $this->assertCount(0, $result->snippets);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithTotalCount()
+    {
+        $result = $this->api->get_snippets(
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsPagination()
+    {
+        $result = $this->api->get_snippets(
+            per_page: 1
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+    }
+
+    /**
+     * Test that create_snippet() and update_snippet() works.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateAndUpdateSnippet()
+    {
+        // Create a snippet.
+        $result = $this->api->create_snippet(
+            name: 'Test Snippet',
+            snippet_type: 'inline',
+            content: 'Test Content'
+        );
+        $snippetID = $result->snippet->id;
+
+        // Confirm the Snippet saved.
+        $result = get_object_vars($result->snippet);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Snippet', $result['name']);
+        $this->assertEquals('inline', $result['snippet_type']);
+        $this->assertEquals('Test Content', $result['content']);
+
+        // Update the existing sequence.
+        $result = $this->api->update_snippet(
+            snippet_id: $snippetID,
+            name: 'Edited Test Snippet',
+            snippet_type: 'inline',
+            content: 'Edited Test Content'
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->snippet);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Snippet', $result['name']);
+        $this->assertEquals('inline', $result['snippet_type']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+    }
+
+    /**
+     * Test that get_snippet() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippet()
+    {
+        $result = $this->api->get_snippet((int) $_ENV['CONVERTKIT_API_SNIPPET_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('snippet', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->snippet));
+    }
+
+    /**
+     * Test that get_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetWithInvalidSnippetID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_snippet(12345);
+    }
+
+    /**
+     * Test that update_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippetWithInvalidSnippetID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_snippet(12345);
+    }
+
+    /**
+     * Test that delete_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSnippetWithInvalidSnippetID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_snippet(12345);
+    }
+
+    /**
      * Test that get_tags() returns the expected data.
      *
      * @since   1.0.0
