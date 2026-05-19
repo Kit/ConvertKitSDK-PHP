@@ -1619,9 +1619,9 @@ class ConvertKitAPITest extends TestCase
         $this->assertPaginationExists($result);
 
         // Check first sequence in resultset has expected data.
-        $sequence = get_object_vars($result->sequences[0]);
-        $this->assertArrayHasKey('id', $sequence);
-        $this->assertArrayHasKey('sequence_id', $sequence);
+        $email = get_object_vars($result->emails[0]);
+        $this->assertArrayHasKey('id', $email);
+        $this->assertArrayHasKey('sequence_id', $email);
         $this->assertArrayHasKey('subject', $email);
         $this->assertArrayHasKey('preview_text', $email);
         $this->assertArrayHasKey('email_address', $email);
