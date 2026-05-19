@@ -1772,15 +1772,13 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
         $this->assertEquals(false, $result['published']);
         $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
-        $this->assertEquals(0, $result['position']);
+        $this->assertEquals(2, $result['position']);
 
         // Get the sequence email.
         $result = $this->api->get_sequence_email(
             sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
             email_id: $sequenceEmailID
         );
-        var_dump($result);
-        die();
 
         // Update the existing sequence email.
         $result = $this->api->update_sequence_email(
@@ -1811,7 +1809,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals(1, $result['position']);
 
         // Delete Sequence Email.
-        $this->api->delete_sequence_email($sequenceID, $sequenceEmailID);
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
         $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
     }
 
