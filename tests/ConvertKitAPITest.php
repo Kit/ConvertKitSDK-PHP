@@ -1060,6 +1060,135 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that create_sequence(), update_sequence() and delete_sequence() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequences remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequences.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateUpdateAndDeleteSequence()
+    {
+        // Create a sequence.
+        $result = $this->api->create_sequence(
+            name: 'Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            send_hour: 12,
+            time_zone: 'America/Los_Angeles',
+            active: false,
+            repeat: false,
+            hold: false
+        );
+        $sequenceID = $result->sequence->id;
+
+        // Confirm the Sequence saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(12, $result['send_hour']);
+        $this->assertEquals('America/Los_Angeles', $result['time_zone']);
+        $this->assertEquals(false, $result['active']);
+        $this->assertEquals(false, $result['repeat']);
+        $this->assertEquals(false, $result['hold']);
+
+        // Update the existing sequence.
+        $result = $this->api->update_sequence(
+            sequence_id: $sequenceID,
+            name: 'Edited Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['saturday', 'sunday'],
+            send_hour: 13,
+            time_zone: 'America/New_York',
+            active: true,
+            repeat: true,
+            hold: true
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(13, $result['send_hour']);
+        $this->assertEquals('America/New_York', $result['time_zone']);
+        $this->assertEquals(true, $result['active']);
+        $this->assertEquals(true, $result['repeat']);
+        $this->assertEquals(true, $result['hold']);
+
+        // Delete Sequence.
+        $this->api->delete_sequence($sequenceID);
+        $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
+    }
+
+    /**
+     * Test that get_sequence() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequence()
+    {
+        $result = $this->api->get_sequence((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('sequence', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+    }
+
+    /**
+     * Test that get_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence(12345);
+    }
+
+    /**
+     * Test that update_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence(12345);
+    }
+
+    /**
+     * Test that delete_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence(12345);
+    }
+
+    /**
      * Test that add_subscriber_to_sequence_by_email() returns the expected data.
      *
      * @since   1.0.0
@@ -1470,6 +1599,579 @@ class ConvertKitAPITest extends TestCase
             sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
             after_cursor: 'not-a-valid-cursor'
         );
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmails()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Check first sequence in resultset has expected data.
+        $email = get_object_vars($result->emails[0]);
+        $this->assertArrayHasKey('id', $email);
+        $this->assertArrayHasKey('sequence_id', $email);
+        $this->assertArrayHasKey('subject', $email);
+        $this->assertArrayHasKey('preview_text', $email);
+        $this->assertArrayHasKey('email_address', $email);
+        $this->assertArrayHasKey('email_template_id', $email);
+        $this->assertArrayHasKey('published', $email);
+        $this->assertArrayHasKey('position', $email);
+        $this->assertArrayHasKey('delay_value', $email);
+        $this->assertArrayHasKey('delay_unit', $email);
+        $this->assertArrayHasKey('send_days', $email);
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithTotalCount()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsPagination()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+    }
+
+    /**
+     * Test that get_sequence_emails() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->get_sequence_emails(
+            sequence_id: 12345
+        );
+    }
+
+    /**
+     * Test that create_sequence_email(), get_sequence_email(), update_sequence_email()
+     * and delete_sequence_email() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequence Emails remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequence Emails.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateGetUpdateAndDeleteSequenceEmail()
+    {
+        // Create a sequence email.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            preview_text: 'Test Preview Text',
+            content: 'Test Content',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: false,
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            position: 0
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Confirm the Sequence Email saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence Email', $result['subject']);
+        $this->assertEquals(1, $result['delay_value']);
+        $this->assertEquals('days', $result['delay_unit']);
+        $this->assertEquals('Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(false, $result['published']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(2, $result['position']);
+
+        // Get the sequence email.
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID
+        );
+
+        // Update the existing sequence email.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            subject: 'Edited Test Sequence Email',
+            preview_text: 'Edited Test Preview Text',
+            content: 'Edited Test Content',
+            delay_value: 2,
+            delay_unit: 'hours',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: true,
+            send_days: ['saturday', 'sunday'],
+            position: 1,
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence Email', $result['subject']);
+        $this->assertEquals(2, $result['delay_value']);
+        $this->assertEquals('hours', $result['delay_unit']);
+        $this->assertEquals('Edited Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(true, $result['published']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(1, $result['position']);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
+        $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
+    }
+
+    /**
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
+     * Test that update_sequence_email() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that update_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidSequenceID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence_email(12345, 12345);
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidEmailID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippets()
+    {
+        $result = $this->api->get_snippets();
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Check first snippet in resultset has expected data.
+        $snippet = get_object_vars($result->snippets[0]);
+        $this->assertArrayHasKey('id', $snippet);
+        $this->assertArrayHasKey('name', $snippet);
+        $this->assertArrayHasKey('snippet_type', $snippet);
+        $this->assertArrayHasKey('archived', $snippet);
+        $this->assertArrayHasKey('key', $snippet);
+        $this->assertArrayHasKey('created_at', $snippet);
+        $this->assertArrayHasKey('updated_at', $snippet);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is inline.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetInlineSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'inline'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is block.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetBlockSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'block'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert no snippets were returned.
+        $this->assertCount(0, $result->snippets);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the archived parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithArchivedParam()
+    {
+        $result = $this->api->get_snippets(
+            archived: true
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithTotalCount()
+    {
+        $result = $this->api->get_snippets(
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsPagination()
+    {
+        $result = $this->api->get_snippets(
+            per_page: 1
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+    }
+
+    /**
+     * Test that create_snippet() works.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateSnippet()
+    {
+        // Add mock handler for this API request, as the API doesn't provide
+        // a method to delete snippets to cleanup the test.
+        $this->api = $this->mockResponse(
+            api: $this->api,
+            responseBody: [
+                'snippet' => [
+                    'id' => 12345,
+                    'name' => 'Test Snippet',
+                    'snippet_type' => 'inline',
+                    'content' => 'Test Content',
+                ],
+            ]
+        );
+
+        // Create a snippet.
+        $result = $this->api->create_snippet(
+            name: 'Test Snippet',
+            snippet_type: 'inline',
+            content: 'Test Content'
+        );
+        $snippetID = $result->snippet->id;
+
+        // Confirm the Snippet saved.
+        $result = get_object_vars($result->snippet);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Snippet', $result['name']);
+        $this->assertEquals('inline', $result['snippet_type']);
+        $this->assertEquals('Test Content', $result['content']);
+    }
+
+    /**
+     * Test that update_snippet() works.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippet()
+    {
+        $result = $this->api->update_snippet(
+            snippet_id: (int) $_ENV['CONVERTKIT_API_SNIPPET_ID'],
+            name: 'Edited Test Snippet',
+            snippet_type: 'inline',
+            content: 'Edited Test Content'
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->snippet);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Snippet', $result['name']);
+        $this->assertEquals('inline', $result['snippet_type']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+    }
+
+    /**
+     * Test that get_snippet() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippet()
+    {
+        $result = $this->api->get_snippet((int) $_ENV['CONVERTKIT_API_SNIPPET_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('snippet', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->snippet));
+    }
+
+    /**
+     * Test that get_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetWithInvalidSnippetID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_snippet(12345);
+    }
+
+    /**
+     * Test that update_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippetWithInvalidSnippetID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->update_snippet(12345);
     }
 
     /**
@@ -3317,6 +4019,28 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_subscribers() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithIncludeParam()
+    {
+        $result = $this->api->get_subscribers(
+            include: ['tags']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert fields are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
      * when pagination parameters and per_page limits are specified.
      *
      * @since   2.0.0
@@ -4060,6 +4784,9 @@ class ConvertKitAPITest extends TestCase
             email_address: $emailAddress
         );
 
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
+
         // Unsubscribe.
         $this->assertNull($this->api->unsubscribe_by_email($emailAddress));
     }
@@ -4106,6 +4833,9 @@ class ConvertKitAPITest extends TestCase
         $result = $this->api->create_subscriber(
             email_address: $emailAddress
         );
+
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
 
         // Unsubscribe.
         $this->assertNull($this->api->unsubscribe($result->subscriber->id));
@@ -4338,6 +5068,229 @@ class ConvertKitAPITest extends TestCase
         $this->assertTrue($result->pagination->has_next_page);
     }
 
+    /**
+     * Test that get_posts() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPosts()
+    {
+        $result = $this->api->get_posts();
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is not included.
+        $this->assertArrayNotHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the post content is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithIncludeContent()
+    {
+        $result = $this->api->get_posts(
+            include_content: true,
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is included.
+        $this->assertArrayHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithTotalCount()
+    {
+        $result = $this->api->get_posts(
+            include_total_count: true
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsPagination()
+    {
+        $result = $this->api->get_posts(
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_post() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPost()
+    {
+        $result = $this->api->get_post($_ENV['CONVERTKIT_API_POST_ID']);
+        $result = get_object_vars($result->post);
+        $this->assertEquals($result['id'], $_ENV['CONVERTKIT_API_POST_ID']);
+    }
+
+    /**
+     * Test that get_post() throws a ClientException when an invalid
+     * post ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostWithInvalidPostID()
+    {
+        $this->expectException(ClientException::class);
+        $this->api->get_post(12345);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_after date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentAfter()
+    {
+        $date = new DateTime('now');
+        $date->modify('-4 years');
+        $result = $this->api->get_broadcasts(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(8, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns no broadcasts
+     * when a sent_after date is specified that is after all broadcasts.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentAfterNow()
+    {
+        $date = new DateTime('now');
+        $date->modify('-1 day');
+        $result = $this->api->get_broadcasts(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_before date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentBefore()
+    {
+        $date = new DateTime('now');
+        $result = $this->api->get_broadcasts(
+            sent_before: new DateTime('now'),
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
 
     /**
      * Test that get_broadcasts() returns the expected data

@@ -416,6 +416,156 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Create a sequence
+     *
+     * @param string                              $name                       The name of the sequence.
+     * @param string                              $email_address              The sending email address to use. Uses the account's sending email address if not provided.
+     * @param integer                             $email_template_id          Id of the email template to use.
+     * @param array<string>                       $send_days                  The days of the week to send the sequence on. Must be one of: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`.
+     * @param integer                             $send_hour                  The hour of the day to send the sequence at. Must be an integer between 0 and 23.
+     * @param string                              $time_zone                  The timezone to use for the sequence. Must be a valid IANA timezone string.
+     * @param boolean                             $active                     Use `true` to activate the sequence, `false` to deactivate it.
+     * @param boolean                             $repeat                     When `true`, subscribers can restart the sequence multiple times.
+     * @param boolean                             $hold                       When `true`, subscribers added via Visual Automations stay in the sequence after receiving the last email.
+     * @param array<string,string|array<integer>> $exclude_subscriber_sources The subscriber sources to exclude from the sequence. Uses the account's default exclude subscriber sources if not provided.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function create_sequence(
+        string $name,
+        string $email_address = '',
+        int $email_template_id = 0,
+        array $send_days = [],
+        int $send_hour = 0,
+        string $time_zone = '',
+        bool $active = true,
+        bool $repeat = false,
+        bool $hold = false,
+        array $exclude_subscriber_sources = []
+    ) {
+        $options = [
+            'name'              => $name,
+            'email_address'     => $email_address,
+            'email_template_id' => $email_template_id,
+            'send_hour'         => $send_hour,
+            'time_zone'         => $time_zone,
+            'active'            => $active,
+            'repeat'            => $repeat,
+            'hold'              => $hold,
+        ];
+        if (count($send_days)) {
+            $options['send_days'] = $send_days;
+        }
+        if (count($exclude_subscriber_sources)) {
+            $options['exclude_subscriber_sources'] = $exclude_subscriber_sources;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->post(
+            'sequences',
+            $options
+        );
+    }
+
+    /**
+     * Get a sequence.
+     *
+     * @param integer $id Sequence ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/get-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function get_sequence(int $id)
+    {
+        return $this->get(sprintf('sequences/%s', $id));
+    }
+
+    /**
+     * Updates a sequence
+     *
+     * @param integer                             $sequence_id                Sequence ID.
+     * @param string                              $name                       The name of the sequence.
+     * @param string                              $email_address              The sending email address to use. Uses the account's sending email address if not provided.
+     * @param integer                             $email_template_id          Id of the email template to use.
+     * @param array<string>                       $send_days                  The days of the week to send the sequence on. Must be one of: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`.
+     * @param integer                             $send_hour                  The hour of the day to send the sequence at. Must be an integer between 0 and 23.
+     * @param string                              $time_zone                  The timezone to use for the sequence. Must be a valid IANA timezone string.
+     * @param boolean                             $active                     Use `true` to activate the sequence, `false` to deactivate it.
+     * @param boolean                             $repeat                     When `true`, subscribers can restart the sequence multiple times.
+     * @param boolean                             $hold                       When `true`, subscribers added via Visual Automations stay in the sequence after receiving the last email.
+     * @param array<string,string|array<integer>> $exclude_subscriber_sources The subscriber sources to exclude from the sequence. Uses the account's default exclude subscriber sources if not provided.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function update_sequence(
+        int $sequence_id,
+        string $name = '',
+        string $email_address = '',
+        int $email_template_id = 0,
+        array $send_days = [],
+        int $send_hour = 0,
+        string $time_zone = '',
+        bool $active = true,
+        bool $repeat = false,
+        bool $hold = false,
+        array $exclude_subscriber_sources = []
+    ) {
+        $options = [
+            'name'              => $name,
+            'email_address'     => $email_address,
+            'email_template_id' => $email_template_id,
+            'send_days'         => $send_days,
+            'send_hour'         => $send_hour,
+            'time_zone'         => $time_zone,
+            'active'            => $active,
+            'repeat'            => $repeat,
+            'hold'              => $hold,
+        ];
+        if (count($exclude_subscriber_sources)) {
+            $options['exclude_subscriber_sources'] = $exclude_subscriber_sources;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('sequences/%s', $sequence_id),
+            $options
+        );
+    }
+
+    /**
+     * Deletes a sequence.
+     *
+     * @param integer $id Sequence ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/delete-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function delete_sequence(int $id)
+    {
+        return $this->delete(sprintf('sequences/%s', $id));
+    }
+
+    /**
      * Adds subscriber to sequence by email address
      *
      * @param integer $sequence_id   Sequence ID.
@@ -509,6 +659,343 @@ trait ConvertKit_API_Traits
                 $before_cursor,
                 $per_page
             )
+        );
+    }
+
+    /**
+     * List sequence emails
+     *
+     * @param integer $sequence_id         Sequence ID.
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails
+     *
+     * @return false|mixed
+     */
+    public function get_sequence_emails(
+        int $sequence_id,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        return $this->get(
+            sprintf('sequences/%s/emails', $sequence_id),
+            $this->build_total_count_and_pagination_params(
+                [],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Create a sequence email
+     *
+     * @param integer            $sequence_id       Sequence ID.
+     * @param string             $subject           Subject line of the email.
+     * @param integer            $delay_value       Number of days or hours to wait before sending this email after the previous one.
+     * @param string             $delay_unit        Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
+     * @param string|null        $preview_text      Preview text shown in email clients before the email is opened.
+     * @param string|null        $content           HTML body content of the email.
+     * @param integer|null       $email_template_id ID of the email template to use for layout and styling.
+     * @param boolean            $published         Whether the email is active and will be sent to subscribers.
+     * @param array<string>|null $send_days         Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param integer|null       $position          Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function create_sequence_email(
+        int $sequence_id,
+        string $subject,
+        int $delay_value,
+        string $delay_unit,
+        string|null $preview_text = null,
+        string|null $content = null,
+        int|null $email_template_id = null,
+        bool $published = false,
+        array|null $send_days = null,
+        int|null $position = null,
+    ) {
+        $options = [
+            'subject'     => $subject,
+            'delay_value' => $delay_value,
+            'delay_unit'  => $delay_unit,
+            'published'   => $published,
+            'send_days'   => $send_days,
+        ];
+
+        if (!empty($preview_text)) {
+            $options['preview_text'] = $preview_text;
+        }
+        if (!empty($content)) {
+            $options['content'] = $content;
+        }
+        if (!empty($email_template_id)) {
+            $options['email_template_id'] = $email_template_id;
+        }
+        if (!empty($position)) {
+            $options['position'] = $position;
+        }
+
+        // Send request.
+        return $this->post(
+            sprintf('sequences/%s/emails', $sequence_id),
+            $options
+        );
+    }
+
+    /**
+     * Get a sequence email.
+     *
+     * @param integer $sequence_id Sequence ID.
+     * @param integer $email_id    Email ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function get_sequence_email(int $sequence_id, int $email_id)
+    {
+        return $this->get(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id));
+    }
+
+    /**
+     * Updates a sequence
+     *
+     * @param integer            $sequence_id       Sequence ID.
+     * @param integer            $email_id          Sequence Email ID.
+     * @param string|null        $subject           Subject line of the email.
+     * @param integer|null       $delay_value       Number of days or hours to wait before sending this email after the previous one.
+     * @param string|null        $delay_unit        Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
+     * @param string|null        $preview_text      Preview text shown in email clients before the email is opened.
+     * @param string|null        $content           HTML body content of the email.
+     * @param integer|null       $email_template_id ID of the email template to use for layout and styling.
+     * @param boolean|null       $published         Whether the email is active and will be sent to subscribers.
+     * @param array<string>|null $send_days         Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param integer|null       $position          Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     *
+     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     *
+     * @return mixed|object
+     */
+    public function update_sequence_email(
+        int $sequence_id,
+        int $email_id,
+        string|null $subject = null,
+        int|null $delay_value = null,
+        string|null $delay_unit = null,
+        string|null $preview_text = null,
+        string|null $content = null,
+        int|null $email_template_id = null,
+        bool|null $published = null,
+        array|null $send_days = null,
+        int|null $position = null,
+    ) {
+        // Build parameters.
+        $options = ['send_days' => $send_days];
+
+        if (!is_null($subject)) {
+            $options['subject'] = $subject;
+        }
+        if (!is_null($delay_value)) {
+            $options['delay_value'] = $delay_value;
+        }
+        if (!is_null($delay_unit)) {
+            $options['delay_unit'] = $delay_unit;
+        }
+        if (!is_null($preview_text)) {
+            $options['preview_text'] = $preview_text;
+        }
+        if (!is_null($content)) {
+            $options['content'] = $content;
+        }
+        if (!is_null($email_template_id)) {
+            $options['email_template_id'] = $email_template_id;
+        }
+        if (!is_null($published)) {
+            $options['published'] = $published;
+        }
+        if (!is_null($send_days)) {
+            $options['send_days'] = $send_days;
+        }
+        if (!is_null($position)) {
+            $options['position'] = $position;
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('sequences/%s/emails/%s', $sequence_id, $email_id),
+            $options
+        );
+    }
+
+    /**
+     * Deletes a sequence email.
+     *
+     * @param integer $sequence_id Sequence ID.
+     * @param integer $email_id    Email ID.
+     *
+     * @see https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email
+     *
+     * @return mixed|object
+     */
+    public function delete_sequence_email(int $sequence_id, int $email_id)
+    {
+        return $this->delete(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id));
+    }
+
+   /**
+    * List snippets
+    *
+    * @param boolean     $archived            When `true`, returns only archived snippets. Defaults to `false`.
+    * @param boolean     $include_content     When `true`, includes both the content and document fields for each snippet in the response. Defaults to `false`.
+    * @param string|null $snippet_type        Filter snippets by type. Use inline for text snippets or block for rich-text block snippets.
+    * @param boolean     $include_total_count To include the total count of records in the response, use true.
+    * @param string      $after_cursor        Return results after the given pagination cursor.
+    * @param string      $before_cursor       Return results before the given pagination cursor.
+    * @param integer     $per_page            Number of results to return.
+    *
+    * @see https://developers.kit.com/api-reference/snippets/list-snippets
+    *
+    * @return false|mixed
+    */
+    public function get_snippets(
+        bool $archived = false,
+        bool $include_content = false,
+        string|null $snippet_type = null,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        $options = [
+            'archived'        => $archived,
+            'include_content' => $include_content,
+        ];
+        if (!is_null($snippet_type)) {
+            $options['snippet_type'] = $snippet_type;
+        }
+        return $this->get(
+            'snippets',
+            $this->build_total_count_and_pagination_params(
+                $options,
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Create a snippet
+     *
+     * @param string $name         Name of the snippet.
+     * @param string $snippet_type Type of snippet. Must be one of: `inline`, `block`.
+     * @param string $content      Content of the snippet.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/create-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function create_snippet(
+        string $name,
+        string $snippet_type,
+        string $content
+    ) {
+        $options = [
+            'name'         => $name,
+            'snippet_type' => $snippet_type,
+        ];
+
+        switch ($snippet_type) {
+            case 'inline':
+                $options['content'] = $content;
+                break;
+
+            case 'block':
+            default:
+                $options['document_attributes'] = ['value_html' => $content];
+                break;
+        }
+
+        // Send request.
+        return $this->post(
+            'snippets',
+            $options
+        );
+    }
+
+    /**
+     * Get a snippet.
+     *
+     * @param integer $id Snippet ID.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/get-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function get_snippet(int $id)
+    {
+        return $this->get(sprintf('snippets/%s', $id));
+    }
+
+    /**
+     * Updates a snippet
+     *
+     * @param integer $snippet_id   Snippet ID.
+     * @param string  $name         Name of the snippet.
+     * @param string  $snippet_type Type of snippet. Must be one of: `inline`, `block`.
+     * @param boolean $archived     Pass `true` to archive or `false` to restore the snippet.
+     * @param string  $content      Content of the snippet.
+     *
+     * @see https://developers.kit.com/api-reference/snippets/update-a-snippet
+     *
+     * @return mixed|object
+     */
+    public function update_snippet(
+        int $snippet_id,
+        string $name = '',
+        string $snippet_type = '',
+        bool $archived = false,
+        string $content = ''
+    ) {
+        $options = [
+            'name'         => $name,
+            'snippet_type' => $snippet_type,
+            'archived'     => $archived,
+        ];
+
+        switch ($snippet_type) {
+            case 'inline':
+                $options['content'] = $content;
+                break;
+
+            case 'block':
+            default:
+                $options['document_attributes'] = ['value_html' => $content];
+                break;
+        }
+
+        // Iterate through options, removing blank entries.
+        foreach ($options as $key => $value) {
+            if (is_string($value) && strlen($value) === 0) {
+                unset($options[$key]);
+            }
+        }
+
+        // Send request.
+        return $this->put(
+            sprintf('snippets/%s', $snippet_id),
+            $options
         );
     }
 
@@ -812,6 +1299,57 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List posts.
+     *
+     * @param boolean $include_content     To include the content field on each post in the response, use true.
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @since 2.5.0
+     *
+     * @see https://developers.kit.com/api-reference/posts/list-posts
+     *
+     * @return false|mixed
+     */
+    public function get_posts(
+        bool $include_content = false,
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Send request.
+        return $this->get(
+            'posts',
+            $this->build_total_count_and_pagination_params(
+                ['include_content' => $include_content],
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Get a post.
+     *
+     * @param integer $id Post ID.
+     *
+     * @since 2.5.0
+     *
+     * @see https://developers.kit.com/api-reference/posts/get-a-post
+     *
+     * @return mixed|object
+     */
+    public function get_post(int $id)
+    {
+        return $this->get(sprintf('posts/%s', $id));
+    }
+
+    /**
      * List subscribers.
      *
      * @param string         $subscriber_state    Subscriber State (active|bounced|cancelled|complained|inactive).
@@ -822,6 +1360,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $updated_before      Filter subscribers who have been updated before this date.
      * @param string         $sort_field          Sort Field (id|updated_at|cancelled_at).
      * @param string         $sort_order          Sort Order (asc|desc).
+     * @param array<string>  $include             Additional fields to include: attribution, tags, location, canceled_at.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -842,6 +1381,7 @@ trait ConvertKit_API_Traits
         \DateTime|null $updated_before = null,
         string $sort_field = 'id',
         string $sort_order = 'desc',
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -873,6 +1413,9 @@ trait ConvertKit_API_Traits
         }
         if (!empty($sort_order)) {
             $options['sort_order'] = $sort_order;
+        }
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
         }
 
         // Send request.
@@ -1205,26 +1748,40 @@ trait ConvertKit_API_Traits
     /**
      * List broadcasts.
      *
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param \DateTime|null $sent_after          Get broadcasts sent after the given date.
+     * @param \DateTime|null $sent_before         Get broadcasts sent before the given date.
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/broadcasts/list-broadcasts
      *
      * @return false|mixed
      */
     public function get_broadcasts(
+        \DateTime|null $sent_after = null,
+        \DateTime|null $sent_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!is_null($sent_after)) {
+            $options['sent_after'] = $sent_after->format('Y-m-d');
+        }
+        if (!is_null($sent_before)) {
+            $options['sent_before'] = $sent_before->format('Y-m-d');
+        }
+
         // Send request.
         return $this->get(
             'broadcasts',
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -2053,8 +2610,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a PUT request to the API.
      *
-     * @param string                                                              $endpoint API Endpoint.
-     * @param array<string, bool|integer|string|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                                   $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<int>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */
