@@ -47,8 +47,8 @@
   "scripts": {
     "create-docs": "phpDocumentor --directory=src --target=docs --template='vendor/saggre/phpdocumentor-markdown/themes/markdown'",
     "phpcs": "vendor/bin/phpcs --standard=phpcs.xml -s -v", 
-    "phpcbf": "vendor/bin/phpcbf --standard=phpcs.tests.xml -s -v",
-    "phpcs-tests": "vendor/bin/phpcs --standard=phpcs.xml -s -v",
+    "phpcbf": "vendor/bin/phpcbf --standard=phpcs.xml -s -v",
+    "phpcs-tests": "vendor/bin/phpcs --standard=phpcs.tests.xml -s -v",
     "phpcbf-tests": "vendor/bin/phpcbf --standard=phpcs.tests.xml -s -v",
     "phpstan": "vendor/bin/phpstan analyse --memory-limit=1250M",
     "php-coding-standards": "vendor/bin/phpcs --standard=phpcs.xml -s -v",
