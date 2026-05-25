@@ -1212,6 +1212,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
      * @param \DateTime|null $tagged_after        Filter subscribers who have been tagged after this date.
      * @param \DateTime|null $tagged_before       Filter subscribers who have been tagged before this date.
+     * @param boolean        $slim                When true, omits expensive optional fields from the response.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1228,13 +1229,14 @@ trait ConvertKit_API_Traits
         \DateTime|null $created_before = null,
         \DateTime|null $tagged_after = null,
         \DateTime|null $tagged_before = null,
+        bool $slim = false,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
         // Build parameters.
-        $options = [];
+        $options = ['slim' => $slim];
 
         if (!empty($subscriber_state)) {
             $options['status'] = $subscriber_state;
@@ -1750,6 +1752,7 @@ trait ConvertKit_API_Traits
      *
      * @param \DateTime|null $sent_after          Get broadcasts sent after the given date.
      * @param \DateTime|null $sent_before         Get broadcasts sent before the given date.
+     * @param boolean        $slim                When true, omits expensive optional fields from the response.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1762,13 +1765,14 @@ trait ConvertKit_API_Traits
     public function get_broadcasts(
         \DateTime|null $sent_after = null,
         \DateTime|null $sent_before = null,
+        bool $slim = false,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
         // Build parameters.
-        $options = [];
+        $options = ['slim' => $slim];
 
         if (!is_null($sent_after)) {
             $options['sent_after'] = $sent_after->format('Y-m-d');
