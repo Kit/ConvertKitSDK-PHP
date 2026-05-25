@@ -5619,7 +5619,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that get_broadcasts() returns the expected data
+     * Test that get_broadcasts_stats() returns the expected data
      * when a valid sent_after date is specified.
      *
      * @since   2.5
@@ -5643,7 +5643,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that get_broadcasts() returns no broadcasts
+     * Test that get_broadcasts_stats() returns no broadcasts
      * when a sent_after date is specified that is after all broadcasts.
      *
      * @since   2.5
@@ -5667,7 +5667,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that get_broadcasts() returns the expected data
+     * Test that get_broadcasts_stats() returns the expected data
      * when a valid sent_before date is specified.
      *
      * @since   2.5
