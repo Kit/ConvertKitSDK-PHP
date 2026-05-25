@@ -5619,6 +5619,77 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_after date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfter()
+    {
+        $date = new DateTime('now');
+        $date->modify('-4 years');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(8, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns no broadcasts
+     * when a sent_after date is specified that is after all broadcasts.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfterNow()
+    {
+        $date = new DateTime('now');
+        $date->modify('-1 day');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_before date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentBefore()
+    {
+        $date = new DateTime('now');
+        $result = $this->api->get_broadcasts_stats(
+            sent_before: new DateTime('now'),
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
      * Test that get_broadcasts_stats() returns the expected data
      * when the total count is included.
      *
