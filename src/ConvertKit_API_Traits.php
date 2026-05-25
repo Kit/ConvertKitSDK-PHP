@@ -1929,10 +1929,12 @@ trait ConvertKit_API_Traits
     /**
      * List stats for a list of broadcasts.
      *
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param \DateTime|null $sent_after          Get broadcasts sent after the given date.
+     * @param \DateTime|null $sent_before         Get broadcasts sent before the given date.
+     * @param boolean        $include_total_count To include the total count of records in the response, use true.
+     * @param string         $after_cursor        Return results after the given pagination cursor.
+     * @param string         $before_cursor       Return results before the given pagination cursor.
+     * @param integer        $per_page            Number of results to return.
      *
      * @since 2.2.1
      *
@@ -1941,16 +1943,28 @@ trait ConvertKit_API_Traits
      * @return false|mixed
      */
     public function get_broadcasts_stats(
+        \DateTime|null $sent_after = null,
+        \DateTime|null $sent_before = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!is_null($sent_after)) {
+            $options['sent_after'] = $sent_after->format('Y-m-d');
+        }
+        if (!is_null($sent_before)) {
+            $options['sent_before'] = $sent_before->format('Y-m-d');
+        }
+
         // Send request.
         return $this->get(
-            'broadcasts/stats',
+            'broadcasts',
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -1958,7 +1972,6 @@ trait ConvertKit_API_Traits
             )
         );
     }
-
 
     /**
      * Update a broadcast.
