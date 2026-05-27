@@ -2961,6 +2961,30 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_tag_subscriptions() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsSlim()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $broadcast = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $broadcast);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
      * when the total count is included.
      *
      * @since   2.0.0
@@ -5294,6 +5318,33 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_broadcasts() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsSlim()
+    {
+        $result = $this->api->get_broadcasts(
+            slim: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Confirm content, public_url, email_address, email_template and subscriber_filter are excluded from the data.
+        $broadcast = get_object_vars($result->broadcasts[0]);
+        $this->assertArrayNotHasKey('content', $broadcast);
+        $this->assertArrayNotHasKey('public_url', $broadcast);
+        $this->assertArrayNotHasKey('email_address', $broadcast);
+        $this->assertArrayNotHasKey('email_template', $broadcast);
+        $this->assertArrayNotHasKey('subscriber_filter', $broadcast);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
      * when pagination parameters and per_page limits are specified.
      *
      * @since   2.0.0
@@ -5616,6 +5667,77 @@ class ConvertKitAPITest extends TestCase
 
         // Assert the broadcast ID matches the first broadcast.
         $this->assertEquals($id, $result->broadcasts[0]->id);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when a valid sent_after date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfter()
+    {
+        $date = new DateTime('now');
+        $date->modify('-4 years');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(8, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns no broadcasts
+     * when a sent_after date is specified that is after all broadcasts.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfterNow()
+    {
+        $date = new DateTime('now');
+        $date->modify('-1 day');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when a valid sent_before date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentBefore()
+    {
+        $date = new DateTime('now');
+        $result = $this->api->get_broadcasts_stats(
+            sent_before: new DateTime('now'),
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
     }
 
     /**
