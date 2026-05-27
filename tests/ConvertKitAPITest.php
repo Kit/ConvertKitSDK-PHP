@@ -2961,6 +2961,30 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_tag_subscriptions() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsSlim()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $broadcast = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $broadcast);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
      * when the total count is included.
      *
      * @since   2.0.0
@@ -5290,6 +5314,33 @@ class ConvertKitAPITest extends TestCase
 
         // Assert the expected number of broadcasts were returned.
         $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsSlim()
+    {
+        $result = $this->api->get_broadcasts(
+            slim: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Confirm content, public_url, email_address, email_template and subscriber_filter are excluded from the data.
+        $broadcast = get_object_vars($result->broadcasts[0]);
+        $this->assertArrayNotHasKey('content', $broadcast);
+        $this->assertArrayNotHasKey('public_url', $broadcast);
+        $this->assertArrayNotHasKey('email_address', $broadcast);
+        $this->assertArrayNotHasKey('email_template', $broadcast);
+        $this->assertArrayNotHasKey('subscriber_filter', $broadcast);
     }
 
     /**
