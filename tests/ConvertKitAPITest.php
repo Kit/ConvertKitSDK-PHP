@@ -691,6 +691,30 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_form_subscriptions() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithSlimParameter()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $subscriber = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $subscriber);
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
      * when the total count is included.
      *
      * @since   2.0.0
@@ -3827,6 +3851,29 @@ class ConvertKitAPITest extends TestCase
         // Assert subscribers and pagination exist.
         $this->assertDataExists($result, 'subscribers');
         $this->assertPaginationExists($result);
+    }
+
+     /**
+     * Test that get_subscribers() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithSlimParameter()
+    {
+        $result = $this->api->get_subscribers(
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $subscriber = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $subscriber);
     }
 
     /**
