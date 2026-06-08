@@ -1538,6 +1538,10 @@ trait ConvertKit_API_Traits
         foreach ($all as $condition) {
             $option = [];
 
+            if (array_key_exists('type', $condition) && !empty($condition['type'])) {
+                $option['type'] = $condition['type'];
+            }
+
             if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
                 $option['count_greater_than'] = $condition['count_greater_than'];
             }
@@ -1552,6 +1556,10 @@ trait ConvertKit_API_Traits
 
             if (array_key_exists('before', $condition) && $condition['before'] instanceof \DateTime) {
                 $option['before'] = $condition['before']->format('Y-m-d');
+            }
+
+            if (array_key_exists('states', $condition) && !empty($condition['states'])) {
+                $option['states'] = (array) $condition['states'];
             }
 
             if (array_key_exists('any', $condition) && !empty($condition['any'])) {
