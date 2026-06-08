@@ -4491,17 +4491,11 @@ class ConvertKitAPITest extends TestCase
      */
     public function testFilterSubscribersWithNoParameters()
     {
-        $this->expectException(ClientException::class);
-        $result = $this->api->filter_subscribers(
-            [
-                [
-                    'foo' => 'bar',
-                ],
-                [
-                    'type' => 'not-a-real-type',
-                ]
-            ]
-        );
+        $result = $this->api->filter_subscribers();
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
     }
 
     /**
@@ -4514,11 +4508,17 @@ class ConvertKitAPITest extends TestCase
      */
     public function testFilterSubscribersWithInvalidParameters()
     {
-        $result = $this->api->filter_subscribers();
-
-        // Assert subscribers and pagination exist.
-        $this->assertDataExists($result, 'subscribers');
-        $this->assertPaginationExists($result);
+        $this->expectException(ClientException::class);
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'foo' => 'bar',
+                ],
+                [
+                    'type' => 'not-a-real-type',
+                ]
+            ]
+        );
     }
 
     /**
