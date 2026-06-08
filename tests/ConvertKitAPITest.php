@@ -4483,13 +4483,36 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that filter_subscribers() returns the expected data
-     * when multiple any conditions are specified.
+     * when no parameters are specified.
      *
      * @since   2.4.0
      *
      * @return void
      */
     public function testFilterSubscribersWithNoParameters()
+    {
+        $this->expectException(ClientException::class);
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'foo' => 'bar',
+                ],
+                [
+                    'type' => 'not-a-real-type',
+                ]
+            ]
+        );
+    }
+
+    /**
+     * Test that filter_subscribers() throws a ClientException
+     * when invalid parameters are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInvalidParameters()
     {
         $result = $this->api->filter_subscribers();
 
