@@ -1755,7 +1755,7 @@ class ConvertKitAPITest extends TestCase
             preview_text: 'Test Preview Text',
             content: 'Test Content',
             email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
-            published: false,
+            published: true,
             send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
             position: 0
         );
@@ -1770,7 +1770,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals('Test Preview Text', $result['preview_text']);
         $this->assertEquals('Test Content', $result['content']);
         $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
-        $this->assertEquals(false, $result['published']);
+        $this->assertEquals(true, $result['published']);
         $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
         $this->assertEquals(2, $result['position']);
 
