@@ -4499,7 +4499,7 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that filter_subscribers() throws a ClientException
+     * Test that filter_subscribers() throws a ServerException
      * when invalid parameters are specified.
      *
      * @since   2.4.0
@@ -4508,7 +4508,7 @@ class ConvertKitAPITest extends TestCase
      */
     public function testFilterSubscribersWithInvalidParameters()
     {
-        $this->expectException(ClientException::class);
+        $this->expectException(ServerException::class);
         $result = $this->api->filter_subscribers(
             [
                 [
