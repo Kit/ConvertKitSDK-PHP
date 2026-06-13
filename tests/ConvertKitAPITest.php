@@ -1779,7 +1779,7 @@ class ConvertKitAPITest extends TestCase
             preview_text: 'Test Preview Text',
             content: 'Test Content',
             email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
-            published: false,
+            published: true,
             send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
             position: 0
         );
@@ -1794,7 +1794,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals('Test Preview Text', $result['preview_text']);
         $this->assertEquals('Test Content', $result['content']);
         $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
-        $this->assertEquals(false, $result['published']);
+        $this->assertEquals(true, $result['published']);
         $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
         $this->assertEquals(2, $result['position']);
 
@@ -4376,8 +4376,8 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_subscriber() throws a ClientException when an invalid
-     * custom field is included.
+     * Test that create_subscriber() returns the expected warnings
+     * when an invalid custom field is included.
      *
      * @since   2.0.0
      *
@@ -4385,7 +4385,6 @@ class ConvertKitAPITest extends TestCase
      */
     public function testCreateSubscriberWithInvalidCustomFields()
     {
-        $this->expectException(ClientException::class);
         $emailAddress = $this->generateEmailAddress();
         $result = $this->api->create_subscriber(
             email_address: $emailAddress,
@@ -4393,6 +4392,7 @@ class ConvertKitAPITest extends TestCase
                 'not_a_custom_field' => 'value'
             ]
         );
+        $this->assertArrayHasKey('warnings', get_object_vars($result));
     }
 
     /**
