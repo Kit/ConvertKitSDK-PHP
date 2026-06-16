@@ -1514,6 +1514,7 @@ trait ConvertKit_API_Traits
      *                                                              - 'count_less_than' (int|null).
      *                                                              - 'after' (\DateTime|null).
      *                                                              - 'before' (\DateTime|null).
+     *                                                              - 'states' (array<string>).
      *                                                              - 'any' (array<int|string, mixed>|null).
      * @param boolean                          $include_total_count To include the total count of records in the response, use true.
      * @param string                           $after_cursor        Return results after the given pagination cursor.
