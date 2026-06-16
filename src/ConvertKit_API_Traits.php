@@ -1753,6 +1753,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $sent_after          Get broadcasts sent after the given date.
      * @param \DateTime|null $sent_before         Get broadcasts sent before the given date.
      * @param boolean        $slim                When true, omits expensive optional fields from the response.
+     * @param string|null    $status              Get broadcasts with the given status (draft, scheduled, sending, completed, aborted).
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1766,6 +1767,7 @@ trait ConvertKit_API_Traits
         \DateTime|null $sent_after = null,
         \DateTime|null $sent_before = null,
         bool $slim = false,
+        string|null $status = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -1774,6 +1776,9 @@ trait ConvertKit_API_Traits
         // Build parameters.
         $options = ['slim' => $slim];
 
+        if (!is_null($status)) {
+            $options['status'] = $status;
+        }
         if (!is_null($sent_after)) {
             $options['sent_after'] = $sent_after->format('Y-m-d');
         }
@@ -1935,6 +1940,7 @@ trait ConvertKit_API_Traits
      *
      * @param \DateTime|null $sent_after          Get broadcasts sent after the given date.
      * @param \DateTime|null $sent_before         Get broadcasts sent before the given date.
+     * @param string|null    $status              Get broadcasts with the given status (draft, scheduled, sending, completed, aborted).
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1949,6 +1955,7 @@ trait ConvertKit_API_Traits
     public function get_broadcasts_stats(
         \DateTime|null $sent_after = null,
         \DateTime|null $sent_before = null,
+        string|null $status = null,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -1957,6 +1964,9 @@ trait ConvertKit_API_Traits
         // Build parameters.
         $options = [];
 
+        if (!is_null($status)) {
+            $options['status'] = $status;
+        }
         if (!is_null($sent_after)) {
             $options['sent_after'] = $sent_after->format('Y-m-d');
         }
