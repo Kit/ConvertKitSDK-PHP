@@ -5374,6 +5374,46 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_broadcasts() returns the expected data
+     * when the completed status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithCompletedStatus()
+    {
+        $result = $this->api->get_broadcasts(
+            status: 'completed'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when the aborted status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithAbortedStatus()
+    {
+        $result = $this->api->get_broadcasts(
+            status: 'aborted'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
      * when pagination parameters and per_page limits are specified.
      *
      * @since   2.0.0
@@ -5767,6 +5807,50 @@ class ConvertKitAPITest extends TestCase
 
         // Assert the expected number of broadcasts were returned.
         $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the completed status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithCompletedStatus()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            status: 'completed'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the aborted status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithAbortedStatus()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            status: 'aborted'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
     }
 
     /**
