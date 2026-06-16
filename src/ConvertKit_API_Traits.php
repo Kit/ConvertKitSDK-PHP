@@ -1516,6 +1516,9 @@ trait ConvertKit_API_Traits
      *                                                              - 'before' (\DateTime|null).
      *                                                              - 'states' (array<string>).
      *                                                              - 'any' (array<int|string, mixed>|null).
+     * @param string                           $counting_mode       Controls how engagement-filter count thresholds are tallied.
+     *                                                              - 'raw' (default) counts every event — five opens of the same email = five.
+     *                                                              - 'unique_email' counts distinct emails on which the action occurred.
      * @param boolean                          $include_total_count To include the total count of records in the response, use true.
      * @param string                           $after_cursor        Return results after the given pagination cursor.
      * @param string                           $before_cursor       Return results before the given pagination cursor.
@@ -1529,12 +1532,13 @@ trait ConvertKit_API_Traits
      */
     public function filter_subscribers(
         array $all = [],
+        string $counting_mode = 'raw',
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
-        $options = [];
+        $options = ['counting_mode' => $counting_mode];
 
         foreach ($all as $condition) {
             $option = [];
