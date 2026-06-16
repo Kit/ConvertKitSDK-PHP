@@ -4491,7 +4491,7 @@ class ConvertKitAPITest extends TestCase
      * Test that filter_subscribers() returns the expected data
      * when a counting mode is specified.
      *
-     * @since   2.4.0
+     * @since   2.5.0
      *
      * @return void
      */
