@@ -4438,6 +4438,9 @@ class ConvertKitAPITest extends TestCase
                     'count_less_than' => 100,
                     'after' => new \DateTime('2024-01-01'),
                     'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
                 ]
             ]
         );
@@ -4465,6 +4468,9 @@ class ConvertKitAPITest extends TestCase
                     'count_less_than' => 100,
                     'after' => new \DateTime('2024-01-01'),
                     'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
                 ],
                 [
                     'type' => 'clicks',
