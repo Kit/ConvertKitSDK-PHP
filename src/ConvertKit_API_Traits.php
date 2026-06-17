@@ -1538,7 +1538,7 @@ trait ConvertKit_API_Traits
         string $before_cursor = '',
         int $per_page = 100
     ) {
-        $options = ['counting_mode' => $counting_mode];
+        $options = [];
 
         foreach ($all as $condition) {
             $option = [];
@@ -1577,7 +1577,10 @@ trait ConvertKit_API_Traits
         return $this->post(
             'subscribers/filter',
             $this->build_total_count_and_pagination_params(
-                ['all' => $options],
+                [
+                    'all'           => $options,
+                    'counting_mode' => $counting_mode,
+                ],
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
