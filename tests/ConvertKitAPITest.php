@@ -4438,6 +4438,9 @@ class ConvertKitAPITest extends TestCase
                     'count_less_than' => 100,
                     'after' => new \DateTime('2024-01-01'),
                     'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
                 ]
             ]
         );
@@ -4465,6 +4468,9 @@ class ConvertKitAPITest extends TestCase
                     'count_less_than' => 100,
                     'after' => new \DateTime('2024-01-01'),
                     'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
                 ],
                 [
                     'type' => 'clicks',
@@ -4483,7 +4489,7 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that filter_subscribers() returns the expected data
-     * when multiple any conditions are specified.
+     * when no parameters are specified.
      *
      * @since   2.4.0
      *
@@ -4496,6 +4502,29 @@ class ConvertKitAPITest extends TestCase
         // Assert subscribers and pagination exist.
         $this->assertDataExists($result, 'subscribers');
         $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() throws a ServerException
+     * when invalid parameters are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInvalidParameters()
+    {
+        $this->expectException(ServerException::class);
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'foo' => 'bar',
+                ],
+                [
+                    'type' => 'not-a-real-type',
+                ]
+            ]
+        );
     }
 
     /**
