@@ -332,6 +332,7 @@ trait ConvertKit_API_Traits
      * @param \DateTime|null $created_before      Filter subscribers who have been created before this date.
      * @param \DateTime|null $added_after         Filter subscribers who have been added to the form after this date.
      * @param \DateTime|null $added_before        Filter subscribers who have been added to the form before this date.
+     * @param boolean        $slim                When true, omits expensive optional fields from the response.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -348,13 +349,14 @@ trait ConvertKit_API_Traits
         \DateTime|null $created_before = null,
         \DateTime|null $added_after = null,
         \DateTime|null $added_before = null,
+        bool $slim = false,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
         // Build parameters.
-        $options = [];
+        $options = ['slim' => $slim];
 
         if (!empty($subscriber_state)) {
             $options['status'] = $subscriber_state;
@@ -1363,6 +1365,7 @@ trait ConvertKit_API_Traits
      * @param string         $sort_field          Sort Field (id|updated_at|cancelled_at).
      * @param string         $sort_order          Sort Order (asc|desc).
      * @param array<string>  $include             Additional fields to include: attribution, tags, location, canceled_at.
+     * @param boolean        $slim                When true, omits expensive optional fields from the response.
      * @param boolean        $include_total_count To include the total count of records in the response, use true.
      * @param string         $after_cursor        Return results after the given pagination cursor.
      * @param string         $before_cursor       Return results before the given pagination cursor.
@@ -1384,13 +1387,14 @@ trait ConvertKit_API_Traits
         string $sort_field = 'id',
         string $sort_order = 'desc',
         array $include = [],
+        bool $slim = false,
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
         // Build parameters.
-        $options = [];
+        $options = ['slim' => $slim];
 
         if (!empty($subscriber_state)) {
             $options['status'] = $subscriber_state;
