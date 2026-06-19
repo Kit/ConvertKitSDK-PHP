@@ -4489,6 +4489,37 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that filter_subscribers() returns the expected data
+     * when a counting mode is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithCountingMode()
+    {
+        $result = $this->api->filter_subscribers(
+            all: [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ],
+            counting_mode: 'unique_email'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
      * when no parameters are specified.
      *
      * @since   2.4.0
