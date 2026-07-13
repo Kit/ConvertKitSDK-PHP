@@ -4603,6 +4603,44 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that filter_subscribers() returns the expected data
+     * when the `include` parameter is specified.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInclude()
+    {
+        $result = $this->api->filter_subscribers(
+            all: [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 0,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2029-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ],
+            include: [
+                [
+                    'type' => 'tags',
+                ],
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert tags are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
      * when no parameters are specified.
      *
      * @since   2.4.0
