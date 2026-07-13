@@ -2410,41 +2410,33 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_tags() returns the expected data.
+     * Test that create_tags() and delete_tags() returns the expected data.
      *
      * @since   1.1.0
      *
      * @return void
      */
-    public function testCreateTags()
+    public function testCreateAndDeleteTags()
     {
         $tagNames = [
             'Tag Test ' . mt_rand(),
             'Tag Test ' . mt_rand(),
         ];
 
-        // Add mock handler for this API request, as the API doesn't provide
-        // a method to delete tags to cleanup the test.
-        $this->api = $this->mockResponse(
-            api: $this->api,
-            responseBody: [
-                'tags' => [
-                    [
-                        'id' => 12345,
-                        'name' => $tagNames[0],
-                        'created_at' => date('Y-m-d') . 'T' . date('H:i:s') . 'Z',
-                    ],
-                    [
-                        'id' => 23456,
-                        'name' => $tagNames[1],
-                        'created_at' => date('Y-m-d') . 'T' . date('H:i:s') . 'Z',
-                    ],
-                ],
-                'failures' => [],
-            ]
-        );
-
+        // Create tags.
         $result = $this->api->create_tags($tagNames);
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Build tag IDs array.
+        $ids = [];
+        foreach ($result->tags as $tag) {
+            $ids[] = $tag->id;
+        }
+
+        // Delete tags.
+        $result = $this->api->delete_tags($ids);
 
         // Assert no failures.
         $this->assertCount(0, $result->failures);

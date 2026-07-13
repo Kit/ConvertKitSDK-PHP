@@ -237,12 +237,18 @@ class ConvertKitAPIKeyTest extends ConvertKitAPITest
      *
      * @return void
      */
-    public function testCreateTags()
+    public function testCreateAndDeleteTags()
     {
         $this->expectException(ClientException::class);
         $result = $this->api->create_tags([
             'Tag Test ' . mt_rand(),
             'Tag Test ' . mt_rand(),
+        ]);
+
+        $this->expectException(ClientException::class);
+        $result = $this->api->delete_tags([
+            12345,
+            23456,
         ]);
     }
 

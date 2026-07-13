@@ -1104,6 +1104,41 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Bulk delete tags.
+     *
+     * @param array<int> $tag_ids      Tag IDs.
+     * @param string     $callback_url URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.6.0
+     *
+     * @see https://developers.kit.com/api-reference/tags/bulk-delete-tags
+     *
+     * @return false|mixed
+     */
+    public function delete_tags(array $tag_ids, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = [
+            'tags' => [],
+        ];
+        foreach ($tag_ids as $i => $tag_id) {
+            $options['tags'][] = [
+                'id' => (int) $tag_id,
+            ];
+        }
+
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->delete(
+            'bulk/tags',
+            $options
+        );
+    }
+
+    /**
      * Updates the name of a tag.
      *
      * @param integer $tag_id Tag ID.
@@ -2688,8 +2723,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a DELETE request to the API.
      *
-     * @param string                                                     $endpoint API Endpoint.
-     * @param array<string, int|string|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                                                  $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<string, int|string>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */
