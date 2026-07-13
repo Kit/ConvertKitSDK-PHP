@@ -446,6 +446,28 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_forms() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetFormsWithSubscriberCount()
+    {
+        $result = $this->api->get_forms(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->forms[0]));
+    }
+
+    /**
      * Test that get_forms() returns the expected data
      * when the total count is included.
      *
@@ -2218,6 +2240,28 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('id', $tag);
         $this->assertArrayHasKey('name', $tag);
         $this->assertArrayHasKey('created_at', $tag);
+    }
+
+    /**
+     * Test that get_tags() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetTagsWithSubscriberCount()
+    {
+        $result = $this->api->get_tags(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->tags[0]));
     }
 
     /**

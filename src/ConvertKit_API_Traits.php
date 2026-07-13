@@ -158,11 +158,12 @@ trait ConvertKit_API_Traits
     /**
      * List forms.
      *
-     * @param string  $status              Form status (active|archived|trashed|all).
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param string        $status              Form status (active|archived|trashed|all).
+     * @param array<string> $include             Additional fields to include: subscriber_count.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/forms/list-forms
      *
@@ -170,18 +171,26 @@ trait ConvertKit_API_Traits
      */
     public function get_forms(
         string $status = 'active',
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [
+            'type'   => 'embed',
+            'status' => $status,
+        ];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             'forms',
             $this->build_total_count_and_pagination_params(
-                [
-                    'type'   => 'embed',
-                    'status' => $status,
-                ],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -1004,10 +1013,11 @@ trait ConvertKit_API_Traits
     /**
      * List tags.
      *
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param array<string> $include             Additional fields to include: subscriber_count.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/tags/list-tags
      *
@@ -1016,15 +1026,23 @@ trait ConvertKit_API_Traits
      * @return mixed|array<int,\stdClass>
      */
     public function get_tags(
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             'tags',
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
