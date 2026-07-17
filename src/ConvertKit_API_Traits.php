@@ -158,11 +158,12 @@ trait ConvertKit_API_Traits
     /**
      * List forms.
      *
-     * @param string  $status              Form status (active|archived|trashed|all).
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param string        $status              Form status (active|archived|trashed|all).
+     * @param array<string> $include             Additional fields to include: subscriber_count.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/forms/list-forms
      *
@@ -170,18 +171,26 @@ trait ConvertKit_API_Traits
      */
     public function get_forms(
         string $status = 'active',
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [
+            'type'   => 'embed',
+            'status' => $status,
+        ];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             'forms',
             $this->build_total_count_and_pagination_params(
-                [
-                    'type'   => 'embed',
-                    'status' => $status,
-                ],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -1004,10 +1013,11 @@ trait ConvertKit_API_Traits
     /**
      * List tags.
      *
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param array<string> $include             Additional fields to include: subscriber_count.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/tags/list-tags
      *
@@ -1016,15 +1026,23 @@ trait ConvertKit_API_Traits
      * @return mixed|array<int,\stdClass>
      */
     public function get_tags(
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             'tags',
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -1080,6 +1098,41 @@ trait ConvertKit_API_Traits
 
         // Send request.
         return $this->post(
+            'bulk/tags',
+            $options
+        );
+    }
+
+    /**
+     * Bulk delete tags.
+     *
+     * @param array<int> $tag_ids      Tag IDs.
+     * @param string     $callback_url URL to notify for large batch size when async processing complete.
+     *
+     * @since 2.6.0
+     *
+     * @see https://developers.kit.com/api-reference/tags/bulk-delete-tags
+     *
+     * @return false|mixed
+     */
+    public function delete_tags(array $tag_ids, string $callback_url = '')
+    {
+        // Build parameters.
+        $options = [
+            'tags' => [],
+        ];
+        foreach ($tag_ids as $i => $tag_id) {
+            $options['tags'][] = [
+                'id' => (int) $tag_id,
+            ];
+        }
+
+        if (!empty($callback_url)) {
+            $options['callback_url'] = $callback_url;
+        }
+
+        // Send request.
+        return $this->delete(
             'bulk/tags',
             $options
         );
@@ -1512,21 +1565,22 @@ trait ConvertKit_API_Traits
     /**
      * Filter subscribers based on engagement.
      *
-     * @param array<int, array<string, mixed>> $all                 Array of filter conditions where ALL must be met (AND logic). Each condition can have.
-     *                                                              - 'type' (string).
-     *                                                              - 'count_greater_than' (int|null).
-     *                                                              - 'count_less_than' (int|null).
-     *                                                              - 'after' (\DateTime|null).
-     *                                                              - 'before' (\DateTime|null).
-     *                                                              - 'states' (array<string>).
-     *                                                              - 'any' (array<int|string, mixed>|null).
-     * @param string                           $counting_mode       Controls how engagement-filter count thresholds are tallied.
-     *                                                              - 'raw' (default) counts every event — five opens of the same email = five.
-     *                                                              - 'unique_email' counts distinct emails on which the action occurred.
-     * @param boolean                          $include_total_count To include the total count of records in the response, use true.
-     * @param string                           $after_cursor        Return results after the given pagination cursor.
-     * @param string                           $before_cursor       Return results before the given pagination cursor.
-     * @param integer                          $per_page            Number of results to return.
+     * @param list<array<string, mixed>> $all                 Array of filter conditions where ALL must be met (AND logic). Each condition can have.
+     *                                                        - 'type' (string).
+     *                                                        - 'count_greater_than' (int|null).
+     *                                                        - 'count_less_than' (int|null).
+     *                                                        - 'after' (\DateTime|null).
+     *                                                        - 'before' (\DateTime|null).
+     *                                                        - 'states' (array<string>).
+     *                                                        - 'any' (array<int|string, mixed>|null).
+     * @param string                     $counting_mode       Controls how engagement-filter count thresholds are tallied.
+     *                                                        - 'raw' (default) counts every event — five opens of the same email = five.
+     *                                                        - 'unique_email' counts distinct emails on which the action occurred.
+     * @param list<array<string, mixed>> $include             Array of additional fields to embed on each subscriber row.
+     * @param boolean                    $include_total_count To include the total count of records in the response, use true.
+     * @param string                     $after_cursor        Return results after the given pagination cursor.
+     * @param string                     $before_cursor       Return results before the given pagination cursor.
+     * @param integer                    $per_page            Number of results to return.
      *
      * @since 2.4.0
      *
@@ -1537,6 +1591,7 @@ trait ConvertKit_API_Traits
     public function filter_subscribers(
         array $all = [],
         string $counting_mode = 'raw',
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
@@ -1584,6 +1639,7 @@ trait ConvertKit_API_Traits
                 [
                     'all'           => $options,
                     'counting_mode' => $counting_mode,
+                    'include'       => $include,
                 ],
                 $include_total_count,
                 $after_cursor,
@@ -2670,8 +2726,8 @@ trait ConvertKit_API_Traits
     /**
      * Performs a DELETE request to the API.
      *
-     * @param string                                                     $endpoint API Endpoint.
-     * @param array<string, int|string|array<string, int|string>|string> $args     Request arguments.
+     * @param string                                                                                                                  $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, array<string, int|string>|boolean|integer|float|string>> $args     Request arguments.
      *
      * @return false|mixed
      */

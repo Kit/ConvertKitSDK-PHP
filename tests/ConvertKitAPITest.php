@@ -446,6 +446,28 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_forms() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetFormsWithSubscriberCount()
+    {
+        $result = $this->api->get_forms(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->forms[0]));
+    }
+
+    /**
      * Test that get_forms() returns the expected data
      * when the total count is included.
      *
@@ -1816,7 +1838,7 @@ class ConvertKitAPITest extends TestCase
             email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
             published: true,
             send_days: ['saturday', 'sunday'],
-            position: 1,
+            position: 2,
         );
 
         // Confirm the changes saved.
@@ -1830,7 +1852,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
         $this->assertEquals(true, $result['published']);
         $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
-        $this->assertEquals(1, $result['position']);
+        $this->assertEquals(2, $result['position']);
 
         // Delete Sequence Email.
         $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
@@ -2221,6 +2243,28 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
+     * Test that get_tags() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetTagsWithSubscriberCount()
+    {
+        $result = $this->api->get_tags(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->tags[0]));
+    }
+
+    /**
      * Test that get_tags() returns the expected data
      * when the total count is included.
      *
@@ -2366,41 +2410,33 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that create_tags() returns the expected data.
+     * Test that create_tags() and delete_tags() returns the expected data.
      *
      * @since   1.1.0
      *
      * @return void
      */
-    public function testCreateTags()
+    public function testCreateAndDeleteTags()
     {
         $tagNames = [
             'Tag Test ' . mt_rand(),
             'Tag Test ' . mt_rand(),
         ];
 
-        // Add mock handler for this API request, as the API doesn't provide
-        // a method to delete tags to cleanup the test.
-        $this->api = $this->mockResponse(
-            api: $this->api,
-            responseBody: [
-                'tags' => [
-                    [
-                        'id' => 12345,
-                        'name' => $tagNames[0],
-                        'created_at' => date('Y-m-d') . 'T' . date('H:i:s') . 'Z',
-                    ],
-                    [
-                        'id' => 23456,
-                        'name' => $tagNames[1],
-                        'created_at' => date('Y-m-d') . 'T' . date('H:i:s') . 'Z',
-                    ],
-                ],
-                'failures' => [],
-            ]
-        );
-
+        // Create tags.
         $result = $this->api->create_tags($tagNames);
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Build tag IDs array.
+        $ids = [];
+        foreach ($result->tags as $tag) {
+            $ids[] = $tag->id;
+        }
+
+        // Delete tags.
+        $result = $this->api->delete_tags($ids);
 
         // Assert no failures.
         $this->assertCount(0, $result->failures);
@@ -4563,6 +4599,44 @@ class ConvertKitAPITest extends TestCase
         // Assert subscribers and pagination exist.
         $this->assertDataExists($result, 'subscribers');
         $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when the `include` parameter is specified.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInclude()
+    {
+        $result = $this->api->filter_subscribers(
+            all: [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 0,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2029-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ],
+            include: [
+                [
+                    'type' => 'tags',
+                ],
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert tags are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
     }
 
     /**
