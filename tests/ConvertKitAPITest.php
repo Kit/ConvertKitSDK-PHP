@@ -182,9 +182,28 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('account', $result);
 
         $account = get_object_vars($result['account']);
+        $this->assertArrayHasKey('id', $account);
         $this->assertArrayHasKey('name', $account);
         $this->assertArrayHasKey('plan_type', $account);
         $this->assertArrayHasKey('primary_email_address', $account);
+        $this->assertArrayHasKey('created_at', $account);
+        $this->assertArrayHasKey('plan', $account);
+        $this->assertArrayHasKey('sending_addresses', $account);
+        $this->assertArrayHasKey('timezone', $account);
+
+        $plan = get_object_vars($account['plan']);
+        $this->assertArrayHasKey('plan_type', $plan);
+        $this->assertArrayHasKey('interval', $plan);
+        $this->assertArrayHasKey('subscriber_limit', $plan);
+        $this->assertArrayHasKey('on_trial', $plan);
+        $this->assertArrayHasKey('trial_lapse_date', $plan);
+        $this->assertArrayHasKey('renews_at', $plan);
+        $this->assertArrayHasKey('cancels_at', $plan);
+
+        $timezone = get_object_vars($account['timezone']);
+        $this->assertArrayHasKey('name', $timezone);
+        $this->assertArrayHasKey('friendly_name', $timezone);
+        $this->assertArrayHasKey('utc_offset', $timezone);
     }
 
     /**
