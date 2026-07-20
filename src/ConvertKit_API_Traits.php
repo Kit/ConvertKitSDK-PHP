@@ -1607,11 +1607,19 @@ trait ConvertKit_API_Traits
             }
 
             if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
-                $option['count_greater_than'] = $condition['count_greater_than'];
+                $option['count_greater_than'] = (int) $condition['count_greater_than'];
+            }
+
+            if (array_key_exists('count_greater_than_or_equal', $condition) && $condition['count_greater_than_or_equal'] !== null) {
+                $option['count_greater_than'] = (int) $condition['count_greater_than_or_equal'];
             }
 
             if (array_key_exists('count_less_than', $condition) && $condition['count_less_than'] !== null) {
-                $option['count_less_than'] = $condition['count_less_than'];
+                $option['count_less_than'] = (int) $condition['count_less_than'];
+            }
+
+            if (array_key_exists('count_less_than_or_equal', $condition) && $condition['count_less_than_or_equal'] !== null) {
+                $option['count_less_than_or_equal'] = (int) $condition['count_less_than_or_equal'];
             }
 
             if (array_key_exists('after', $condition) && $condition['after'] instanceof \DateTime) {
@@ -1624,6 +1632,30 @@ trait ConvertKit_API_Traits
 
             if (array_key_exists('states', $condition) && !empty($condition['states'])) {
                 $option['states'] = (array) $condition['states'];
+            }
+
+            if (array_key_exists('subscriber_custom_field_id', $condition) && $condition['subscriber_custom_field_id'] !== null) {
+                $option['subscriber_custom_field_id'] = (int) $condition['subscriber_custom_field_id'];
+            }
+
+            if (array_key_exists('value', $condition) && $condition['value'] !== null) {
+                $option['value'] = $condition['value'];
+            }
+
+            if (array_key_exists('comparison', $condition) && $condition['comparison'] !== null) {
+                $option['comparison'] = $condition['comparison'];
+            }
+
+            if (array_key_exists('latitude', $condition) && $condition['latitude'] !== null) {
+                $option['latitude'] = (float) $condition['latitude'];
+            }
+
+            if (array_key_exists('longitude', $condition) && $condition['longitude'] !== null) {
+                $option['longitude'] = (float) $condition['longitude'];
+            }
+
+            if (array_key_exists('radius', $condition) && $condition['radius'] !== null) {
+                $option['radius'] = $condition['radius'];
             }
 
             if (array_key_exists('any', $condition) && !empty($condition['any'])) {
