@@ -1606,19 +1606,19 @@ trait ConvertKit_API_Traits
                 $option['type'] = $condition['type'];
             }
 
-            if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
+            if (array_key_exists('count_greater_than', $condition) && is_numeric($condition['count_greater_than'])) {
                 $option['count_greater_than'] = (int) $condition['count_greater_than'];
             }
 
-            if (array_key_exists('count_greater_than_or_equal', $condition) && $condition['count_greater_than_or_equal'] !== null) {
-                $option['count_greater_than'] = (int) $condition['count_greater_than_or_equal'];
+            if (array_key_exists('count_greater_than_or_equal', $condition) && is_numeric($condition['count_greater_than_or_equal'])) {
+                $option['count_greater_than_or_equal'] = (int) $condition['count_greater_than_or_equal'];
             }
 
-            if (array_key_exists('count_less_than', $condition) && $condition['count_less_than'] !== null) {
+            if (array_key_exists('count_less_than', $condition) && is_numeric($condition['count_less_than'])) {
                 $option['count_less_than'] = (int) $condition['count_less_than'];
             }
 
-            if (array_key_exists('count_less_than_or_equal', $condition) && $condition['count_less_than_or_equal'] !== null) {
+            if (array_key_exists('count_less_than_or_equal', $condition) && is_numeric($condition['count_less_than_or_equal'])) {
                 $option['count_less_than_or_equal'] = (int) $condition['count_less_than_or_equal'];
             }
 
@@ -1634,7 +1634,7 @@ trait ConvertKit_API_Traits
                 $option['states'] = (array) $condition['states'];
             }
 
-            if (array_key_exists('subscriber_custom_field_id', $condition) && $condition['subscriber_custom_field_id'] !== null) {
+            if (array_key_exists('subscriber_custom_field_id', $condition) && is_numeric($condition['subscriber_custom_field_id'])) {
                 $option['subscriber_custom_field_id'] = (int) $condition['subscriber_custom_field_id'];
             }
 
@@ -1646,11 +1646,11 @@ trait ConvertKit_API_Traits
                 $option['comparison'] = $condition['comparison'];
             }
 
-            if (array_key_exists('latitude', $condition) && $condition['latitude'] !== null) {
+            if (array_key_exists('latitude', $condition) && is_numeric($condition['latitude'])) {
                 $option['latitude'] = (float) $condition['latitude'];
             }
 
-            if (array_key_exists('longitude', $condition) && $condition['longitude'] !== null) {
+            if (array_key_exists('longitude', $condition) && is_numeric($condition['longitude'])) {
                 $option['longitude'] = (float) $condition['longitude'];
             }
 
