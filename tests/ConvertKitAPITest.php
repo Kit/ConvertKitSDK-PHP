@@ -1028,6 +1028,28 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_sequences() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequencesWithIncludeParam()
+    {
+        $result = $this->api->get_sequences(
+            include: ['stats']
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert fields are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->sequences[0]));
+    }
+
+    /**
+     * Test that get_sequences() returns the expected data
      * when the total count is included.
      *
      * @since   2.0.0
@@ -1193,17 +1215,24 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Test that get_sequence() throws a ClientException when an invalid
-     * sequence ID is specified.
+     * Test that get_sequence() returns the expected data.
      *
-     * @since   2.5.0
+     * @since   2.6.0
      *
      * @return void
      */
-    public function testGetSequenceWithInvalidSequenceID()
+    public function testGetSequenceWithIncludeParam()
     {
-        $this->expectException(ClientException::class);
-        $this->api->get_sequence(12345);
+        $result = $this->api->get_sequence(
+            (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('sequence', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->sequence));
     }
 
     /**
@@ -1681,6 +1710,28 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that get_sequence_emails() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithIncludeParam()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('emails', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->emails[0]));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->emails[0]));
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data
      * when the total count is included.
      *
      * @since   2.5.0
@@ -1823,7 +1874,8 @@ class ConvertKitAPITest extends TestCase
         // Get the sequence email.
         $result = $this->api->get_sequence_email(
             sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
-            email_id: $sequenceEmailID
+            email_id: $sequenceEmailID,
+            include: ['stats']
         );
 
         // Update the existing sequence email.
@@ -1857,6 +1909,45 @@ class ConvertKitAPITest extends TestCase
         // Delete Sequence Email.
         $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
         $this->assertEquals(204, $this->api->getResponseInterface()->getStatusCode());
+    }
+
+    /**
+     * Test that get_sequence_email() returns the expected data.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmail()
+    {
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_EMAIL_ID']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('id', get_object_vars($result->email));
+    }
+
+    /**
+     * Test that get_sequence_email() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithIncludeParam()
+    {
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_EMAIL_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('id', get_object_vars($result->email));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->email));
     }
 
     /**
