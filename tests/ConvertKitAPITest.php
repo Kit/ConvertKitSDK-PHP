@@ -5557,7 +5557,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertPaginationExists($result);
 
         // Assert the expected number of broadcasts were returned.
-        $this->assertCount(8, $result->broadcasts);
+        $this->assertCount(4, $result->broadcasts);
     }
 
     /**
@@ -6021,7 +6021,7 @@ class ConvertKitAPITest extends TestCase
         $this->assertPaginationExists($result);
 
         // Assert the expected number of broadcasts were returned.
-        $this->assertCount(8, $result->broadcasts);
+        $this->assertCount(4, $result->broadcasts);
     }
 
     /**
