@@ -399,25 +399,34 @@ trait ConvertKit_API_Traits
     /**
      * List sequences
      *
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param array<string> $include             Additional fields to include: stats.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/sequences/list-sequences
      *
      * @return false|mixed
      */
     public function get_sequences(
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             'sequences',
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -490,15 +499,25 @@ trait ConvertKit_API_Traits
     /**
      * Get a sequence.
      *
-     * @param integer $id Sequence ID.
+     * @param integer       $id      Sequence ID.
+     * @param array<string> $include Additional fields to include: stats.
      *
      * @see https://developers.kit.com/api-reference/sequences/get-a-sequence
      *
      * @return mixed|object
      */
-    public function get_sequence(int $id)
-    {
-        return $this->get(sprintf('sequences/%s', $id));
+    public function get_sequence(
+        int $id,
+        array $include = []
+    ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
+        return $this->get(sprintf('sequences/%s', $id), $options);
     }
 
     /**
@@ -676,11 +695,12 @@ trait ConvertKit_API_Traits
     /**
      * List sequence emails
      *
-     * @param integer $sequence_id         Sequence ID.
-     * @param boolean $include_total_count To include the total count of records in the response, use true.
-     * @param string  $after_cursor        Return results after the given pagination cursor.
-     * @param string  $before_cursor       Return results before the given pagination cursor.
-     * @param integer $per_page            Number of results to return.
+     * @param integer       $sequence_id         Sequence ID.
+     * @param array<string> $include             Additional fields to include: stats.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
      *
      * @see https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails
      *
@@ -688,15 +708,23 @@ trait ConvertKit_API_Traits
      */
     public function get_sequence_emails(
         int $sequence_id,
+        array $include = [],
         bool $include_total_count = false,
         string $after_cursor = '',
         string $before_cursor = '',
         int $per_page = 100
     ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
         return $this->get(
             sprintf('sequences/%s/emails', $sequence_id),
             $this->build_total_count_and_pagination_params(
-                [],
+                $options,
                 $include_total_count,
                 $after_cursor,
                 $before_cursor,
@@ -766,16 +794,27 @@ trait ConvertKit_API_Traits
     /**
      * Get a sequence email.
      *
-     * @param integer $sequence_id Sequence ID.
-     * @param integer $email_id    Email ID.
+     * @param integer       $sequence_id Sequence ID.
+     * @param integer       $email_id    Email ID.
+     * @param array<string> $include     Additional fields to include: stats.
      *
      * @see https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email
      *
      * @return mixed|object
      */
-    public function get_sequence_email(int $sequence_id, int $email_id)
-    {
-        return $this->get(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id));
+    public function get_sequence_email(
+        int $sequence_id,
+        int $email_id,
+        array $include = []
+    ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($include)) {
+            $options['include'] = implode(',', $include);
+        }
+
+        return $this->get(sprintf('sequences/%s/emails/%s', $sequence_id, $email_id), $options);
     }
 
     /**
@@ -1606,12 +1645,20 @@ trait ConvertKit_API_Traits
                 $option['type'] = $condition['type'];
             }
 
-            if (array_key_exists('count_greater_than', $condition) && $condition['count_greater_than'] !== null) {
-                $option['count_greater_than'] = $condition['count_greater_than'];
+            if (array_key_exists('count_greater_than', $condition) && is_numeric($condition['count_greater_than'])) {
+                $option['count_greater_than'] = (int) $condition['count_greater_than'];
             }
 
-            if (array_key_exists('count_less_than', $condition) && $condition['count_less_than'] !== null) {
-                $option['count_less_than'] = $condition['count_less_than'];
+            if (array_key_exists('count_greater_than_or_equal', $condition) && is_numeric($condition['count_greater_than_or_equal'])) {
+                $option['count_greater_than_or_equal'] = (int) $condition['count_greater_than_or_equal'];
+            }
+
+            if (array_key_exists('count_less_than', $condition) && is_numeric($condition['count_less_than'])) {
+                $option['count_less_than'] = (int) $condition['count_less_than'];
+            }
+
+            if (array_key_exists('count_less_than_or_equal', $condition) && is_numeric($condition['count_less_than_or_equal'])) {
+                $option['count_less_than_or_equal'] = (int) $condition['count_less_than_or_equal'];
             }
 
             if (array_key_exists('after', $condition) && $condition['after'] instanceof \DateTime) {
@@ -1624,6 +1671,30 @@ trait ConvertKit_API_Traits
 
             if (array_key_exists('states', $condition) && !empty($condition['states'])) {
                 $option['states'] = (array) $condition['states'];
+            }
+
+            if (array_key_exists('subscriber_custom_field_id', $condition) && is_numeric($condition['subscriber_custom_field_id'])) {
+                $option['subscriber_custom_field_id'] = (int) $condition['subscriber_custom_field_id'];
+            }
+
+            if (array_key_exists('value', $condition) && $condition['value'] !== null) {
+                $option['value'] = $condition['value'];
+            }
+
+            if (array_key_exists('comparison', $condition) && $condition['comparison'] !== null) {
+                $option['comparison'] = $condition['comparison'];
+            }
+
+            if (array_key_exists('latitude', $condition) && is_numeric($condition['latitude'])) {
+                $option['latitude'] = (float) $condition['latitude'];
+            }
+
+            if (array_key_exists('longitude', $condition) && is_numeric($condition['longitude'])) {
+                $option['longitude'] = (float) $condition['longitude'];
+            }
+
+            if (array_key_exists('radius', $condition) && $condition['radius'] !== null) {
+                $option['radius'] = $condition['radius'];
             }
 
             if (array_key_exists('any', $condition) && !empty($condition['any'])) {
