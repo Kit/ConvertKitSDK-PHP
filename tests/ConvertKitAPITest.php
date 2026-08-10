@@ -14,14 +14,10 @@ use ConvertKit_API\ConvertKit_API;
 
 /**
  * ConvertKit API class tests.
- *
- * This class hosts SDK-only tests and the shim methods that let the
- * portable `SharedTests` trait run against Guzzle. All shared tests
- * live in tests/SharedTests.php (a trait) and are pulled in via `use`.
  */
 class ConvertKitAPITest extends TestCase
 {
-    use SharedTests;
+    use TestsTrait;
 
     /**
      * ConvertKit Class Object
@@ -105,19 +101,8 @@ class ConvertKitAPITest extends TestCase
         }
     }
 
-    // -----------------------------------------------------------------
-    // Shims required by the SharedTests trait.
-    // -----------------------------------------------------------------
-
     /**
-     * Assert that the given callable produces an API-level error.
-     *
-     * In the PHP SDK an API-level error surfaces as a thrown Guzzle
-     * exception (ClientException / ServerException) or, for pre-request
-     * validation, a PHP exception such as InvalidArgumentException.
-     *
-     * WP Libs implements the same shim by asserting the callable
-     * returns a WP_Error instead of throwing.
+     * Assert that the given callable throws a ClientException, ServerException, or InvalidArgumentException.
      *
      * @since   2.7.0
      *
@@ -150,11 +135,6 @@ class ConvertKitAPITest extends TestCase
             $this->api->getResponseInterface()->getStatusCode()
         );
     }
-
-    // -----------------------------------------------------------------
-    // SDK-only tests. These stay here because they depend on Guzzle
-    // internals (Response, MockHandler) that have no WP Libs analogue.
-    // -----------------------------------------------------------------
 
     /**
      * Test that a Response instance is returned when calling getResponseInterface()
@@ -223,10 +203,6 @@ class ConvertKitAPITest extends TestCase
 
     /**
      * Test that create_snippet() works.
-     *
-     * Kept here rather than in the trait: the API has no delete-snippet
-     * endpoint, so the test relies on a Guzzle MockHandler to avoid
-     * leaving a stray snippet on the account.
      *
      * @since   2.5.0
      *
@@ -301,10 +277,6 @@ class ConvertKitAPITest extends TestCase
         $this->assertArrayHasKey('created_at', $tag);
         $this->assertEquals($tag['name'], $tagName);
     }
-
-    // -----------------------------------------------------------------
-    // SDK-only helpers.
-    // -----------------------------------------------------------------
 
     /**
      * Deletes the src/logs/debug.log file, if it remains following a previous test.

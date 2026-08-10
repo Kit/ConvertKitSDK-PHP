@@ -1,13 +1,9 @@
 <?php
 
 /**
- * Holds tests assertions that are platform agnostic and must work with both the PHP SDK and WordPress Libs.
+ * Holds the API tests, agnostic of platform.
  */
-
-/**
- * ConvertKit API class tests.
- */
-trait SharedTests
+trait TestsTrait
 {
     /**
      * Test that get_account() returns the expected data.
@@ -6923,13 +6919,6 @@ trait SharedTests
             return $this->api->get_resource('https://kit.com/a/url/that/does/not/exist');
         });
     }
-
-    // -----------------------------------------------------------------
-    // Portable helpers.
-    //
-    // Identical on both PHP SDK and WP Libs — kept in the trait so the
-    // file copies cleanly between repositories with no edits.
-    // -----------------------------------------------------------------
 
     /**
      * Generates a unique email address for use in a test, comprising of a prefix,
