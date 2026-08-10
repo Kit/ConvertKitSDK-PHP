@@ -5,7 +5,7 @@ use Dotenv\Dotenv;
 use ConvertKit_API\ConvertKit_API;
 
 /**
- * ConvertKit API Key class tests.
+ * Runs tests against the API using an API Key.
  */
 class ConvertKitAPIKeyTest extends ConvertKitAPITest
 {

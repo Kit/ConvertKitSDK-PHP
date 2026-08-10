@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Holds the API tests, agnostic of platform.
+ * Test methods in ConvertKit_API_Traits that interact with the API.
  */
 trait TestsTrait
 {

@@ -6,7 +6,7 @@ use Dotenv\Dotenv;
 use ConvertKit_API\ConvertKit_API;
 
 /**
- * ConvertKit API OAuth Key class tests.
+ * Runs tests against the API using an OAuth Access Token.
  */
 class ConvertKitAPIOAuthTest extends ConvertKitAPITest
 {
