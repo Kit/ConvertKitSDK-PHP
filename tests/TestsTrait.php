@@ -1,0 +1,6987 @@
+<?php
+
+/**
+ * Test methods in ConvertKit_API_Traits that interact with the API.
+ */
+trait TestsTrait
+{
+    /**
+     * Test that get_account() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetAccount()
+    {
+        $result = $this->api->get_account();
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $this->assertArrayHasKey('user', $result);
+        $this->assertArrayHasKey('account', $result);
+
+        $account = get_object_vars($result['account']);
+        $this->assertArrayHasKey('id', $account);
+        $this->assertArrayHasKey('name', $account);
+        $this->assertArrayHasKey('plan_type', $account);
+        $this->assertArrayHasKey('primary_email_address', $account);
+        $this->assertArrayHasKey('created_at', $account);
+        $this->assertArrayHasKey('plan', $account);
+        $this->assertArrayHasKey('sending_addresses', $account);
+        $this->assertArrayHasKey('timezone', $account);
+
+        $plan = get_object_vars($account['plan']);
+        $this->assertArrayHasKey('plan_type', $plan);
+        $this->assertArrayHasKey('interval', $plan);
+        $this->assertArrayHasKey('subscriber_limit', $plan);
+        $this->assertArrayHasKey('on_trial', $plan);
+        $this->assertArrayHasKey('trial_lapse_date', $plan);
+        $this->assertArrayHasKey('renews_at', $plan);
+        $this->assertArrayHasKey('cancels_at', $plan);
+
+        $timezone = get_object_vars($account['timezone']);
+        $this->assertArrayHasKey('name', $timezone);
+        $this->assertArrayHasKey('friendly_name', $timezone);
+        $this->assertArrayHasKey('utc_offset', $timezone);
+    }
+
+    /**
+     * Test that get_account_colors() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetAccountColors()
+    {
+        $result = $this->api->get_account_colors();
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $this->assertArrayHasKey('colors', $result);
+        $this->assertIsArray($result['colors']);
+    }
+
+    /**
+     * Test that update_account_colors() updates the account's colors.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testUpdateAccountColors()
+    {
+        $result = $this->api->update_account_colors([
+            '#111111',
+        ]);
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $this->assertArrayHasKey('colors', $result);
+        $this->assertIsArray($result['colors']);
+        $this->assertEquals($result['colors'][0], '#111111');
+    }
+
+    /**
+     * Test that get_creator_profile() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetCreatorProfile()
+    {
+        $result = $this->api->get_creator_profile();
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $profile = get_object_vars($result['profile']);
+        $this->assertArrayHasKey('name', $profile);
+        $this->assertArrayHasKey('byline', $profile);
+        $this->assertArrayHasKey('bio', $profile);
+        $this->assertArrayHasKey('image_url', $profile);
+        $this->assertArrayHasKey('profile_url', $profile);
+    }
+
+    /**
+     * Test that get_email_stats() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetEmailStats()
+    {
+        $result = $this->api->get_email_stats();
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $stats = get_object_vars($result['stats']);
+        $this->assertArrayHasKey('sent', $stats);
+        $this->assertArrayHasKey('clicked', $stats);
+        $this->assertArrayHasKey('opened', $stats);
+        $this->assertArrayHasKey('email_stats_mode', $stats);
+        $this->assertArrayHasKey('open_tracking_enabled', $stats);
+        $this->assertArrayHasKey('click_tracking_enabled', $stats);
+        $this->assertArrayHasKey('starting', $stats);
+        $this->assertArrayHasKey('ending', $stats);
+    }
+
+    /**
+     * Test that get_growth_stats() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetGrowthStats()
+    {
+        $result = $this->api->get_growth_stats();
+        $this->assertInstanceOf('stdClass', $result);
+
+        $result = get_object_vars($result);
+        $stats = get_object_vars($result['stats']);
+        $this->assertArrayHasKey('cancellations', $stats);
+        $this->assertArrayHasKey('net_new_subscribers', $stats);
+        $this->assertArrayHasKey('new_subscribers', $stats);
+        $this->assertArrayHasKey('subscribers', $stats);
+        $this->assertArrayHasKey('starting', $stats);
+        $this->assertArrayHasKey('ending', $stats);
+    }
+
+    /**
+     * Test that get_growth_stats() returns the expected data
+     * when a start date is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetGrowthStatsWithStartDate()
+    {
+        // Define start and end dates.
+        $starting = new DateTime('now');
+        $starting->modify('-7 days');
+        $ending = new DateTime('now');
+
+        // Send request.
+        $result = $this->api->get_growth_stats(
+            starting: $starting
+        );
+        $this->assertInstanceOf('stdClass', $result);
+
+        // Confirm response object contains expected keys.
+        $result = get_object_vars($result);
+        $stats = get_object_vars($result['stats']);
+        $this->assertArrayHasKey('cancellations', $stats);
+        $this->assertArrayHasKey('net_new_subscribers', $stats);
+        $this->assertArrayHasKey('new_subscribers', $stats);
+        $this->assertArrayHasKey('subscribers', $stats);
+        $this->assertArrayHasKey('starting', $stats);
+        $this->assertArrayHasKey('ending', $stats);
+
+        // Assert start and end dates were honored.
+        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
+        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
+    }
+
+    /**
+     * Test that get_growth_stats() returns the expected data
+     * when an end date is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetGrowthStatsWithEndDate()
+    {
+        // Define start and end dates.
+        $starting = new DateTime('now');
+        $starting->modify('-90 days');
+        $ending = new DateTime('now');
+        $ending->modify('-7 days');
+
+        // Send request.
+        $result = $this->api->get_growth_stats(
+            ending: $ending
+        );
+        $this->assertInstanceOf('stdClass', $result);
+
+        // Confirm response object contains expected keys.
+        $result = get_object_vars($result);
+        $stats = get_object_vars($result['stats']);
+        $this->assertArrayHasKey('cancellations', $stats);
+        $this->assertArrayHasKey('net_new_subscribers', $stats);
+        $this->assertArrayHasKey('new_subscribers', $stats);
+        $this->assertArrayHasKey('subscribers', $stats);
+        $this->assertArrayHasKey('starting', $stats);
+        $this->assertArrayHasKey('ending', $stats);
+
+        // Assert start and end dates were honored.
+        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
+        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
+        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
+        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
+    }
+
+    /**
+     * Test that get_forms() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetForms()
+    {
+        $result = $this->api->get_forms();
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Iterate through each form, confirming no landing pages were included.
+        foreach ($result->forms as $form) {
+            $form = get_object_vars($form);
+
+            // Assert shape of object is valid.
+            $this->assertArrayHasKey('id', $form);
+            $this->assertArrayHasKey('name', $form);
+            $this->assertArrayHasKey('created_at', $form);
+            $this->assertArrayHasKey('type', $form);
+            $this->assertArrayHasKey('format', $form);
+            $this->assertArrayHasKey('embed_js', $form);
+            $this->assertArrayHasKey('embed_url', $form);
+            $this->assertArrayHasKey('archived', $form);
+
+            // Assert form is not a landing page i.e embed.
+            $this->assertEquals($form['type'], 'embed');
+
+            // Assert form is not archived.
+            $this->assertFalse($form['archived']);
+        }
+    }
+
+    /**
+     * Test that get_forms() returns the expected data when
+     * the status is set to archived.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormsWithArchivedStatus()
+    {
+        $result = $this->api->get_forms(
+            status: 'archived'
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Iterate through each form, confirming no landing pages were included.
+        foreach ($result->forms as $form) {
+            $form = get_object_vars($form);
+
+            // Assert shape of object is valid.
+            $this->assertArrayHasKey('id', $form);
+            $this->assertArrayHasKey('name', $form);
+            $this->assertArrayHasKey('created_at', $form);
+            $this->assertArrayHasKey('type', $form);
+            $this->assertArrayHasKey('format', $form);
+            $this->assertArrayHasKey('embed_js', $form);
+            $this->assertArrayHasKey('embed_url', $form);
+            $this->assertArrayHasKey('archived', $form);
+
+            // Assert form is not a landing page i.e embed.
+            $this->assertEquals($form['type'], 'embed');
+
+            // Assert form is not archived.
+            $this->assertTrue($form['archived']);
+        }
+    }
+
+    /**
+     * Test that get_forms() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetFormsWithSubscriberCount()
+    {
+        $result = $this->api->get_forms(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->forms[0]));
+    }
+
+    /**
+     * Test that get_forms() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormsWithTotalCount()
+    {
+        $result = $this->api->get_forms(
+            include_total_count: true
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_forms() returns the expected data when pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormsPagination()
+    {
+        $result = $this->api->get_forms(
+            per_page: 1
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_forms(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_forms(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_landing_pages() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetLandingPages()
+    {
+        $result = $this->api->get_landing_pages();
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Iterate through each landing page, confirming no forms were included.
+        foreach ($result->forms as $form) {
+            $form = get_object_vars($form);
+
+            // Assert shape of object is valid.
+            $this->assertArrayHasKey('id', $form);
+            $this->assertArrayHasKey('name', $form);
+            $this->assertArrayHasKey('created_at', $form);
+            $this->assertArrayHasKey('type', $form);
+            $this->assertArrayHasKey('format', $form);
+            $this->assertArrayHasKey('embed_js', $form);
+            $this->assertArrayHasKey('embed_url', $form);
+            $this->assertArrayHasKey('archived', $form);
+
+            // Assert form is a landing page i.e. hosted.
+            $this->assertEquals($form['type'], 'hosted');
+
+            // Assert form is not archived.
+            $this->assertFalse($form['archived']);
+        }
+    }
+
+    /**
+     * Test that get_landing_pages() returns the expected data when
+     * the status is set to archived.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetLandingPagesWithArchivedStatus()
+    {
+        $result = $this->api->get_forms(
+            status: 'archived'
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert no landing pages are returned, as the account doesn't have any archived landing pages.
+        $this->assertCount(0, $result->forms);
+    }
+
+    /**
+     * Test that get_landing_pages() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetLandingPagesWithTotalCount()
+    {
+        $result = $this->api->get_landing_pages(
+            include_total_count: true
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_landing_pages() returns the expected data when pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetLandingPagesPagination()
+    {
+        $result = $this->api->get_landing_pages(
+            per_page: 1
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_landing_pages(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_landing_pages(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'forms');
+        $this->assertPaginationExists($result);
+
+        // Assert a single form was returned.
+        $this->assertCount(1, $result->forms);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptions()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithSlimParameter()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $subscriber = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $subscriber);
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithTotalCount()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and the subscription status
+     * is cancelled.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithCancelledSubscriberState()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_state: 'cancelled'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertEquals($result->subscribers[0]->state, 'cancelled');
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and the added_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithAddedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            added_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->added_at))
+        );
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and the added_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithAddedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            added_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->added_at))
+        );
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and the created_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithCreatedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            created_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and the created_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithCreatedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            created_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_form_subscriptions() returns the expected data
+     * when a valid Form ID is specified and pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsPagination()
+    {
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_form_subscriptions(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_form_subscriptions() throws a ClientException when an invalid
+     * Form ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithInvalidFormID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_form_subscriptions(
+                form_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that get_form_subscriptions() throws a ClientException when an invalid
+     * subscriber state is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithInvalidSubscriberState()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_form_subscriptions(
+                form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                subscriber_state: 'not-a-valid-state'
+            );
+        });
+    }
+
+    /**
+     * Test that get_form_subscriptions() throws a ClientException when invalid
+     * pagination parameters are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetFormSubscriptionsWithInvalidPagination()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_form_subscriptions(
+                form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                after_cursor: 'not-a-valid-cursor'
+            );
+        });
+    }
+
+    /**
+     * Test that get_sequences() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSequences()
+    {
+        $result = $this->api->get_sequences();
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Check first sequence in resultset has expected data.
+        $sequence = get_object_vars($result->sequences[0]);
+        $this->assertArrayHasKey('id', $sequence);
+        $this->assertArrayHasKey('name', $sequence);
+        $this->assertArrayHasKey('hold', $sequence);
+        $this->assertArrayHasKey('repeat', $sequence);
+        $this->assertArrayHasKey('created_at', $sequence);
+    }
+
+    /**
+     * Test that get_sequences() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequencesWithIncludeParam()
+    {
+        $result = $this->api->get_sequences(
+            include: ['stats']
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert fields are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->sequences[0]));
+    }
+
+    /**
+     * Test that get_sequences() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequencesWithTotalCount()
+    {
+        $result = $this->api->get_sequences(
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_sequences() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequencesPagination()
+    {
+        $result = $this->api->get_sequences(
+            per_page: 1
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->sequences);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_sequences(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->sequences);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_sequences(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'sequences');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->sequences);
+    }
+
+    /**
+     * Test that create_sequence(), update_sequence() and delete_sequence() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequences remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequences.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateUpdateAndDeleteSequence()
+    {
+        // Create a sequence.
+        $result = $this->api->create_sequence(
+            name: 'Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            send_hour: 12,
+            time_zone: 'America/Los_Angeles',
+            active: false,
+            repeat: false,
+            hold: false
+        );
+        $sequenceID = $result->sequence->id;
+
+        // Confirm the Sequence saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(12, $result['send_hour']);
+        $this->assertEquals('America/Los_Angeles', $result['time_zone']);
+        $this->assertEquals(false, $result['active']);
+        $this->assertEquals(false, $result['repeat']);
+        $this->assertEquals(false, $result['hold']);
+
+        // Update the existing sequence.
+        $result = $this->api->update_sequence(
+            sequence_id: $sequenceID,
+            name: 'Edited Test Sequence',
+            email_address: 'wordpress@convertkit.com',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            send_days: ['saturday', 'sunday'],
+            send_hour: 13,
+            time_zone: 'America/New_York',
+            active: true,
+            repeat: true,
+            hold: true
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->sequence);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence', $result['name']);
+        $this->assertEquals('wordpress@convertkit.com', $result['email_address']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(13, $result['send_hour']);
+        $this->assertEquals('America/New_York', $result['time_zone']);
+        $this->assertEquals(true, $result['active']);
+        $this->assertEquals(true, $result['repeat']);
+        $this->assertEquals(true, $result['hold']);
+
+        // Delete Sequence.
+        $this->api->delete_sequence($sequenceID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
+     * Test that get_sequence() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequence()
+    {
+        $result = $this->api->get_sequence((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('sequence', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+    }
+
+    /**
+     * Test that get_sequence() returns the expected data.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceWithIncludeParam()
+    {
+        $result = $this->api->get_sequence(
+            (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('sequence', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->sequence));
+    }
+
+    /**
+     * Test that update_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_sequence(12345);
+        });
+    }
+
+    /**
+     * Test that delete_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_sequence(12345);
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence_by_email() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequenceByEmail()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to sequence.
+        $result = $this->api->add_subscriber_to_sequence_by_email(
+            sequence_id: $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_address: $emailAddress
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence_by_email() throws a ClientException when an invalid
+     * sequence is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequenceByEmailWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_sequence_by_email(
+                sequence_id: 12345,
+                email_address: $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence_by_email() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequenceByEmailWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_sequence_by_email(
+                sequence_id: $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequence()
+    {
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to sequence.
+        $result = $this->api->add_subscriber_to_sequence(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subscriber_id: $subscriber->subscriber->id
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequenceWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_sequence(
+                sequence_id: 12345,
+                subscriber_id: $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_sequence() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToSequenceWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_sequence(
+                sequence_id: $_ENV['CONVERTKIT_API_SUBSCRIBER_ID'],
+                subscriber_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptions()
+    {
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: $_ENV['CONVERTKIT_API_SEQUENCE_ID']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithTotalCount()
+    {
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and the subscription status
+     * is cancelled.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithCancelledSubscriberState()
+    {
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subscriber_state: 'cancelled'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertEquals($result->subscribers[0]->state, 'cancelled');
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and the added_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithAddedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            added_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->added_at))
+        );
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and the added_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithAddedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            added_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->added_at))
+        );
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and the created_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithCreatedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            created_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and the created_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithCreatedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            created_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() returns the expected data
+     * when a valid Sequence ID is specified and pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsPagination()
+    {
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_sequence_subscriptions(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() throws a ClientException when an invalid
+     * Sequence ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_subscriptions(
+                sequence_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() throws a ClientException when an invalid
+     * subscriber state is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithInvalidSubscriberState()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_subscriptions(
+                sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+                subscriber_state: 'not-a-valid-state'
+            );
+        });
+    }
+
+    /**
+     * Test that get_sequence_subscriptions() throws a ClientException when invalid
+     * pagination parameters are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSequenceSubscriptionsWithInvalidPagination()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_subscriptions(
+                sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+                after_cursor: 'not-a-valid-cursor'
+            );
+        });
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmails()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID']
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Check first sequence in resultset has expected data.
+        $email = get_object_vars($result->emails[0]);
+        $this->assertArrayHasKey('id', $email);
+        $this->assertArrayHasKey('sequence_id', $email);
+        $this->assertArrayHasKey('subject', $email);
+        $this->assertArrayHasKey('preview_text', $email);
+        $this->assertArrayHasKey('email_address', $email);
+        $this->assertArrayHasKey('email_template_id', $email);
+        $this->assertArrayHasKey('published', $email);
+        $this->assertArrayHasKey('position', $email);
+        $this->assertArrayHasKey('delay_value', $email);
+        $this->assertArrayHasKey('delay_unit', $email);
+        $this->assertArrayHasKey('send_days', $email);
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithIncludeParam()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('emails', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->emails[0]));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->emails[0]));
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithTotalCount()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_sequence_emails() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsPagination()
+    {
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_sequence_emails(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert emails and pagination exist.
+        $this->assertDataExists($result, 'emails');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email was returned.
+        $this->assertCount(1, $result->emails);
+    }
+
+    /**
+     * Test that get_sequence_emails() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailsWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_emails(
+                sequence_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that create_sequence_email(), get_sequence_email(), update_sequence_email()
+     * and delete_sequence_email() works.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary
+     * Sequence Emails remaining on the Kit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Sequence Emails.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testCreateGetUpdateAndDeleteSequenceEmail()
+    {
+        // Create a sequence email.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            preview_text: 'Test Preview Text',
+            content: 'Test Content',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: true,
+            send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            position: 0
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Confirm the Sequence Email saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Sequence Email', $result['subject']);
+        $this->assertEquals(1, $result['delay_value']);
+        $this->assertEquals('days', $result['delay_unit']);
+        $this->assertEquals('Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(true, $result['published']);
+        $this->assertEquals(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], $result['send_days']);
+        $this->assertEquals(2, $result['position']);
+
+        // Get the sequence email.
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            include: ['stats']
+        );
+
+        // Update the existing sequence email.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            subject: 'Edited Test Sequence Email',
+            preview_text: 'Edited Test Preview Text',
+            content: 'Edited Test Content',
+            delay_value: 2,
+            delay_unit: 'hours',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: true,
+            send_days: ['saturday', 'sunday'],
+            position: 2,
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->email);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Sequence Email', $result['subject']);
+        $this->assertEquals(2, $result['delay_value']);
+        $this->assertEquals('hours', $result['delay_unit']);
+        $this->assertEquals('Edited Test Preview Text', $result['preview_text']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+        $this->assertEquals((int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'], $result['email_template_id']);
+        $this->assertEquals(true, $result['published']);
+        $this->assertEquals(['saturday', 'sunday'], $result['send_days']);
+        $this->assertEquals(2, $result['position']);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
+     * Test that get_sequence_email() returns the expected data.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmail()
+    {
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_EMAIL_ID']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('id', get_object_vars($result->email));
+    }
+
+    /**
+     * Test that get_sequence_email() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithIncludeParam()
+    {
+        $result = $this->api->get_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_EMAIL_ID'],
+            include: ['stats']
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('id', get_object_vars($result->email));
+
+        // Assert stats are included.
+        $this->assertArrayHasKey('stats', get_object_vars($result->email));
+    }
+
+    /**
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_email(12345, 12345);
+        });
+    }
+
+    /**
+     * Test that get_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSequenceEmailWithInvalidEmailID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+        });
+    }
+
+    /**
+     * Test that update_sequence_email() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_sequence_email(12345, 12345);
+        });
+    }
+
+    /**
+     * Test that update_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithInvalidEmailID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+        });
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * sequence email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidSequenceID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_sequence_email(12345, 12345);
+        });
+    }
+
+    /**
+     * Test that delete_sequence_email() throws a ClientException when an invalid
+     * email ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testDeleteSequenceEmailWithInvalidEmailID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], 12345);
+        });
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippets()
+    {
+        $result = $this->api->get_snippets();
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Check first snippet in resultset has expected data.
+        $snippet = get_object_vars($result->snippets[0]);
+        $this->assertArrayHasKey('id', $snippet);
+        $this->assertArrayHasKey('name', $snippet);
+        $this->assertArrayHasKey('snippet_type', $snippet);
+        $this->assertArrayHasKey('archived', $snippet);
+        $this->assertArrayHasKey('key', $snippet);
+        $this->assertArrayHasKey('created_at', $snippet);
+        $this->assertArrayHasKey('updated_at', $snippet);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is inline.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetInlineSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'inline'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the snippet type is block.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetBlockSnippets()
+    {
+        $result = $this->api->get_snippets(
+            snippet_type: 'block'
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert no snippets were returned.
+        $this->assertCount(0, $result->snippets);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * the archived parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithArchivedParam()
+    {
+        $result = $this->api->get_snippets(
+            archived: true
+        );
+
+        // Assert snippets and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert snippets were returned.
+        $this->assertGreaterThan(0, count($result->snippets));
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsWithTotalCount()
+    {
+        $result = $this->api->get_snippets(
+            include_total_count: true
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_snippets() returns the expected data when
+     * pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetsPagination()
+    {
+        $result = $this->api->get_snippets(
+            per_page: 1
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_snippets(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'snippets');
+        $this->assertPaginationExists($result);
+
+        // Assert a single sequence was returned.
+        $this->assertCount(1, $result->snippets);
+    }
+
+    // Note: testCreateSnippet lives on each consumer class (SDK / WP Libs).
+    // It depends on a platform-specific HTTP mock (Guzzle MockHandler in the
+    // SDK, pre_http_request filter in WP Libs), so it cannot live in this
+    // portable trait.
+
+    /**
+     * Test that update_snippet() works.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippet()
+    {
+        $result = $this->api->update_snippet(
+            snippet_id: (int) $_ENV['CONVERTKIT_API_SNIPPET_ID'],
+            name: 'Edited Test Snippet',
+            snippet_type: 'inline',
+            content: 'Edited Test Content'
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->snippet);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Edited Test Snippet', $result['name']);
+        $this->assertEquals('inline', $result['snippet_type']);
+        $this->assertEquals('Edited Test Content', $result['content']);
+    }
+
+    /**
+     * Test that get_snippet() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippet()
+    {
+        $result = $this->api->get_snippet((int) $_ENV['CONVERTKIT_API_SNIPPET_ID']);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('snippet', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->snippet));
+    }
+
+    /**
+     * Test that get_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSnippetWithInvalidSnippetID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_snippet(12345);
+        });
+    }
+
+    /**
+     * Test that update_snippet() throws a ClientException when an invalid
+     * snippet ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testUpdateSnippetWithInvalidSnippetID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_snippet(12345);
+        });
+    }
+
+    /**
+     * Test that get_tags() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetTags()
+    {
+        $result = $this->api->get_tags();
+
+        // Assert sequences and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Check first tag in resultset has expected data.
+        $tag = get_object_vars($result->tags[0]);
+        $this->assertArrayHasKey('id', $tag);
+        $this->assertArrayHasKey('name', $tag);
+        $this->assertArrayHasKey('created_at', $tag);
+    }
+
+    /**
+     * Test that get_tags() returns the subscriber count
+     * when included in the `include` argument.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testGetTagsWithSubscriberCount()
+    {
+        $result = $this->api->get_tags(
+            include: ['subscriber_count']
+        );
+
+        // Assert forms and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert subscriber count is included.
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->tags[0]));
+    }
+
+    /**
+     * Test that get_tags() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagsWithTotalCount()
+    {
+        $result = $this->api->get_tags(
+            include_total_count: true
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_tags() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagsPagination()
+    {
+        $result = $this->api->get_tags(
+            per_page: 1
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert a single tag was returned.
+        $this->assertCount(1, $result->tags);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_tags(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->tags);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_tags(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+    }
+
+    // Note: testCreateTag lives on each consumer class (SDK / WP Libs).
+    // Same reason as testCreateSnippet — the create endpoint has no matching
+    // delete endpoint, so tests must mock the HTTP layer to avoid polluting
+    // the account, and the mock is platform-specific.
+
+    /**
+     * Test that create_tag() throws a ClientException when creating
+     * a blank tag.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateTagBlank()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_tag('');
+        });
+    }
+
+    /**
+     * Test that create_tag() returns the expected data when creating
+     * a tag that already exists.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateTagThatExists()
+    {
+        $result = $this->api->create_tag($_ENV['CONVERTKIT_API_TAG_NAME']);
+
+        // Assert response contains correct data.
+        $tag = get_object_vars($result->tag);
+        $this->assertArrayHasKey('id', $tag);
+        $this->assertArrayHasKey('name', $tag);
+        $this->assertArrayHasKey('created_at', $tag);
+        $this->assertEquals($tag['name'], $_ENV['CONVERTKIT_API_TAG_NAME']);
+    }
+
+    /**
+     * Test that create_tags() and delete_tags() returns the expected data.
+     *
+     * @since   1.1.0
+     *
+     * @return void
+     */
+    public function testCreateAndDeleteTags()
+    {
+        $tagNames = [
+            'Tag Test ' . mt_rand(),
+            'Tag Test ' . mt_rand(),
+        ];
+
+        // Create tags.
+        $result = $this->api->create_tags($tagNames);
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Build tag IDs array.
+        $ids = [];
+        foreach ($result->tags as $tag) {
+            $ids[] = $tag->id;
+        }
+
+        // Delete tags.
+        $result = $this->api->delete_tags($ids);
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+    }
+
+    /**
+     * Test that create_tags() returns failures when attempting
+     * to create blank tags.
+     *
+     * @since   1.1.0
+     *
+     * @return void
+     */
+    public function testCreateTagsBlank()
+    {
+        $result = $this->api->create_tags([
+            '',
+            '',
+        ]);
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that create_tags() throws a ClientException when creating
+     * tags that already exists.
+     *
+     * @since   1.1.0
+     *
+     * @return void
+     */
+    public function testCreateTagsThatExist()
+    {
+        $result = $this->api->create_tags(
+            [
+                $_ENV['CONVERTKIT_API_TAG_NAME'],
+                $_ENV['CONVERTKIT_API_TAG_NAME_2'],
+            ]
+        );
+
+        // Assert existing tags are returned.
+        $this->assertCount(2, $result->tags);
+        $this->assertEquals($result->tags[1]->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
+        $this->assertEquals($result->tags[0]->name, $_ENV['CONVERTKIT_API_TAG_NAME_2']);
+    }
+
+    /**
+     * Test that update_tag_name() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagName()
+    {
+        $result = $this->api->update_tag_name(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+        );
+
+        // Assert existing tag is returned.
+        $this->assertEquals($result->tag->id, (int) $_ENV['CONVERTKIT_API_TAG_ID']);
+        $this->assertEquals($result->tag->name, $_ENV['CONVERTKIT_API_TAG_NAME']);
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithInvalidTagID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_tag_name(
+                tag_id: 12345,
+                name: $_ENV['CONVERTKIT_API_TAG_NAME'],
+            );
+        });
+    }
+
+    /**
+     * Test that update_tag_name() throws a ClientException when a blank
+     * name is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testUpdateTagNameWithBlankName()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_tag_name(
+                tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                name: ''
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscriber_stats() returns the expected data
+     * when using a valid subscriber ID.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStats()
+    {
+        $result = $this->api->get_subscriber_stats(
+            id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+        );
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('stats', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('bounced', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('open_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('click_rate', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_sent', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_opened', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('last_clicked', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_open', get_object_vars($result->subscriber->stats));
+        $this->assertArrayHasKey('sends_since_last_click', get_object_vars($result->subscriber->stats));
+    }
+
+    /**
+     * Test that get_subscriber_stats() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetSubscriberStatsWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscriber_stats(12345);
+        });
+    }
+
+    /**
+     * Test that tag_subscribers() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribers()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+        $this->assertCount(2, $result->subscribers);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * tag ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidTagID()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Tag subscribers.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[0]
+                ],
+                [
+                    'tag_id' => 12345,
+                    'subscriber_id' => $this->subscriber_ids[1]
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that tag_subscribers() returns failures when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testTagSubscribersWithInvalidSubscriberID()
+    {
+        // Tag subscribers that do not exist.
+        $result = $this->api->tag_subscribers(
+            [
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 12345,
+                ],
+                [
+                    'tag_id' => (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                    'subscriber_id' => 67890,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that tag_subscriber_by_email() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriberByEmail()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Tag subscriber by email.
+        $subscriber = $this->api->tag_subscriber_by_email(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            email_address: $emailAddress,
+        );
+        $this->assertArrayHasKey('subscriber', get_object_vars($subscriber));
+        $this->assertArrayHasKey('id', get_object_vars($subscriber->subscriber));
+        $this->assertArrayHasKey('tagged_at', get_object_vars($subscriber->subscriber));
+
+        // Confirm the subscriber is tagged.
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: $subscriber->subscriber->id
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert correct tag was assigned.
+        $this->assertEquals($result->tags[0]->id, $_ENV['CONVERTKIT_API_TAG_ID']);
+    }
+
+    /**
+     * Test that tag_subscriber_by_email() throws a ClientException when an invalid
+     * tag is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriberByEmailWithInvalidTagID()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        $this->assertApiError(function () {
+            return $this->api->tag_subscriber_by_email(
+                tag_id: 12345,
+                email_address: $emailAddress
+            );
+        });
+    }
+
+    /**
+     * Test that tag_subscriber_by_email() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriberByEmailWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->tag_subscriber_by_email(
+                tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that tag_subscriber() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriber()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Tag subscriber by email.
+        $result = $this->api->tag_subscriber(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            subscriber_id: $subscriber->subscriber->id,
+        );
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertArrayHasKey('tagged_at', get_object_vars($result->subscriber));
+
+        // Confirm the subscriber is tagged.
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: $result->subscriber->id
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert correct tag was assigned.
+        $this->assertEquals($result->tags[0]->id, $_ENV['CONVERTKIT_API_TAG_ID']);
+    }
+
+    /**
+     * Test that tag_subscriber() throws a ClientException when an invalid
+     * sequence ID is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriberWithInvalidTagID()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        $this->assertApiError(function () {
+            return $this->api->tag_subscriber(
+                tag_id: 12345,
+                subscriber_id: $subscriber->subscriber->id
+            );
+        });
+    }
+
+    /**
+     * Test that tag_subscriber() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testTagSubscriberWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->tag_subscriber(
+                tag_id: $_ENV['CONVERTKIT_API_TAG_ID'],
+                subscriber_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriber()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Tag subscriber by email.
+        $subscriber = $this->api->tag_subscriber_by_email(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            email_address: $emailAddress,
+        );
+
+        // Remove tag from subscriber.
+        $result = $this->api->remove_tag_from_subscriber(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            subscriber_id: $subscriber->subscriber->id
+        );
+
+        // Confirm that the subscriber no longer has the tag.
+        $result = $this->api->get_subscriber_tags($subscriber->subscriber->id);
+        $this->assertIsArray($result->tags);
+        $this->assertCount(0, $result->tags);
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() throws a ClientException when an invalid
+     * tag ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriberWithInvalidTagID()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Tag subscriber by email.
+        $subscriber = $this->api->tag_subscriber_by_email(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            email_address: $emailAddress,
+        );
+
+        // Remove tag from subscriber.
+        $this->assertApiError(function () {
+            return $this->api->remove_tag_from_subscriber(
+                tag_id: 12345,
+                subscriber_id: $subscriber->subscriber->id
+            );
+        });
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriberWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->remove_tag_from_subscriber(
+                tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+                subscriber_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriberByEmail()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Tag subscriber by email.
+        $subscriber = $this->api->tag_subscriber_by_email(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            email_address: $emailAddress,
+        );
+
+        // Remove tag from subscriber.
+        $result = $this->api->remove_tag_from_subscriber(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            subscriber_id: $subscriber->subscriber->id
+        );
+
+        // Confirm that the subscriber no longer has the tag.
+        $result = $this->api->get_subscriber_tags($subscriber->subscriber->id);
+        $this->assertIsArray($result->tags);
+        $this->assertCount(0, $result->tags);
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() throws a ClientException when an invalid
+     * tag ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriberByEmailWithInvalidTagID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->remove_tag_from_subscriber_by_email(
+                tag_id: 12345,
+                email_address: $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']
+            );
+        });
+    }
+
+    /**
+     * Test that remove_tag_from_subscriber() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testRemoveTagFromSubscriberByEmailWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->remove_tag_from_subscriber_by_email(
+                tag_id: $_ENV['CONVERTKIT_API_TAG_ID'],
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptions()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsSlim()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $broadcast = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $broadcast);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithTotalCount()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and the subscription status
+     * is cancelled.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithCancelledSubscriberState()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            subscriber_state: 'cancelled'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertEquals($result->subscribers[0]->state, 'cancelled');
+    }
+
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and the added_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithTaggedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            tagged_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->tagged_at))
+        );
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and the tagged_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithTaggedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            tagged_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->tagged_at))
+        );
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and the created_after parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithCreatedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            created_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and the created_before parameter
+     * is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithCreatedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            created_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified and pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsPagination()
+    {
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_tag_subscriptions(
+            tag_id: (int) $_ENV['CONVERTKIT_API_TAG_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_tag_subscriptions() returns the expected data
+     * when a valid Tag ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetTagSubscriptionsWithInvalidTagID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_tag_subscriptions(12345);
+        });
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected data.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToForms()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected data
+     * when a referrer URL is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrer()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => 'https://mywebsite.com/bfpromo/',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+
+        // Assert referrer data set for subscribers.
+        foreach ($result->subscribers as $subscriber) {
+             $this->assertEquals(
+                 $subscriber->referrer,
+                 'https://mywebsite.com/bfpromo/'
+             );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected data
+     * when a referrer URL with UTM parameters is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => $subscriber->subscriber->id,
+                    'referrer' => $referrer,
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each subscriber that was created.
+        $this->assertIsArray($result->subscribers);
+
+        // Assert referrer data set for subscribers.
+        foreach ($result->subscribers as $subscriber) {
+            $this->assertEquals(
+                $subscriber->referrer,
+                $referrer
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->source,
+                $referrerUTMParams['utm_source']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->medium,
+                $referrerUTMParams['utm_medium']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->campaign,
+                $referrerUTMParams['utm_campaign']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->term,
+                $referrerUTMParams['utm_term']
+            );
+            $this->assertEquals(
+                $subscriber->referrer_utm_parameters->content,
+                $referrerUTMParams['utm_content']
+            );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected errors
+     * when invalid Form IDs are specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidFormIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+                [
+                    'form_id' => 9999999,
+                    'subscriber_id' => $subscriber->subscriber->id,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+        foreach ($result->failures as $failure) {
+            $this->assertEquals(
+                $failure->errors[0],
+                'Form does not exist'
+            );
+        }
+    }
+
+    /**
+     * Test that add_subscribers_to_forms() returns the expected errors
+     * when invalid Subscriber IDs are specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscribersToFormsWithInvalidSubscriberIDs()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscribers to forms.
+        $result = $this->api->add_subscribers_to_forms(
+            forms_subscribers_ids: [
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+                    'subscriber_id' => 999999,
+                ],
+                [
+                    'form_id' => (int) $_ENV['CONVERTKIT_API_FORM_ID_2'],
+                    'subscriber_id' => 999999,
+                ],
+            ]
+        );
+
+        // Assert failures.
+        $this->assertCount(2, $result->failures);
+        foreach ($result->failures as $failure) {
+            $this->assertEquals(
+                $failure->errors[0],
+                'Subscriber does not exist'
+            );
+        }
+    }
+
+    /**
+     * Test that add_subscriber_to_form_by_email() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmail()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form_by_email(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            email_address: $emailAddress
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form_by_email() returns the expected data
+     * when a referrer is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithReferrer()
+    {
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress,
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form_by_email(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            email_address: $emailAddress,
+            referrer: 'https://mywebsite.com/bfpromo/',
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form_by_email() returns the expected data
+     * when a referrer is specified that includes UTM parameters.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $subscriber = $this->api->create_subscriber(
+            email_address: $emailAddress,
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form_by_email(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            email_address: $emailAddress,
+            referrer: $referrer,
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(
+            get_object_vars($result->subscriber)['email_address'],
+            $emailAddress
+        );
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form_by_email() throws a ClientException when an invalid
+     * form ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithInvalidFormID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_form_by_email(
+                form_id: 12345,
+                email_address: $this->generateEmailAddress()
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_form() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormByEmailWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_form_by_email(
+                form_id: $_ENV['CONVERTKIT_API_FORM_ID'],
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_form() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToForm()
+    {
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        $result = $this->api->add_subscriber_to_form(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_id: $subscriber->subscriber->id
+        );
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+    }
+
+    /**
+     * Test that add_subscriber_to_form() returns the expected data
+     * when a referrer is specified.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithReferrer()
+    {
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_id: $subscriber->subscriber->id,
+            referrer: 'https://mywebsite.com/bfpromo/',
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            'https://mywebsite.com/bfpromo/'
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form() returns the expected data
+     * when a referrer is specified that includes UTM parameters.
+     *
+     * @since   2.1.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithReferrerUTMParams()
+    {
+        // Define referrer.
+        $referrerUTMParams = [
+            'utm_source'    => 'facebook',
+            'utm_medium'    => 'cpc',
+            'utm_campaign'  => 'black_friday',
+            'utm_term'      => 'car_owners',
+            'utm_content'   => 'get_10_off',
+        ];
+        $referrer = 'https://mywebsite.com/bfpromo/?' . http_build_query($referrerUTMParams);
+
+        // Create subscriber.
+        $subscriber = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $subscriber->subscriber->id;
+
+        // Add subscriber to form.
+        $result = $this->api->add_subscriber_to_form(
+            form_id: (int) $_ENV['CONVERTKIT_API_FORM_ID'],
+            subscriber_id: $subscriber->subscriber->id,
+            referrer: $referrer,
+        );
+
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertArrayHasKey('subscriber', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->subscriber));
+        $this->assertEquals(get_object_vars($result->subscriber)['id'], $subscriber->subscriber->id);
+
+        // Assert referrer data set for form subscriber.
+        $this->assertEquals(
+            $result->subscriber->referrer,
+            $referrer
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->source,
+            $referrerUTMParams['utm_source']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->medium,
+            $referrerUTMParams['utm_medium']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->campaign,
+            $referrerUTMParams['utm_campaign']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->term,
+            $referrerUTMParams['utm_term']
+        );
+        $this->assertEquals(
+            $result->subscriber->referrer_utm_parameters->content,
+            $referrerUTMParams['utm_content']
+        );
+    }
+
+    /**
+     * Test that add_subscriber_to_form() throws a ClientException when an invalid
+     * form ID is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithInvalidFormID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_form(
+                form_id: 12345,
+                subscriber_id: $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']
+            );
+        });
+    }
+
+    /**
+     * Test that add_subscriber_to_form() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testAddSubscriberToFormWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->add_subscriber_to_form(
+                form_id: $_ENV['CONVERTKIT_API_FORM_ID'],
+                subscriber_id: 12345
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribers()
+    {
+        $result = $this->api->get_subscribers();
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+     /**
+     * Test that get_subscribers() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithSlimParameter()
+    {
+        $result = $this->api->get_subscribers(
+            slim: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Confirm custom field values are excluded from the data.
+        $subscriber = get_object_vars($result->subscribers[0]);
+        $this->assertArrayNotHasKey('fields', $subscriber);
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithTotalCount()
+    {
+        $result = $this->api->get_subscribers(
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data when
+     * searching by an email address.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersByEmailAddress()
+    {
+        $result = $this->api->get_subscribers(
+            email_address: $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert correct subscriber returned.
+        $this->assertEquals(
+            $result->subscribers[0]->email_address,
+            $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']
+        );
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the subscription status is cancelled.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithCancelledSubscriberState()
+    {
+        $result = $this->api->get_subscribers(
+            subscriber_state: 'cancelled'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertEquals($result->subscribers[0]->state, 'cancelled');
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the created_after parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithCreatedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_subscribers(
+            created_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertGreaterThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the created_before parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithCreatedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_subscribers(
+            created_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Check the correct subscribers were returned.
+        $this->assertLessThanOrEqual(
+            $date->format('Y-m-d'),
+            date('Y-m-d', strtotime($result->subscribers[0]->created_at))
+        );
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the updated_after parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithUpdatedAfterParam()
+    {
+        $date = new \DateTime('2022-01-01');
+        $result = $this->api->get_subscribers(
+            updated_after: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the updated_before parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithUpdatedBeforeParam()
+    {
+        $date = new \DateTime('2024-01-01');
+        $result = $this->api->get_subscribers(
+            updated_before: $date
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the sort_field parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithSortFieldParam()
+    {
+        $result = $this->api->get_subscribers(
+            sort_field: 'id'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert sorting is honored by ID in descending (default) order.
+        $this->assertLessThanOrEqual(
+            $result->subscribers[0]->id,
+            $result->subscribers[1]->id
+        );
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the sort_order parameter is used.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithSortOrderParam()
+    {
+        $result = $this->api->get_subscribers(
+            sort_order: 'asc'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert sorting is honored by ID (default) in ascending order.
+        $this->assertGreaterThanOrEqual(
+            $result->subscribers[0]->id,
+            $result->subscribers[1]->id
+        );
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when the include parameter is used.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithIncludeParam()
+    {
+        $result = $this->api->get_subscribers(
+            include: ['tags']
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert fields are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
+    }
+
+    /**
+     * Test that get_subscribers() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersPagination()
+    {
+        $result = $this->api->get_subscribers(
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_subscribers(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_subscribers(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_subscribers() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscribers(
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscribers() throws a ClientException when an invalid
+     * subscriber state is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithInvalidSubscriberState()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscribers(
+                subscriber_state: 'not-an-valid-state'
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscribers() throws a ClientException when an invalid
+     * sort field is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithInvalidSortFieldParam()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscribers(
+                sort_field: 'not-a-valid-sort-field'
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscribers() throws a ClientException when an invalid
+     * sort order is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithInvalidSortOrderParam()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscribers(
+                sort_order: 'not-a-valid-sort-order'
+            );
+        });
+    }
+
+    /**
+     * Test that get_subscribers() throws a ClientException when an invalid
+     * pagination parameters are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscribersWithInvalidPagination()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscribers(
+                after_cursor: 'not-a-valid-cursor'
+            );
+        });
+    }
+
+    /**
+     * Test that create_subscriber() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriber()
+    {
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+    }
+
+    /**
+     * Test that create_subscriber() returns the expected data
+     * when a first name is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithFirstName()
+    {
+        $firstName = 'FirstName';
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress,
+            first_name: $firstName
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+        $this->assertEquals($result->subscriber->first_name, $firstName);
+    }
+
+    /**
+     * Test that create_subscriber() returns the expected data
+     * when a subscriber state is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithSubscriberState()
+    {
+        $subscriberState = 'cancelled';
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress,
+            subscriber_state: $subscriberState
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+        $this->assertEquals($result->subscriber->state, $subscriberState);
+    }
+
+    /**
+     * Test that create_subscriber() returns the expected data
+     * when custom field data is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithCustomFields()
+    {
+        $lastName = 'LastName';
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress,
+            fields: [
+                'last_name' => $lastName
+            ]
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+        $this->assertEquals($result->subscriber->fields->last_name, $lastName);
+    }
+
+    /**
+     * Test that create_subscriber() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_subscriber(
+                email_address: 'not-an-email-address'
+            );
+        });
+    }
+
+    /**
+     * Test that create_subscriber() throws a ClientException when an invalid
+     * subscriber state is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithInvalidSubscriberState()
+    {
+        $emailAddress = $this->generateEmailAddress();
+        $this->assertApiError(function () use ($emailAddress) {
+            return $this->api->create_subscriber(
+                email_address: $emailAddress,
+                subscriber_state: 'not-a-valid-state'
+            );
+        });
+    }
+
+    /**
+     * Test that create_subscriber() returns the expected warnings
+     * when an invalid custom field is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscriberWithInvalidCustomFields()
+    {
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress,
+            fields: [
+                'not_a_custom_field' => 'value'
+            ]
+        );
+        $this->assertArrayHasKey('warnings', get_object_vars($result));
+    }
+
+    /**
+     * Test that create_subscribers() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribers()
+    {
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Assert subscribers exists with correct data.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->assertEquals($subscriber->email_address, $subscribers[$i]['email_address']);
+        }
+    }
+
+    /**
+     * Test that create_subscribers() throws a ClientException when no data is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithBlankData()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_subscribers([
+                [],
+            ]);
+        });
+    }
+
+    /**
+     * Test that create_subscribers() returns the expected data when invalid email addresses
+     * are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreateSubscribersWithInvalidEmailAddresses()
+    {
+        $subscribers = [
+            [
+                'email_address' => 'not-an-email-address',
+            ],
+            [
+                'email_address' => 'not-an-email-address-again',
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Assert no subscribers were added.
+        $this->assertCount(0, $result->subscribers);
+        $this->assertCount(2, $result->failures);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribers()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when multiple all conditions are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithMultipleConditions()
+    {
+        $result = $this->api->filter_subscribers(
+            [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ],
+                [
+                    'type' => 'clicks',
+                    'count_greater_than' => 1,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                ]
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when a counting mode is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithCountingMode()
+    {
+        $result = $this->api->filter_subscribers(
+            all: [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 10,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2027-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ],
+            counting_mode: 'unique_email'
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when the `include` parameter is specified.
+     *
+     * @since   2.6.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInclude()
+    {
+        $result = $this->api->filter_subscribers(
+            all: [
+                [
+                    'type' => 'opens',
+                    'count_greater_than' => 0,
+                    'count_less_than' => 100,
+                    'after' => new \DateTime('2024-01-01'),
+                    'before' => new \DateTime('2029-01-01'),
+                    'states' => [
+                        'active',
+                    ],
+                ]
+            ],
+            include: [
+                [
+                    'type' => 'tags',
+                ],
+            ]
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert tags are included.
+        $this->assertArrayHasKey('tags', get_object_vars($result->subscribers[0]));
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when no parameters are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithNoParameters()
+    {
+        $result = $this->api->filter_subscribers();
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that filter_subscribers() throws a ServerException
+     * when invalid parameters are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithInvalidParameters()
+    {
+        $this->assertApiError(function () {
+            return $this->api->filter_subscribers(
+                [
+                    [
+                        'foo' => 'bar',
+                    ],
+                    [
+                        'type' => 'not-a-real-type',
+                    ]
+                ]
+            );
+        });
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersWithTotalCount()
+    {
+        $result = $this->api->filter_subscribers(
+            include_total_count: true
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that filter_subscribers() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testFilterSubscribersPagination()
+    {
+        $result = $this->api->filter_subscribers(
+            per_page: 1
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->filter_subscribers(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert subscribers and pagination exist.
+        $this->assertDataExists($result, 'subscribers');
+        $this->assertPaginationExists($result);
+
+        // Assert a single subscriber was returned.
+        $this->assertCount(1, $result->subscribers);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_subscriber_id() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberID()
+    {
+        $subscriber_id = $this->api->get_subscriber_id($_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']);
+        $this->assertIsInt($subscriber_id);
+        $this->assertEquals($subscriber_id, (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+    }
+
+    /**
+     * Test that get_subscriber_id() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberIDWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscriber_id('not-an-email-address');
+        });
+    }
+
+    /**
+     * Test that get_subscriber_id() return false when no subscriber found
+     * matching the given email address.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberIDWithNotSubscribedEmailAddress()
+    {
+        $result = $this->api->get_subscriber_id('not-a-subscriber@test.com');
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test that get_subscriber() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriber()
+    {
+        $result = $this->api->get_subscriber((int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->id, $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+        $this->assertEquals($result->subscriber->email_address, $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']);
+    }
+
+    /**
+     * Test that get_subscriber() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscriber(12345);
+        });
+    }
+
+    /**
+     * Test that update_subscriber() works when no changes are made.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberWithNoChanges()
+    {
+        $result = $this->api->update_subscriber($_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+
+        // Assert subscriber exists with correct data.
+        $this->assertEquals($result->subscriber->id, $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+        $this->assertEquals($result->subscriber->email_address, $_ENV['CONVERTKIT_API_SUBSCRIBER_EMAIL']);
+    }
+
+    /**
+     * Test that update_subscriber() works when updating the subscriber's first name.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberFirstName()
+    {
+        // Add a subscriber.
+        $firstName = 'FirstName';
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber created with no first name.
+        $this->assertNull($result->subscriber->first_name);
+
+        // Get subscriber ID.
+        $subscriberID = $result->subscriber->id;
+
+        // Update subscriber's first name.
+        $result = $this->api->update_subscriber(
+            subscriber_id: $subscriberID,
+            first_name: $firstName
+        );
+
+        // Assert changes were made.
+        $this->assertEquals($result->subscriber->id, $subscriberID);
+        $this->assertEquals($result->subscriber->first_name, $firstName);
+    }
+
+    /**
+     * Test that update_subscriber() works when updating the subscriber's email address.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberEmailAddress()
+    {
+        // Add a subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber created.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+
+        // Get subscriber ID.
+        $subscriberID = $result->subscriber->id;
+
+        // Update subscriber's email address.
+        $newEmail = $this->generateEmailAddress();
+        $result = $this->api->update_subscriber(
+            subscriber_id: $subscriberID,
+            email_address: $newEmail
+        );
+
+        // Assert changes were made.
+        $this->assertEquals($result->subscriber->id, $subscriberID);
+        $this->assertEquals($result->subscriber->email_address, $newEmail);
+    }
+
+    /**
+     * Test that update_subscriber() works when updating the subscriber's custom fields.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFields()
+    {
+        // Add a subscriber.
+        $lastName = 'LastName';
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids[] = $result->subscriber->id;
+
+        // Assert subscriber created.
+        $this->assertEquals($result->subscriber->email_address, $emailAddress);
+
+        // Get subscriber ID.
+        $subscriberID = $result->subscriber->id;
+
+        // Update subscriber's custom fields.
+        $result = $this->api->update_subscriber(
+            subscriber_id: $subscriberID,
+            fields: [
+                'last_name' => $lastName,
+            ]
+        );
+
+        // Assert changes were made.
+        $this->assertEquals($result->subscriber->id, $subscriberID);
+        $this->assertEquals($result->subscriber->fields->last_name, $lastName);
+    }
+
+    /**
+     * Test that update_subscriber() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_subscriber(12345);
+        });
+    }
+
+    /**
+     * Test that unsubscribe_by_email() works with a valid subscriber email address.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUnsubscribeByEmail()
+    {
+        // Add a subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
+
+        // Unsubscribe.
+        $this->assertNull($this->api->unsubscribe_by_email($emailAddress));
+    }
+
+    /**
+     * Test that unsubscribe_by_email() throws a ClientException when an email
+     * address is specified that is not subscribed.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUnsubscribeByEmailWithNotSubscribedEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->unsubscribe_by_email('not-subscribed@kit.com');
+        });
+    }
+
+    /**
+     * Test that unsubscribe_by_email() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUnsubscribeByEmailWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->unsubscribe_by_email('invalid-email');
+        });
+    }
+
+    /**
+     * Test that unsubscribe() works with a valid subscriber ID.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testUnsubscribe()
+    {
+        // Add a subscriber.
+        $emailAddress = $this->generateEmailAddress();
+        $result = $this->api->create_subscriber(
+            email_address: $emailAddress
+        );
+
+        // Wait a moment to ensure subscriber is created.
+        sleep(3);
+
+        // Unsubscribe.
+        $this->assertNull($this->api->unsubscribe($result->subscriber->id));
+    }
+
+    /**
+     * Test that unsubscribe() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testUnsubscribeWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->unsubscribe(12345);
+        });
+    }
+
+    /**
+     * Test that get_subscriber_tags() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberTags()
+    {
+        $result = $this->api->get_subscriber_tags((int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID']);
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_subscriber_tags() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberTagsWithTotalCount()
+    {
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID'],
+            include_total_count: true
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_subscriber_tags() throws a ClientException when an invalid
+     * subscriber ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberTagsWithInvalidSubscriberID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_subscriber_tags(12345);
+        });
+    }
+
+    /**
+     * Test that get_subscriber_tags() returns the expected data
+     * when a valid Subscriber ID is specified and pagination parameters
+     * and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSubscriberTagsPagination()
+    {
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID'],
+            per_page: 1
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert a single tag was returned.
+        $this->assertCount(1, $result->tags);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID'],
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert a single tag was returned.
+        $this->assertCount(1, $result->tags);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_subscriber_tags(
+            subscriber_id: (int) $_ENV['CONVERTKIT_API_SUBSCRIBER_ID'],
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert tags and pagination exist.
+        $this->assertDataExists($result, 'tags');
+        $this->assertPaginationExists($result);
+
+        // Assert a single tag was returned.
+        $this->assertCount(1, $result->tags);
+    }
+
+    /**
+     * Test that get_email_templates() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetEmailTemplates()
+    {
+        $result = $this->api->get_email_templates();
+
+        // Assert email templates and pagination exist.
+        $this->assertDataExists($result, 'email_templates');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_email_templates() returns the expected data
+     * when the total count is included.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetEmailTemplatesWithTotalCount()
+    {
+        $result = $this->api->get_email_templates(
+            include_total_count: true
+        );
+
+        // Assert email templates and pagination exist.
+        $this->assertDataExists($result, 'email_templates');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_email_templates() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetEmailTemplatesPagination()
+    {
+        $result = $this->api->get_email_templates(
+            per_page: 1
+        );
+
+        // Assert email templates and pagination exist.
+        $this->assertDataExists($result, 'email_templates');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email template was returned.
+        $this->assertCount(1, $result->email_templates);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_email_templates(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert email templates and pagination exist.
+        $this->assertDataExists($result, 'email_templates');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email template was returned.
+        $this->assertCount(1, $result->email_templates);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_email_templates(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert email templates and pagination exist.
+        $this->assertDataExists($result, 'email_templates');
+        $this->assertPaginationExists($result);
+
+        // Assert a single email template was returned.
+        $this->assertCount(1, $result->email_templates);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_posts() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPosts()
+    {
+        $result = $this->api->get_posts();
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is not included.
+        $this->assertArrayNotHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the post content is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithIncludeContent()
+    {
+        $result = $this->api->get_posts(
+            include_content: true,
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert content is included.
+        $this->assertArrayHasKey('content', get_object_vars($result->posts[0]));
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsWithTotalCount()
+    {
+        $result = $this->api->get_posts(
+            include_total_count: true
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_posts() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostsPagination()
+    {
+        $result = $this->api->get_posts(
+            per_page: 1
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_posts(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert posts and pagination exist.
+        $this->assertDataExists($result, 'posts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single post was returned.
+        $this->assertCount(1, $result->posts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_post() returns the expected data.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPost()
+    {
+        $result = $this->api->get_post($_ENV['CONVERTKIT_API_POST_ID']);
+        $result = get_object_vars($result->post);
+        $this->assertEquals($result['id'], $_ENV['CONVERTKIT_API_POST_ID']);
+    }
+
+    /**
+     * Test that get_post() throws a ClientException when an invalid
+     * post ID is specified.
+     *
+     * @since   2.5.0
+     *
+     * @return void
+     */
+    public function testGetPostWithInvalidPostID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_post(12345);
+        });
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_after date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentAfter()
+    {
+        $date = new DateTime('now');
+        $date->modify('-4 years');
+        $result = $this->api->get_broadcasts(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(4, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns no broadcasts
+     * when a sent_after date is specified that is after all broadcasts.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentAfterNow()
+    {
+        $date = new DateTime('now');
+        $date->modify('-1 day');
+        $result = $this->api->get_broadcasts(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when a valid sent_before date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithSentBefore()
+    {
+        $date = new DateTime('now');
+        $result = $this->api->get_broadcasts(
+            sent_before: new DateTime('now'),
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when the slim parameter is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsSlim()
+    {
+        $result = $this->api->get_broadcasts(
+            slim: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Confirm content, public_url, email_address, email_template and subscriber_filter are excluded from the data.
+        $broadcast = get_object_vars($result->broadcasts[0]);
+        $this->assertArrayNotHasKey('content', $broadcast);
+        $this->assertArrayNotHasKey('public_url', $broadcast);
+        $this->assertArrayNotHasKey('email_address', $broadcast);
+        $this->assertArrayNotHasKey('email_template', $broadcast);
+        $this->assertArrayNotHasKey('subscriber_filter', $broadcast);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when the completed status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithCompletedStatus()
+    {
+        $result = $this->api->get_broadcasts(
+            status: 'completed'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when the aborted status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsWithAbortedStatus()
+    {
+        $result = $this->api->get_broadcasts(
+            status: 'aborted'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetBroadcastsPagination()
+    {
+        $result = $this->api->get_broadcasts(
+            per_page: 1
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_broadcasts(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_broadcasts(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that create_broadcast(), update_broadcast() and delete_broadcast() works
+     * when specifying valid published_at and send_at values.
+     *
+     * We do all tests in a single function, so we don't end up with unnecessary Broadcasts remaining
+     * on the ConvertKit account when running tests, which might impact
+     * other tests that expect (or do not expect) specific Broadcasts.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateAndUpdateDraftBroadcast()
+    {
+        // Create a broadcast first.
+        $result = $this->api->create_broadcast(
+            subject: 'Test Subject',
+            content: 'Test Content',
+            description: 'Test Broadcast from PHP SDK',
+        );
+        $broadcastID = $result->broadcast->id;
+
+        // Confirm the Broadcast saved.
+        $result = get_object_vars($result->broadcast);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Subject', $result['subject']);
+        $this->assertEquals('Test Content', $result['content']);
+        $this->assertEquals('Test Broadcast from PHP SDK', $result['description']);
+        $this->assertEquals(null, $result['published_at']);
+        $this->assertEquals(null, $result['send_at']);
+
+        // Update the existing broadcast.
+        $result = $this->api->update_broadcast(
+            id: $broadcastID,
+            subject: 'New Test Subject',
+            content: 'New Test Content',
+            description: 'New Test Broadcast from PHP SDK'
+        );
+
+        // Confirm the changes saved.
+        $result = get_object_vars($result->broadcast);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('New Test Subject', $result['subject']);
+        $this->assertEquals('New Test Content', $result['content']);
+        $this->assertEquals('New Test Broadcast from PHP SDK', $result['description']);
+        $this->assertEquals(null, $result['published_at']);
+        $this->assertEquals(null, $result['send_at']);
+
+        // Delete Broadcast.
+        $this->api->delete_broadcast($broadcastID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
+     * Test that create_broadcast() works when specifying valid published_at and send_at values.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreatePublicBroadcastWithValidDates()
+    {
+        // Create DateTime object.
+        $publishedAt = new DateTime('now');
+        $publishedAt->modify('+7 days');
+        $sendAt = new DateTime('now');
+        $sendAt->modify('+14 days');
+
+        // Create broadcast first.
+        $result = $this->api->create_broadcast(
+            subject: 'Test Subject',
+            content: 'Test Content',
+            description: 'Test Broadcast from PHP SDK',
+            public: true,
+            published_at: $publishedAt,
+            send_at: $sendAt
+        );
+        $broadcastID = $result->broadcast->id;
+
+        // Set broadcast_id to ensure broadcast is deleted after test.
+        $this->broadcast_ids[] = $broadcastID;
+
+        // Confirm the Broadcast saved.
+        $result = get_object_vars($result->broadcast);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('Test Subject', $result['subject']);
+        $this->assertEquals('Test Content', $result['content']);
+        $this->assertEquals('Test Broadcast from PHP SDK', $result['description']);
+        $this->assertEquals(
+            $publishedAt->format('Y-m-d') . 'T' . $publishedAt->format('H:i:s') . 'Z',
+            $result['published_at']
+        );
+        $this->assertEquals(
+            $sendAt->format('Y-m-d') . 'T' . $sendAt->format('H:i:s') . 'Z',
+            $result['send_at']
+        );
+    }
+
+    /**
+     * Test that get_broadcast() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetBroadcast()
+    {
+        $result = $this->api->get_broadcast($_ENV['CONVERTKIT_API_BROADCAST_ID']);
+        $result = get_object_vars($result->broadcast);
+        $this->assertEquals($result['id'], $_ENV['CONVERTKIT_API_BROADCAST_ID']);
+    }
+
+    /**
+     * Test that get_broadcast() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetBroadcastWithInvalidBroadcastID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_broadcast(12345);
+        });
+    }
+
+    /**
+     * Test that get_broadcast_stats() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetBroadcastStats()
+    {
+        $result = $this->api->get_broadcast_stats($_ENV['CONVERTKIT_API_BROADCAST_ID']);
+        $result = get_object_vars($result->broadcast);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertArrayHasKey('stats', $result);
+        $this->assertEquals($result['stats']->recipients, 1);
+        $this->assertEquals($result['stats']->open_rate, 0);
+        $this->assertEquals($result['stats']->click_rate, 0);
+        $this->assertEquals($result['stats']->unsubscribes, 0);
+        $this->assertEquals($result['stats']->total_clicks, 0);
+    }
+
+    /**
+     * Test that get_broadcast_stats() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetBroadcastStatsWithInvalidBroadcastID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_broadcast_stats(12345);
+        });
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicks()
+    {
+        // Get broadcast link clicks.
+        $result = $this->api->get_broadcast_link_clicks(
+            $_ENV['CONVERTKIT_API_BROADCAST_ID'],
+            per_page: 1
+        );
+
+        // Assert clicks and pagination exist.
+        $this->assertDataExists($result->broadcast, 'clicks');
+        $this->assertPaginationExists($result);
+
+        // Assert a single click was returned.
+        $this->assertCount(1, $result->broadcast->clicks);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_broadcast_link_clicks() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastLinkClicksWithInvalidBroadcastID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_broadcast_link_clicks(12345);
+        });
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStats()
+    {
+        // Get broadcasts stats.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Store the Broadcast ID to check it's different from the next broadcast.
+        $id = $result->broadcasts[0]->id;
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single broadcast was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID is different from the previous broadcast.
+        $this->assertNotEquals($id, $result->broadcasts[0]->id);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_broadcasts_stats(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->broadcasts);
+
+        // Assert the broadcast ID matches the first broadcast.
+        $this->assertEquals($id, $result->broadcasts[0]->id);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when a valid sent_after date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfter()
+    {
+        $date = new DateTime('now');
+        $date->modify('-4 years');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(4, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns no broadcasts
+     * when a sent_after date is specified that is after all broadcasts.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentAfterNow()
+    {
+        $date = new DateTime('now');
+        $date->modify('-1 day');
+        $result = $this->api->get_broadcasts_stats(
+            sent_after: $date,
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert no broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when a valid sent_before date is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithSentBefore()
+    {
+        $date = new DateTime('now');
+        $result = $this->api->get_broadcasts_stats(
+            sent_before: new DateTime('now'),
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the completed status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithCompletedStatus()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            status: 'completed'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(12, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the aborted status is specified.
+     *
+     * @since   2.5
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithAbortedStatus()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            status: 'aborted'
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert the expected number of broadcasts were returned.
+        $this->assertCount(0, $result->broadcasts);
+    }
+
+    /**
+     * Test that get_broadcasts_stats() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.2.1
+     *
+     * @return void
+     */
+    public function testGetBroadcastsStatsWithTotalCount()
+    {
+        $result = $this->api->get_broadcasts_stats(
+            include_total_count: true
+        );
+
+        // Assert broadcasts and pagination exist.
+        $this->assertDataExists($result, 'broadcasts');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that update_broadcast() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateBroadcastWithInvalidBroadcastID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_broadcast(12345);
+        });
+    }
+
+    /**
+     * Test that delete_broadcast() throws a ClientException when an invalid
+     * broadcast ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testDeleteBroadcastWithInvalidBroadcastID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_broadcast(12345);
+        });
+    }
+
+    /**
+     * Test that get_webhooks() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetWebhooksPagination()
+    {
+        // Create webhooks first.
+        $results = [
+            $this->api->create_webhook(
+                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                event: 'subscriber.subscriber_activate',
+            ),
+            $this->api->create_webhook(
+                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                event: 'subscriber.subscriber_activate',
+            ),
+        ];
+
+        // Set webhook_ids to ensure webhooks are deleted after test.
+        $this->webhook_ids = [
+            $results[0]->webhook->id,
+            $results[1]->webhook->id,
+        ];
+
+        // Get webhooks.
+        $result = $this->api->get_webhooks(
+            per_page: 1
+        );
+
+        // Assert webhooks and pagination exist.
+        $this->assertDataExists($result, 'webhooks');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->webhooks);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_webhooks(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert webhooks and pagination exist.
+        $this->assertDataExists($result, 'webhooks');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->webhooks);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertFalse($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_webhooks(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert webhooks and pagination exist.
+        $this->assertDataExists($result, 'webhooks');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook was returned.
+        $this->assertCount(1, $result->webhooks);
+    }
+
+    /**
+     * Test that create_webhook(), get_webhooks() and delete_webhook() works.
+     *
+     * We do both, so we don't end up with unnecessary webhooks remaining
+     * on the ConvertKit account when running tests.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateGetAndDeleteWebhook()
+    {
+        // Create a webhook first.
+        $result = $this->api->create_webhook(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            event: 'subscriber.subscriber_activate',
+        );
+        $id = $result->webhook->id;
+
+        // Get webhooks.
+        $result = $this->api->get_webhooks();
+
+        // Assert webhooks and pagination exist.
+        $this->assertDataExists($result, 'webhooks');
+        $this->assertPaginationExists($result);
+
+        // Get webhooks including total count.
+        $result = $this->api->get_webhooks(
+            include_total_count: true
+        );
+
+        // Assert webhooks and pagination exist.
+        $this->assertDataExists($result, 'webhooks');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+
+        // Delete the webhook.
+        $result = $this->api->delete_webhook($id);
+    }
+
+    /**
+     * Test that create_webhook() works with an event parameter.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateWebhookWithEventParameter()
+    {
+        // Create a webhook.
+        $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
+        $result = $this->api->create_webhook(
+            url: $url,
+            event: 'custom_field.field_value_updated',
+            parameter: $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']
+        );
+
+        // Confirm webhook created with correct data.
+        $this->assertArrayHasKey('webhook', get_object_vars($result));
+        $this->assertArrayHasKey('id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('account_id', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('event', get_object_vars($result->webhook));
+        $this->assertArrayHasKey('target_url', get_object_vars($result->webhook));
+        $this->assertEquals($result->webhook->target_url, $url);
+        $this->assertEquals($result->webhook->event->name, 'field_value_updated');
+        $this->assertEquals($result->webhook->event->custom_field_id, $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID']);
+
+        // Delete the webhook.
+        $result = $this->api->delete_webhook($result->webhook->id);
+    }
+
+    /**
+     * Test that create_webhook() throws an InvalidArgumentException when an invalid
+     * event is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateWebhookWithInvalidEvent()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_webhook(
+                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                event: 'invalid.event'
+            );
+        });
+    }
+
+    /**
+     * Test that delete_webhook() throws a ClientException when an invalid
+     * ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testDeleteWebhookWithInvalidID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_webhook(12345);
+        });
+    }
+
+    /**
+     * Test that get_custom_fields() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetCustomFields()
+    {
+        $result = $this->api->get_custom_fields();
+
+        // Assert custom fields and pagination exist.
+        $this->assertDataExists($result, 'custom_fields');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_custom_fields() returns the expected data
+     * when the total count is included.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetCustomFieldsWithTotalCount()
+    {
+        $result = $this->api->get_custom_fields(
+            include_total_count: true
+        );
+
+        // Assert custom fields and pagination exist.
+        $this->assertDataExists($result, 'custom_fields');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_custom_fields() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetCustomFieldsPagination()
+    {
+        $result = $this->api->get_custom_fields(
+            per_page: 1
+        );
+
+        // Assert custom fields and pagination exist.
+        $this->assertDataExists($result, 'custom_fields');
+        $this->assertPaginationExists($result);
+
+        // Assert a single custom field was returned.
+        $this->assertCount(1, $result->custom_fields);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_custom_fields(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert custom fields and pagination exist.
+        $this->assertDataExists($result, 'custom_fields');
+        $this->assertPaginationExists($result);
+
+        // Assert a single custom field was returned.
+        $this->assertCount(1, $result->custom_fields);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_custom_fields(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert custom fields and pagination exist.
+        $this->assertDataExists($result, 'custom_fields');
+        $this->assertPaginationExists($result);
+
+        // Assert a single custom field was returned.
+        $this->assertCount(1, $result->custom_fields);
+    }
+
+    /**
+     * Test that create_custom_field() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateCustomField()
+    {
+        $label = 'Custom Field ' . mt_rand();
+        $result = $this->api->create_custom_field($label);
+
+        // Set custom_field_ids to ensure custom fields are deleted after test.
+        $this->custom_field_ids[] = $result->custom_field->id;
+
+        $result = get_object_vars($result->custom_field);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('key', $result);
+        $this->assertArrayHasKey('label', $result);
+        $this->assertEquals($result['label'], $label);
+    }
+
+    /**
+     * Test that create_custom_field() throws a ClientException when a blank
+     * label is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateCustomFieldWithBlankLabel()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_custom_field('');
+        });
+    }
+
+    /**
+     * Test that create_custom_fields() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreateCustomFields()
+    {
+        $labels = [
+            'Custom Field ' . mt_rand(),
+            'Custom Field ' . mt_rand(),
+        ];
+        $result = $this->api->create_custom_fields($labels);
+
+        // Set custom_field_ids to ensure custom fields are deleted after test.
+        foreach ($result->custom_fields as $index => $customField) {
+            $this->custom_field_ids[] = $customField->id;
+        }
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each custom field that was created.
+        $this->assertIsArray($result->custom_fields);
+    }
+
+    /**
+     * Test that update_subscriber_custom_field_values() works.
+     *
+     * @since   2.4.0
+     *
+     * @return void
+     */
+    public function testUpdateSubscriberCustomFieldValues()
+    {
+        // Create subscribers.
+        $subscribers = [
+            [
+                'email_address' => str_replace('@kit.com', '-1@kit.com', $this->generateEmailAddress()),
+            ],
+            [
+                'email_address' => str_replace('@kit.com', '-2@kit.com', $this->generateEmailAddress()),
+            ],
+        ];
+        $result = $this->api->create_subscribers($subscribers);
+
+        // Set subscriber_id to ensure subscriber is unsubscribed after test.
+        foreach ($result->subscribers as $i => $subscriber) {
+            $this->subscriber_ids[] = $subscriber->id;
+        }
+
+        // Bulk update subscriber custom field values.
+        $result = $this->api->update_subscriber_custom_field_values(
+            [
+                [
+                    'subscriber_id' => $this->subscriber_ids[0],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '100',
+                ],
+                [
+                    'subscriber_id' => $this->subscriber_ids[1],
+                    'subscriber_custom_field_id' => (int) $_ENV['CONVERTKIT_API_CUSTOM_FIELD_ID'],
+                    'value' => '200',
+                ],
+            ]
+        );
+
+        // Assert no failures.
+        $this->assertCount(0, $result->failures);
+
+        // Confirm result is an array comprising of each custom field value that was updated.
+        $this->assertIsArray($result->custom_field_values);
+        $this->assertCount(2, $result->custom_field_values);
+    }
+
+    /**
+     * Test that update_custom_field() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateCustomField()
+    {
+        // Create custom field.
+        $label = 'Custom Field ' . mt_rand();
+        $result = $this->api->create_custom_field($label);
+        $id = $result->custom_field->id;
+
+        // Set custom_field_ids to ensure custom fields are deleted after test.
+        $this->custom_field_ids[] = $result->custom_field->id;
+
+        // Change label.
+        $newLabel = 'Custom Field ' . mt_rand();
+        $this->api->update_custom_field($id, $newLabel);
+
+        // Confirm label changed.
+        $customFields = $this->api->get_custom_fields();
+        foreach ($customFields->custom_fields as $customField) {
+            if ($customField->id === $id) {
+                $this->assertEquals($customField->label, $newLabel);
+            }
+        }
+    }
+
+    /**
+     * Test that update_custom_field() throws a ClientException when an
+     * invalid custom field ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testUpdateCustomFieldWithInvalidID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->update_custom_field(12345, 'Something');
+        });
+    }
+
+    /**
+     * Test that delete_custom_field() works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testDeleteCustomField()
+    {
+        // Create custom field.
+        $label = 'Custom Field ' . mt_rand();
+        $result = $this->api->create_custom_field($label);
+        $id = $result->custom_field->id;
+
+        // Delete custom field as tests passed.
+        $this->api->delete_custom_field($id);
+
+        // Confirm custom field no longer exists.
+        $customFields = $this->api->get_custom_fields();
+        foreach ($customFields->custom_fields as $customField) {
+            $this->assertNotEquals($customField->id, $id);
+        }
+    }
+
+    /**
+     * Test that delete_custom_field() throws a ClientException when an
+     * invalid custom field ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testDeleteCustomFieldWithInvalidID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->delete_custom_field(12345);
+        });
+    }
+
+    /**
+     * Test that get_purchases() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetPurchases()
+    {
+        $result = $this->api->get_purchases();
+
+        // Assert purchases and pagination exist.
+        $this->assertDataExists($result, 'purchases');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_purchases() returns the expected data
+     * when the total count is included.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesWithTotalCount()
+    {
+        $result = $this->api->get_purchases(
+            include_total_count: true
+        );
+
+        // Assert purchases and pagination exist.
+        $this->assertDataExists($result, 'purchases');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_purchases() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetPurchasesPagination()
+    {
+        $result = $this->api->get_purchases(
+            per_page: 1
+        );
+
+        // Assert purchases and pagination exist.
+        $this->assertDataExists($result, 'purchases');
+        $this->assertPaginationExists($result);
+
+        // Assert a single purchase was returned.
+        $this->assertCount(1, $result->purchases);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_purchases(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert purchases and pagination exist.
+        $this->assertDataExists($result, 'purchases');
+        $this->assertPaginationExists($result);
+
+        // Assert a single purchase was returned.
+        $this->assertCount(1, $result->purchases);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_purchases(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert purchases and pagination exist.
+        $this->assertDataExists($result, 'purchases');
+        $this->assertPaginationExists($result);
+
+        // Assert a single purchase was returned.
+        $this->assertCount(1, $result->purchases);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that get_purchases() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetPurchase()
+    {
+        // Get ID of first purchase.
+        $purchases = $this->api->get_purchases(
+            per_page: 1
+        );
+        $id = $purchases->purchases[0]->id;
+
+        // Get purchase.
+        $result = $this->api->get_purchase($id);
+        $this->assertInstanceOf('stdClass', $result);
+        $this->assertEquals($purchases->purchases[0]->id, $id);
+    }
+
+    /**
+     * Test that get_purchases() throws a ClientException when an invalid
+     * purchase ID is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetPurchaseWithInvalidID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_purchase(12345);
+        });
+    }
+
+    /**
+     * Test that create_purchase() returns the expected data.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testCreatePurchase()
+    {
+        $purchase = $this->api->create_purchase(
+            // Required fields.
+            email_address: $this->generateEmailAddress(),
+            transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+            currency: 'usd',
+            products: [
+                [
+                    'name' => 'Floppy Disk (512k)',
+                    'sku' => '7890-ijkl',
+                    'pid' => 9999,
+                    'lid' => 7777,
+                    'quantity' => 2,
+                    'unit_price' => 5.00,
+                ],
+                [
+                    'name' => 'Telephone Cord (data)',
+                    'sku' => 'mnop-1234',
+                    'pid' => 5555,
+                    'lid' => 7778,
+                    'quantity' => 1,
+                    'unit_price' => 10.00,
+                ],
+            ],
+            // Optional fields.
+            first_name: 'Tim',
+            status: 'paid',
+            subtotal: 20.00,
+            tax: 2.00,
+            shipping: 2.00,
+            discount: 3.00,
+            total: 21.00,
+            transaction_time: new DateTime('now'),
+        );
+
+        $this->assertInstanceOf('stdClass', $purchase);
+        $this->assertArrayHasKey('transaction_id', get_object_vars($purchase->purchase));
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when an invalid
+     * email address is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithInvalidEmailAddress()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_purchase(
+                email_address: 'not-an-email-address',
+                transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+                currency: 'usd',
+                products: [
+                    [
+                        'name' => 'Floppy Disk (512k)',
+                        'sku' => '7890-ijkl',
+                        'pid' => 9999,
+                        'lid' => 7777,
+                        'quantity' => 2,
+                        'unit_price' => 5.00,
+                    ],
+                ],
+            );
+        });
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when a blank
+     * transaction ID is specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithBlankTransactionID()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_purchase(
+                email_address: $this->generateEmailAddress(),
+                transaction_id: '',
+                currency: 'usd',
+                products: [
+                    [
+                        'name' => 'Floppy Disk (512k)',
+                        'sku' => '7890-ijkl',
+                        'pid' => 9999,
+                        'lid' => 7777,
+                        'quantity' => 2,
+                        'unit_price' => 5.00,
+                    ],
+                ],
+            );
+        });
+    }
+
+    /**
+     * Test that create_purchase() throws a ClientException when no products
+     * are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testCreatePurchaseWithNoProducts()
+    {
+        $this->assertApiError(function () {
+            return $this->api->create_purchase(
+                email_address: $this->generateEmailAddress(),
+                transaction_id: str_shuffle('wfervdrtgsdewrafvwefds'),
+                currency: 'usd',
+                products: [],
+            );
+        });
+    }
+
+    /**
+     * Test that get_segments() returns the expected data.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSegments()
+    {
+        $result = $this->api->get_segments();
+
+        // Assert segments and pagination exist.
+        $this->assertDataExists($result, 'segments');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_segments() returns the expected data
+     * when the total count is included.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetSegmentsWithTotalCount()
+    {
+        $result = $this->api->get_segments(
+            include_total_count: true
+        );
+
+        // Assert segments and pagination exist.
+        $this->assertDataExists($result, 'segments');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_segments() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.0.0
+     *
+     * @return void
+     */
+    public function testGetSegmentsPagination()
+    {
+        $result = $this->api->get_segments(
+            per_page: 1
+        );
+
+        // Assert segments and pagination exist.
+        $this->assertDataExists($result, 'segments');
+        $this->assertPaginationExists($result);
+
+        // Assert a single segment was returned.
+        $this->assertCount(1, $result->segments);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_segments(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert segments and pagination exist.
+        $this->assertDataExists($result, 'segments');
+        $this->assertPaginationExists($result);
+
+        // Assert a single segment was returned.
+        $this->assertCount(1, $result->segments);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_segments(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert segments and pagination exist.
+        $this->assertDataExists($result, 'segments');
+        $this->assertPaginationExists($result);
+
+        // Assert a single segment was returned.
+        $this->assertCount(1, $result->segments);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+    }
+
+    /**
+     * Test that fetching a legacy form's markup works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetResourceLegacyForm()
+    {
+        $markup = $this->api->get_resource($_ENV['CONVERTKIT_API_LEGACY_FORM_URL']);
+
+        // Assert that the markup is HTML.
+        $this->assertTrue($this->isHtml($markup));
+
+        // Confirm that encoding works correctly.
+        $this->assertStringContainsString('Vantar þinn ungling sjálfstraust í stærðfræði?', $markup);
+    }
+
+    /**
+     * Test that fetching a landing page's markup works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetResourceLandingPage()
+    {
+        $markup = $this->api->get_resource($_ENV['CONVERTKIT_API_LANDING_PAGE_URL']);
+
+        // Assert that the markup is HTML.
+        $this->assertTrue($this->isHtml($markup));
+
+        // Confirm that encoding works correctly.
+        $this->assertStringContainsString('Vantar þinn ungling sjálfstraust í stærðfræði?', $markup);
+    }
+
+    /**
+     * Test that fetching a legacy landing page's markup works.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetResourceLegacyLandingPage()
+    {
+        $markup = $this->api->get_resource($_ENV['CONVERTKIT_API_LEGACY_LANDING_PAGE_URL']);
+
+        // Assert that the markup is HTML.
+        $this->assertTrue($this->isHtml($markup));
+
+        // Confirm that encoding works correctly.
+        $this->assertStringContainsString('Legacy Landing Page', $markup);
+    }
+
+    /**
+     * Test that get_resource() throws an InvalidArgumentException when an invalid
+     * URL is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetResourceInvalidURL()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_resource('not-a-url');
+        });
+    }
+
+    /**
+     * Test that get_resource() throws a ClientException when an inaccessible
+     * URL is specified.
+     *
+     * @since   1.0.0
+     *
+     * @return void
+     */
+    public function testGetResourceInaccessibleURL()
+    {
+        $this->assertApiError(function () {
+            return $this->api->get_resource('https://kit.com/a/url/that/does/not/exist');
+        });
+    }
+
+    /**
+     * Generates a unique email address for use in a test, comprising of a prefix,
+     * date + time and PHP version number.
+     *
+     * This ensures that if tests are run in parallel, the same email address
+     * isn't used for two tests across parallel testing runs.
+     *
+     * @since   1.0.0
+     *
+     * @param   string $domain     Domain (default: kit.com).
+     *
+     * @return  string
+     */
+    public function generateEmailAddress($domain = 'kit.com')
+    {
+        return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
+    }
+
+    /**
+     * Checks if string is html.
+     *
+     * @since   1.0.0
+     *
+     * @param   string $string Possible HTML.
+     * @return  bool
+     */
+    public function isHtml($string)
+    {
+        return preg_match("/<[^<]+>/", $string, $m) != 0;
+    }
+
+    /**
+     * Helper method to assert the given key exists as an array in the API response.
+     *
+     * @since   2.0.0
+     *
+     * @param   object $result API Result.
+     * @param   string $key    Key.
+     */
+    public function assertDataExists($result, $key)
+    {
+        $result = get_object_vars($result);
+        $this->assertArrayHasKey($key, $result);
+        $this->assertIsArray($result[$key]);
+    }
+
+    /**
+     * Helper method to assert pagination object exists in response.
+     *
+     * @since   2.0.0
+     *
+     * @param   object $result API Result.
+     */
+    public function assertPaginationExists($result)
+    {
+        $result = get_object_vars($result);
+        $this->assertArrayHasKey('pagination', $result);
+        $pagination = get_object_vars($result['pagination']);
+        $this->assertArrayHasKey('has_previous_page', $pagination);
+        $this->assertArrayHasKey('has_next_page', $pagination);
+        $this->assertArrayHasKey('start_cursor', $pagination);
+        $this->assertArrayHasKey('end_cursor', $pagination);
+        $this->assertArrayHasKey('per_page', $pagination);
+    }
+}
