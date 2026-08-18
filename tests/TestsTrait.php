@@ -6161,12 +6161,15 @@ trait TestsTrait
      */
     public function testCreateWebhookWithInvalidEvent()
     {
-        $this->assertApiError(function () {
-            return $this->api->create_webhook(
-                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
-                event: 'invalid.event'
-            );
-        });
+        $this->assertApiError(
+            function () {
+                return $this->api->create_webhook(
+                    url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                    event: 'invalid.event'
+                );
+            },
+            \InvalidArgumentException::class
+        );
     }
 
     /**
@@ -6577,7 +6580,7 @@ trait TestsTrait
     }
 
     /**
-     * Test that get_purchases() returns the expected data.
+     * Test that get_purchase() returns the expected data.
      *
      * @since   1.0.0
      *
@@ -6863,7 +6866,7 @@ trait TestsTrait
      */
     public function testGetResourceLandingPage()
     {
-        $markup = $this->api->get_resource($_ENV['CONVERTKIT_API_LANDING_PAGE_URL']);
+        $markup = $this->api->get_resource($_ENV['CONVERTKIT_API_LANDING_PAGE_CHARACTER_ENCODING_URL']);
 
         // Assert that the markup is HTML.
         $this->assertTrue($this->isHtml($markup));
@@ -6900,9 +6903,12 @@ trait TestsTrait
      */
     public function testGetResourceInvalidURL()
     {
-        $this->assertApiError(function () {
-            return $this->api->get_resource('not-a-url');
-        });
+        $this->assertApiError(
+            function () {
+                return $this->api->get_resource('not-a-url');
+            },
+            \InvalidArgumentException::class
+        );
     }
 
     /**
@@ -6954,14 +6960,18 @@ trait TestsTrait
     /**
      * Helper method to assert the given key exists as an array in the API response.
      *
+     * Accepts either a stdClass object (PHP SDK, Guzzle-decoded) or an
+     * associative array (WP Libs, wp_remote_retrieve_body -> json_decode true),
+     * so the same trait file works verbatim in both repos.
+     *
      * @since   2.0.0
      *
-     * @param   object $result API Result.
-     * @param   string $key    Key.
+     * @param   object|array<string, mixed> $result API Result.
+     * @param   string                      $key    Key.
      */
     public function assertDataExists($result, $key)
     {
-        $result = get_object_vars($result);
+        $result = is_object($result) ? get_object_vars($result) : $result;
         $this->assertArrayHasKey($key, $result);
         $this->assertIsArray($result[$key]);
     }
@@ -6969,15 +6979,18 @@ trait TestsTrait
     /**
      * Helper method to assert pagination object exists in response.
      *
+     * Accepts either a stdClass object (PHP SDK) or an associative array
+     * (WP Libs), so the same trait file works verbatim in both repos.
+     *
      * @since   2.0.0
      *
-     * @param   object $result API Result.
+     * @param   object|array<string, mixed> $result API Result.
      */
     public function assertPaginationExists($result)
     {
-        $result = get_object_vars($result);
+        $result     = is_object($result) ? get_object_vars($result) : $result;
         $this->assertArrayHasKey('pagination', $result);
-        $pagination = get_object_vars($result['pagination']);
+        $pagination = is_object($result['pagination']) ? get_object_vars($result['pagination']) : $result['pagination'];
         $this->assertArrayHasKey('has_previous_page', $pagination);
         $this->assertArrayHasKey('has_next_page', $pagination);
         $this->assertArrayHasKey('start_cursor', $pagination);
