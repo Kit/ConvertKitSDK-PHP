@@ -14,8 +14,11 @@ use ConvertKit_API\ConvertKit_API;
 
 /**
  * ConvertKit API class tests.
+ *
+ * Extended by ConvertKitAPIKeyTest and ConvertKitAPIOAuthTest, which define
+ * the authentication method to use when running these tests.
  */
-class ConvertKitAPITest extends TestCase
+abstract class ConvertKitAPITest extends TestCase
 {
     use TestsTrait;
 
@@ -102,18 +105,29 @@ class ConvertKitAPITest extends TestCase
     }
 
     /**
-     * Assert that the given callable throws a ClientException, ServerException, or InvalidArgumentException.
+     * Assert that the given callable throws an exception.
+     *
+     * Any Throwable is accepted by default, as the API may return a ClientException
+     * or a ServerException depending on the error. Where the SDK validates arguments
+     * before performing an API request, specify $expected, to assert that the SDK's
+     * validation produced the error, and not the API.
      *
      * @since   2.7.0
      *
-     * @param   callable $fn Callable that should fail.
+     * @param   callable    $fn       Callable that should fail.
+     * @param   string|null $expected Expected exception class name.
      * @return  void
      */
-    protected function assertApiError(callable $fn): void
+    protected function assertApiError(callable $fn, string|null $expected = null): void
     {
         try {
             $fn();
         } catch (\Throwable $e) {
+            if (!is_null($expected)) {
+                $this->assertInstanceOf($expected, $e);
+                return;
+            }
+
             $this->assertTrue(true, 'Callable threw an exception as expected.');
             return;
         }
