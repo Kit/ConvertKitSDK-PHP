@@ -2682,6 +2682,11 @@ trait ConvertKit_API_Traits
                 continue;
             }
 
+            // Skip if the attribute's value is an anchor.
+            if (strpos($element->getAttribute($attribute), '#') !== false) {
+                continue;
+            }
+
             // Remove element if it's rocket-loader.min.js. Including it prevents landing page redirects from working.
             if (strpos($element->getAttribute($attribute), 'rocket-loader.min.js') !== false) {
                 if ($element->parentNode instanceof \DOMNode) {

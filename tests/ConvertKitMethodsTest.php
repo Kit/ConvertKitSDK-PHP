@@ -47,6 +47,7 @@ class ConvertKitMethodsTest extends TestCase
             </head>
             <body>
                 <a href="/test">Test</a>
+                <a href="#anchor">Anchor</a>
                 <img src="/test.jpg" />
                 <script type="text/javascript" src="/test.js"></script>
                 <form action="/test">Test</form>
@@ -110,6 +111,12 @@ class ConvertKitMethodsTest extends TestCase
         );
         $this->assertStringContainsString(
             '<form action="' . $url_scheme_host_only . '/test">Test</form>',
+            $output
+        );
+
+        // Assert string contains expected HTML elements that should not be modified.
+        $this->assertStringContainsString(
+            '<a href="#anchor">Anchor</a>',
             $output
         );
     }
