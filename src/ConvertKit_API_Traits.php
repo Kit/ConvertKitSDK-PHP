@@ -1725,6 +1725,7 @@ trait ConvertKit_API_Traits
      * Return false if subscriber not found.
      *
      * @param string $email_address Email Address.
+     * @param string $status        Subscriber status (active|bounced|cancelled|complained|inactive|all).
      *
      * @throws \InvalidArgumentException If the email address is not a valid email format.
      *
@@ -1732,11 +1733,14 @@ trait ConvertKit_API_Traits
      *
      * @return false|integer
      */
-    public function get_subscriber_id(string $email_address)
+    public function get_subscriber_id(string $email_address, string $status = 'active')
     {
         $subscribers = $this->get(
             'subscribers',
-            ['email_address' => $email_address]
+            [
+                'email_address' => $email_address,
+                'status'        => $status,
+            ]
         );
 
         if (!$subscribers instanceof \stdClass) {
@@ -1820,17 +1824,25 @@ trait ConvertKit_API_Traits
      *
      * @param string $email_address Email Address.
      *
+     * @throws \InvalidArgumentException If no subscriber exists with the given email address.
+     *
      * @see https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber
      *
      * @return mixed|object
      */
     public function unsubscribe_by_email(string $email_address)
     {
+        $subscriber_id = $this->get_subscriber_id($email_address);
+
+        // Bail if no subscriber found, otherwise a malformed endpoint is requested.
+        if (!is_int($subscriber_id)) {
+            throw new \InvalidArgumentException(
+                sprintf('No subscriber found with the email address %s', $email_address)
+            );
+        }
+
         return $this->post(
-            sprintf(
-                'subscribers/%s/unsubscribe',
-                $this->get_subscriber_id($email_address)
-            )
+            sprintf('subscribers/%s/unsubscribe', $subscriber_id)
         );
     }
 
