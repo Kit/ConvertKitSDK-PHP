@@ -4925,8 +4925,8 @@ trait TestsTrait
             email_address: $emailAddress
         );
 
-        // Wait a moment to ensure subscriber is created.
-        sleep(3);
+        // Wait until the subscriber can be found by their email address.
+        $this->waitForSubscriber($emailAddress);
 
         // Unsubscribe.
         $this->assertNull($this->api->unsubscribe_by_email($emailAddress));
@@ -6942,6 +6942,67 @@ trait TestsTrait
     public function generateEmailAddress($domain = 'kit.com')
     {
         return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
+    }
+
+    /**
+     * Repeatedly invokes the given callback until it returns a truthy value, or the
+     * maximum number of attempts is reached.
+     *
+     * Use this to wrap API checks that can be flaky due to eventual consistency at Kit's
+     * end. List endpoints typically reflect a write within ~30 seconds, and can take up
+     * to 5 minutes, so reading back immediately after a write is not reliable.
+     *
+     * @since   2.7.0
+     *
+     * @see     https://developers.kit.com/api-reference/eventual-consistency
+     *
+     * @param   callable $callback Callback to invoke. Should return the value to use, or
+     *                             false / null when the check has not yet succeeded.
+     * @param   integer  $attempts Maximum number of attempts.
+     * @param   integer  $delay    Seconds to wait between attempts.
+     * @return  mixed              Value returned by the callback, or false if all attempts are exhausted.
+     */
+    public function retryUntil(callable $callback, $attempts = 20, $delay = 5)
+    {
+        for ($i = 0; $i < $attempts; $i++) {
+            $result = $callback();
+
+            if ($result) {
+                return $result;
+            }
+
+            // Don't sleep after the final attempt.
+            if ($i < ($attempts - 1)) {
+                sleep($delay);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Waits for the given email address to be queryable by get_subscriber_id(), returning
+     * the Subscriber ID, and failing the test if it never becomes queryable.
+     *
+     * @since   2.7.0
+     *
+     * @param   string $emailAddress Email Address.
+     * @return  integer              Subscriber ID.
+     */
+    public function waitForSubscriber($emailAddress)
+    {
+        $subscriberID = $this->retryUntil(
+            function () use ($emailAddress) {
+                return $this->api->get_subscriber_id($emailAddress);
+            }
+        );
+
+        $this->assertNotFalse(
+            $subscriberID,
+            sprintf('Subscriber %s was not returned by the API in time.', $emailAddress)
+        );
+
+        return $subscriberID;
     }
 
     /**
