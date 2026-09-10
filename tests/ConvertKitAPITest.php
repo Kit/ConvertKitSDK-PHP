@@ -75,6 +75,15 @@ abstract class ConvertKitAPITest extends TestCase
     protected $broadcast_ids = [];
 
     /**
+     * Webhook Endpoint IDs to delete on teardown of a test.
+     *
+     * @since   2.8.0
+     *
+     * @var     array<int, int>
+     */
+    protected $webhook_endpoint_ids = [];
+
+    /**
      * Cleanup data from the ConvertKit account on a test pass/fail, such as unsubscribing, deleting custom fields etc
      *
      * @since   2.0.0
@@ -101,6 +110,11 @@ abstract class ConvertKitAPITest extends TestCase
         // Delete any Broadcasts.
         foreach ($this->broadcast_ids as $id) {
             $this->api->delete_broadcast($id);
+        }
+
+        // Delete any Webhook Endpoints.
+        foreach ($this->webhook_endpoint_ids as $id) {
+            $this->api->delete_webhook_endpoint($id);
         }
     }
 
