@@ -2800,6 +2800,21 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * Performs a PATCH request to the API.
+     *
+     * @param string                                                                                     $endpoint API Endpoint.
+     * @param array<string, bool|integer|float|string|null|array<int|string, bool|integer|float|string>> $args     Request arguments.
+     *
+     * @since 2.8.0
+     *
+     * @return false|mixed
+     */
+    public function patch(string $endpoint, array $args = [])
+    {
+        return $this->request($endpoint, 'PATCH', $args);
+    }
+
+    /**
      * Performs a DELETE request to the API.
      *
      * @param string                                                                                                                  $endpoint API Endpoint.
