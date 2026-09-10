@@ -6993,7 +6993,10 @@ trait TestsTrait
     {
         $subscriberID = $this->retryUntil(
             function () use ($emailAddress) {
-                return $this->api->get_subscriber_id($emailAddress);
+                $subscriberID = $this->api->get_subscriber_id($emailAddress);
+
+                // WP Libraries returns a WP_Error on failure; keep retrying unless we have an ID.
+                return is_numeric($subscriberID) ? (int) $subscriberID : false;
             }
         );
 
