@@ -6188,6 +6188,750 @@ trait TestsTrait
     }
 
     /**
+     * Test that get_webhook_endpoints() returns the expected data.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpoints()
+    {
+        // Create a webhook endpoint first, so at least one exists.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $result->webhook_endpoint->id ];
+
+        // Get webhook endpoints.
+        $result = $this->api->get_webhook_endpoints();
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_webhook_endpoints() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointsWithTotalCount()
+    {
+        // Create a webhook endpoint first, so at least one exists.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $result->webhook_endpoint->id ];
+
+        // Get webhook endpoints.
+        $result = $this->api->get_webhook_endpoints(
+            include_total_count: true
+        );
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_webhook_endpoints() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointsPagination()
+    {
+        // Create webhook endpoints first.
+        $results = [
+            $this->api->create_webhook_endpoint(
+                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                events: ['subscriber.created']
+            ),
+            $this->api->create_webhook_endpoint(
+                url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+                events: ['subscriber.created']
+            ),
+        ];
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [
+            $results[0]->webhook_endpoint->id,
+            $results[1]->webhook_endpoint->id,
+        ];
+
+        // Get webhook endpoints.
+        $result = $this->api->get_webhook_endpoints(
+            per_page: 1
+        );
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook endpoint was returned.
+        $this->assertCount(1, $result->webhook_endpoints);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_webhook_endpoints(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook endpoint was returned.
+        $this->assertCount(1, $result->webhook_endpoints);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_webhook_endpoints(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+
+        // Assert a single webhook endpoint was returned.
+        $this->assertCount(1, $result->webhook_endpoints);
+    }
+
+    /**
+     * Test that get_webhook_endpoints() returns the expected data
+     * when a status is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointsWithStatus()
+    {
+        // Create a webhook endpoint first, which will be active.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $result->webhook_endpoint->id ];
+
+        // Get active webhook endpoints.
+        $result = $this->api->get_webhook_endpoints(
+            status: 'active'
+        );
+
+        // Assert webhook endpoints and pagination exist.
+        $this->assertDataExists($result, 'webhook_endpoints');
+        $this->assertPaginationExists($result);
+
+        // Assert only active webhook endpoints were returned.
+        foreach ($result->webhook_endpoints as $webhook_endpoint) {
+            $this->assertEquals('active', $webhook_endpoint->status);
+        }
+    }
+
+    /**
+     * Test that create_webhook_endpoint(), get_webhook_endpoint() and
+     * delete_webhook_endpoint() return the expected data.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testCreateGetAndDeleteWebhookEndpoint()
+    {
+        // Create a webhook endpoint.
+        $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
+        $result = $this->api->create_webhook_endpoint(
+            url: $url,
+            events: ['subscriber.created']
+        );
+
+        // Confirm the webhook endpoint created with the correct data.
+        $this->assertArrayHasKey('webhook_endpoint', get_object_vars($result));
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertArrayHasKey('id', $webhook_endpoint);
+        $this->assertArrayHasKey('status', $webhook_endpoint);
+        $this->assertEquals($url, $webhook_endpoint['url']);
+        $this->assertEquals(['subscriber.created'], $webhook_endpoint['events']);
+
+        // Confirm the signing secret is returned when creating the webhook endpoint.
+        $this->assertArrayHasKey('secret', $webhook_endpoint);
+        $this->assertStringStartsWith('whsec_', $webhook_endpoint['secret']);
+
+        $id = $result->webhook_endpoint->id;
+
+        // Get the webhook endpoint.
+        $result = $this->api->get_webhook_endpoint($id);
+
+        // Confirm the expected webhook endpoint was returned.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertEquals($id, $webhook_endpoint['id']);
+        $this->assertEquals($url, $webhook_endpoint['url']);
+
+        // Confirm the signing secret is never returned when getting a webhook endpoint.
+        $this->assertArrayNotHasKey('secret', $webhook_endpoint);
+
+        // Delete the webhook endpoint.
+        $result = $this->api->delete_webhook_endpoint($id);
+
+        // Confirm the webhook endpoint no longer exists.
+        $this->assertApiError(
+            function () use ($id) {
+                return $this->api->get_webhook_endpoint($id);
+            }
+        );
+    }
+
+    /**
+     * Test that create_webhook_endpoint() returns the expected data
+     * when a name and description are specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testCreateWebhookEndpointWithNameAndDescription()
+    {
+        // Create a webhook endpoint.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created'],
+            name: 'Test Webhook Endpoint',
+            description: 'Test Webhook Endpoint Description'
+        );
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $result->webhook_endpoint->id ];
+
+        // Confirm the webhook endpoint created with the correct data.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertEquals('Test Webhook Endpoint', $webhook_endpoint['name']);
+        $this->assertEquals('Test Webhook Endpoint Description', $webhook_endpoint['description']);
+    }
+
+    /**
+     * Test that create_webhook_endpoint() returns the expected data
+     * when multiple events are specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testCreateWebhookEndpointWithMultipleEvents()
+    {
+        // Create a webhook endpoint.
+        $events = [
+            'subscriber.created',
+            'subscriber.unsubscribed',
+            'tag.created',
+        ];
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: $events
+        );
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $result->webhook_endpoint->id ];
+
+        // Confirm the webhook endpoint subscribed to all of the specified events.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertCount(count($events), $webhook_endpoint['events']);
+        foreach ($events as $event) {
+            $this->assertContains($event, $webhook_endpoint['events']);
+        }
+    }
+
+    /**
+     * Test that create_webhook_endpoint() throws a ClientException when a URL
+     * that is not publicly reachable is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testCreateWebhookEndpointWithInvalidURL()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->create_webhook_endpoint(
+                    url: 'http://127.0.0.1/webhook',
+                    events: ['subscriber.created']
+                );
+            }
+        );
+    }
+
+    /**
+     * Test that get_webhook_endpoint() throws a ClientException when an invalid
+     * ID is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointWithInvalidID()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->get_webhook_endpoint(12345);
+            }
+        );
+    }
+
+    /**
+     * Test that update_webhook_endpoint() returns the expected data.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testUpdateWebhookEndpoint()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created'],
+            name: 'Test Webhook Endpoint'
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Update the webhook endpoint.
+        $url = 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds');
+        $result = $this->api->update_webhook_endpoint(
+            id: $id,
+            name: 'Updated Webhook Endpoint',
+            url: $url,
+            events: ['tag.created']
+        );
+
+        // Confirm the webhook endpoint updated with the correct data.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertEquals('Updated Webhook Endpoint', $webhook_endpoint['name']);
+        $this->assertEquals($url, $webhook_endpoint['url']);
+
+        // Confirm the specified events replaced the webhook endpoint's existing events.
+        $this->assertEquals(['tag.created'], $webhook_endpoint['events']);
+    }
+
+    /**
+     * Test that update_webhook_endpoint() only updates the specified parameters,
+     * leaving other values unchanged.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testUpdateWebhookEndpointStatus()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created'],
+            name: 'Test Webhook Endpoint'
+        );
+        $id = $result->webhook_endpoint->id;
+        $url = $result->webhook_endpoint->url;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Disable the webhook endpoint.
+        $result = $this->api->update_webhook_endpoint(
+            id: $id,
+            status: 'disabled'
+        );
+
+        // Confirm the webhook endpoint is disabled.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertEquals('disabled', $webhook_endpoint['status']);
+
+        // Confirm the parameters that weren't specified are unchanged.
+        $this->assertEquals('Test Webhook Endpoint', $webhook_endpoint['name']);
+        $this->assertEquals($url, $webhook_endpoint['url']);
+        $this->assertEquals(['subscriber.created'], $webhook_endpoint['events']);
+    }
+
+    /**
+     * Test that update_webhook_endpoint() throws a ClientException when an invalid
+     * ID is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testUpdateWebhookEndpointWithInvalidID()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->update_webhook_endpoint(
+                    id: 12345,
+                    status: 'disabled'
+                );
+            }
+        );
+    }
+
+    /**
+     * Test that delete_webhook_endpoint() throws a ClientException when an invalid
+     * ID is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testDeleteWebhookEndpointWithInvalidID()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->delete_webhook_endpoint(12345);
+            }
+        );
+    }
+
+    /**
+     * Test that rotate_webhook_endpoint_secret() returns the expected data.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testRotateWebhookEndpointSecret()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+        $secret = $result->webhook_endpoint->secret;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Rotate the webhook endpoint's secret.
+        $result = $this->api->rotate_webhook_endpoint_secret($id);
+
+        // Confirm a new signing secret was returned.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertArrayHasKey('secret', $webhook_endpoint);
+        $this->assertStringStartsWith('whsec_', $webhook_endpoint['secret']);
+        $this->assertNotEquals($secret, $webhook_endpoint['secret']);
+
+        // Confirm the previous secret remains valid until the overlap window closes.
+        $this->assertNotNull($webhook_endpoint['previous_secret_expires_at']);
+    }
+
+    /**
+     * Test that rotate_webhook_endpoint_secret() throws a ClientException when the
+     * previous rotation's overlap window is still open.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testRotateWebhookEndpointSecretWhenOverlapWindowOpen()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Rotate the webhook endpoint's secret, which opens the overlap window.
+        $this->api->rotate_webhook_endpoint_secret($id);
+
+        // Confirm rotating again whilst the overlap window is open returns an error.
+        $this->assertApiError(
+            function () use ($id) {
+                return $this->api->rotate_webhook_endpoint_secret($id);
+            }
+        );
+    }
+
+    /**
+     * Test that rotate_webhook_endpoint_secret() returns the expected data when
+     * the previous rotation's overlap window is still open and force is specified.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testRotateWebhookEndpointSecretWithForce()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Rotate the webhook endpoint's secret, which opens the overlap window.
+        $result = $this->api->rotate_webhook_endpoint_secret($id);
+        $secret = $result->webhook_endpoint->secret;
+
+        // Rotate again, forcing the older secret to expire immediately.
+        $result = $this->api->rotate_webhook_endpoint_secret(
+            id: $id,
+            force: true
+        );
+
+        // Confirm a new signing secret was returned.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertArrayHasKey('secret', $webhook_endpoint);
+        $this->assertNotEquals($secret, $webhook_endpoint['secret']);
+    }
+
+    /**
+     * Test that revoke_webhook_endpoint_previous_secret() returns the expected data.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testRevokeWebhookEndpointPreviousSecret()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Rotate the webhook endpoint's secret, which opens the overlap window.
+        $result = $this->api->rotate_webhook_endpoint_secret($id);
+        $this->assertNotNull($result->webhook_endpoint->previous_secret_expires_at);
+
+        // Revoke the previous secret, closing the overlap window.
+        $result = $this->api->revoke_webhook_endpoint_previous_secret($id);
+
+        // Confirm the overlap window is closed.
+        $webhook_endpoint = get_object_vars($result->webhook_endpoint);
+        $this->assertNull($webhook_endpoint['previous_secret_expires_at']);
+
+        // Confirm the signing secret is not returned when revoking the previous secret.
+        $this->assertArrayNotHasKey('secret', $webhook_endpoint);
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns true when the signature is valid.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignature()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+        $secret = 'whsec_' . str_shuffle('wfervdrtgsdewrafvwefds');
+
+        $this->assertTrue(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $this->generateWebhookSignature($payload, $secret),
+                secret: $secret
+            )
+        );
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns false when the payload was
+     * modified after it was signed.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignatureWithTamperedPayload()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+        $secret = 'whsec_' . str_shuffle('wfervdrtgsdewrafvwefds');
+        $signature_header = $this->generateWebhookSignature($payload, $secret);
+
+        $this->assertFalse(
+            $this->api->verify_webhook_signature(
+                payload: '{"delivery_id":999999,"events":[]}',
+                signature_header: $signature_header,
+                secret: $secret
+            )
+        );
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns false when the payload was
+     * signed with a different secret.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignatureWithIncorrectSecret()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+
+        $this->assertFalse(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $this->generateWebhookSignature($payload, 'whsec_incorrect'),
+                secret: 'whsec_correct'
+            )
+        );
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns false when the delivery is
+     * older than the permitted tolerance.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignatureWithExpiredTimestamp()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+        $secret = 'whsec_' . str_shuffle('wfervdrtgsdewrafvwefds');
+        $timestamp = (time() - 600);
+
+        $this->assertFalse(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $this->generateWebhookSignature($payload, $secret, $timestamp),
+                secret: $secret
+            )
+        );
+
+        // Confirm the same signature is valid when the tolerance permits it.
+        $this->assertTrue(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $this->generateWebhookSignature($payload, $secret, $timestamp),
+                secret: $secret,
+                tolerance: 900
+            )
+        );
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns true for both the current and
+     * previous secret whilst a rotation's overlap window is open.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignatureDuringSecretRotation()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+        $current_secret = 'whsec_current';
+        $previous_secret = 'whsec_previous';
+        $timestamp = time();
+
+        // Build a header containing a signature for both secrets, as Kit sends
+        // whilst a rotation's overlap window is open.
+        $signature_header = sprintf(
+            't=%d,v1=%s,v1=%s',
+            $timestamp,
+            hash_hmac('sha256', $timestamp . '.' . $payload, $current_secret),
+            hash_hmac('sha256', $timestamp . '.' . $payload, $previous_secret)
+        );
+
+        // Confirm both secrets verify the delivery.
+        $this->assertTrue(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $signature_header,
+                secret: $current_secret
+            )
+        );
+        $this->assertTrue(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $signature_header,
+                secret: $previous_secret
+            )
+        );
+
+        // Confirm a secret that didn't sign the delivery does not verify it.
+        $this->assertFalse(
+            $this->api->verify_webhook_signature(
+                payload: $payload,
+                signature_header: $signature_header,
+                secret: 'whsec_other'
+            )
+        );
+    }
+
+    /**
+     * Test that verify_webhook_signature() returns false when the signature header
+     * is missing or malformed.
+     *
+     * @since   2.8.0
+     *
+     * @return void
+     */
+    public function testVerifyWebhookSignatureWithInvalidHeader()
+    {
+        $payload = '{"delivery_id":123456,"events":[]}';
+        $secret = 'whsec_' . str_shuffle('wfervdrtgsdewrafvwefds');
+
+        $headers = [
+            '',
+            'not-a-signature',
+            't=' . time(),
+            'v1=' . hash_hmac('sha256', time() . '.' . $payload, $secret),
+            't=abc,v1=' . hash_hmac('sha256', time() . '.' . $payload, $secret),
+        ];
+
+        foreach ($headers as $signature_header) {
+            $this->assertFalse(
+                $this->api->verify_webhook_signature(
+                    payload: $payload,
+                    signature_header: $signature_header,
+                    secret: $secret
+                ),
+                sprintf('Signature header "%s" should not verify.', $signature_header)
+            );
+        }
+    }
+
+    /**
      * Test that get_custom_fields() returns the expected data.
      *
      * @since   1.0.0
@@ -7006,6 +7750,32 @@ trait TestsTrait
         );
 
         return $subscriberID;
+    }
+
+    /**
+     * Generates an X-Kit-Signature header value for the given payload and secret,
+     * signed as Kit signs webhook endpoint deliveries.
+     *
+     * @since   2.8.0
+     *
+     * @see     https://developers.kit.com/webhooks/verifying-signatures
+     *
+     * @param   string       $payload   Raw request body.
+     * @param   string       $secret    Webhook endpoint signing secret.
+     * @param   integer|null $timestamp Timestamp to sign with. Defaults to now.
+     * @return  string                  Signature header value.
+     */
+    public function generateWebhookSignature($payload, $secret, $timestamp = null)
+    {
+        if (is_null($timestamp)) {
+            $timestamp = time();
+        }
+
+        return sprintf(
+            't=%d,v1=%s',
+            $timestamp,
+            hash_hmac('sha256', $timestamp . '.' . $payload, $secret)
+        );
     }
 
     /**
