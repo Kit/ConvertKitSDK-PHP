@@ -2237,7 +2237,7 @@ trait ConvertKit_API_Traits
      *
      * @since 2.0.0
      *
-     * @see https://developers.kit.com/api-reference/webhooks/list-webhooks
+     * @see https://developers.kit.com/api-reference/webhooks-legacy/list-webhooks
      *
      * @return false|mixed
      */
@@ -2267,7 +2267,7 @@ trait ConvertKit_API_Traits
      * @param string $event     Event to subscribe to.
      * @param string $parameter Optional parameter depending on the event.
      *
-     * @see https://developers.kit.com/api-reference/webhooks/create-a-webhook
+     * @see https://developers.kit.com/api-reference/webhooks-legacy/create-a-webhook
      *
      * @throws \InvalidArgumentException If the event is not supported.
      *
@@ -2350,13 +2350,315 @@ trait ConvertKit_API_Traits
      *
      * @param integer $id Webhook ID.
      *
-     * @see https://developers.kit.com/api-reference/webhooks/delete-a-webhook
+     * @see https://developers.kit.com/api-reference/webhooks-legacy/delete-a-webhook
      *
      * @return mixed|object
      */
     public function delete_webhook(int $id)
     {
         return $this->delete(sprintf('webhooks/%s', $id));
+    }
+
+    /**
+     * List webhook endpoints.
+     *
+     * Webhook endpoints supersede the legacy webhooks resource. Use these methods for
+     * new integrations; get_webhooks(), create_webhook() and delete_webhook() continue
+     * to work against the legacy resource.
+     *
+     * @param string  $status              Endpoint status (active|disabled).
+     * @param boolean $include_total_count To include the total count of records in the response, use true.
+     * @param string  $after_cursor        Return results after the given pagination cursor.
+     * @param string  $before_cursor       Return results before the given pagination cursor.
+     * @param integer $per_page            Number of results to return.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/list-webhook-endpoints
+     *
+     * @return false|mixed
+     */
+    public function get_webhook_endpoints(
+        string $status = '',
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($status)) {
+            $options['status'] = $status;
+        }
+
+        // Send request.
+        return $this->get(
+            'webhook_endpoints',
+            $this->build_total_count_and_pagination_params(
+                $options,
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Create a webhook endpoint.
+     *
+     * The signing secret is returned in this response only, and cannot be fetched again.
+     * Store it to verify the signature of deliveries sent to this endpoint.
+     *
+     * @param string        $url         URL to receive deliveries. Must be publicly reachable.
+     * @param array<string> $events      Event types to subscribe to e.g. subscriber.created.
+     * @param string        $name        Name of the webhook endpoint.
+     * @param string        $description Description of the webhook endpoint.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/create-a-webhook-endpoint
+     *
+     * @return mixed|object
+     */
+    public function create_webhook_endpoint(
+        string $url,
+        array $events,
+        string $name = '',
+        string $description = ''
+    ) {
+        // Build parameters.
+        $options = [
+            'url'    => $url,
+            'events' => $events,
+        ];
+
+        if (!empty($name)) {
+            $options['name'] = $name;
+        }
+        if (!empty($description)) {
+            $options['description'] = $description;
+        }
+
+        // Send request.
+        return $this->post(
+            'webhook_endpoints',
+            $options
+        );
+    }
+
+    /**
+     * Get a webhook endpoint.
+     *
+     * The signing secret is never included in this response.
+     *
+     * @param integer $id Webhook Endpoint ID.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/get-a-webhook-endpoint
+     *
+     * @return mixed|object
+     */
+    public function get_webhook_endpoint(int $id)
+    {
+        return $this->get(sprintf('webhook_endpoints/%s', $id));
+    }
+
+    /**
+     * Update a webhook endpoint.
+     *
+     * Only the supplied parameters are sent, leaving any other values unchanged.
+     * $events replaces the endpoint's entire subscription list, so specify the
+     * full set of event types to subscribe to, not just additions.
+     *
+     * @param integer            $id          Webhook Endpoint ID.
+     * @param string|null        $name        Name of the webhook endpoint.
+     * @param string|null        $url         URL to receive deliveries. Must be publicly reachable.
+     * @param string|null        $description Description of the webhook endpoint.
+     * @param string|null        $status      Endpoint status (active|disabled).
+     * @param array<string>|null $events      Event types to subscribe to e.g. subscriber.created.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/update-a-webhook-endpoint
+     *
+     * @return mixed|object
+     */
+    public function update_webhook_endpoint(
+        int $id,
+        string|null $name = null,
+        string|null $url = null,
+        string|null $description = null,
+        string|null $status = null,
+        array|null $events = null
+    ) {
+        // Build parameters, omitting any that weren't specified.
+        $options = [];
+
+        if (!is_null($name)) {
+            $options['name'] = $name;
+        }
+        if (!is_null($url)) {
+            $options['url'] = $url;
+        }
+        if (!is_null($description)) {
+            $options['description'] = $description;
+        }
+        if (!is_null($status)) {
+            $options['status'] = $status;
+        }
+        if (!is_null($events)) {
+            $options['events'] = $events;
+        }
+
+        // Send request.
+        return $this->patch(
+            sprintf('webhook_endpoints/%s', $id),
+            $options
+        );
+    }
+
+    /**
+     * Delete a webhook endpoint.
+     *
+     * To stop deliveries without deleting the endpoint, use update_webhook_endpoint()
+     * to set the endpoint's status to disabled.
+     *
+     * @param integer $id Webhook Endpoint ID.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint
+     *
+     * @return mixed|object
+     */
+    public function delete_webhook_endpoint(int $id)
+    {
+        return $this->delete(sprintf('webhook_endpoints/%s', $id));
+    }
+
+    /**
+     * Rotate a webhook endpoint's signing secret.
+     *
+     * The new signing secret is returned in this response only, and cannot be fetched
+     * again. The previous secret continues to verify deliveries until the endpoint's
+     * previous_secret_expires_at, with deliveries signed by both secrets until then.
+     *
+     * Rotating whilst a previous rotation's overlap window is still open returns an
+     * error; specify $force to rotate anyway, expiring the older secret immediately.
+     *
+     * @param integer $id    Webhook Endpoint ID.
+     * @param boolean $force Rotate even if the previous rotation's overlap window is open.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret
+     *
+     * @return mixed|object
+     */
+    public function rotate_webhook_endpoint_secret(int $id, bool $force = false)
+    {
+        // Build parameters.
+        $options = [];
+
+        if ($force) {
+            $options['force'] = true;
+        }
+
+        // Send request.
+        return $this->post(
+            sprintf('webhook_endpoints/%s/rotate_secret', $id),
+            $options
+        );
+    }
+
+    /**
+     * Revoke a webhook endpoint's previous signing secret.
+     *
+     * Closes a rotation's overlap window early, so that only the current secret
+     * verifies deliveries.
+     *
+     * @param integer $id Webhook Endpoint ID.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/revoke-the-previous-webhook-endpoint-secret
+     *
+     * @return mixed|object
+     */
+    public function revoke_webhook_endpoint_previous_secret(int $id)
+    {
+        return $this->post(sprintf('webhook_endpoints/%s/revoke_previous_secret', $id));
+    }
+
+    /**
+     * Verify the signature of a webhook endpoint delivery.
+     *
+     * Kit signs each delivery with the endpoint's signing secret, sending the timestamp
+     * and one or more signatures in the X-Kit-Signature header. Deliveries are signed
+     * with both the current and previous secret whilst a rotation's overlap window is
+     * open, so any one signature matching means the delivery is valid.
+     *
+     * $payload must be the raw request body, byte for byte. Decoding and re-encoding it
+     * changes whitespace and key order, which produces a different signature.
+     *
+     * @param string  $payload          Raw request body.
+     * @param string  $signature_header X-Kit-Signature header value.
+     * @param string  $secret           Webhook endpoint signing secret.
+     * @param integer $tolerance        Maximum permitted age of the delivery, in seconds.
+     *
+     * @since 2.8.0
+     *
+     * @see https://developers.kit.com/webhooks/verifying-signatures
+     *
+     * @return boolean
+     */
+    public function verify_webhook_signature(
+        string $payload,
+        string $signature_header,
+        string $secret,
+        int $tolerance = 300
+    ) {
+        // Parse the header into its timestamp and signatures.
+        $timestamp  = '';
+        $signatures = [];
+
+        foreach (explode(',', $signature_header) as $part) {
+            $part = trim($part);
+
+            if (strpos($part, 't=') === 0) {
+                $timestamp = substr($part, 2);
+                continue;
+            }
+
+            if (strpos($part, 'v1=') === 0) {
+                $signatures[] = substr($part, 3);
+            }
+        }
+
+        // Bail if the header didn't include a timestamp and at least one signature.
+        if (!is_numeric($timestamp) || !count($signatures)) {
+            return false;
+        }
+
+        // Bail if the delivery is older than the permitted tolerance, to prevent replays.
+        if (abs((time() - (int) $timestamp)) > $tolerance) {
+            return false;
+        }
+
+        // Build the signature we expect for this payload.
+        $expected = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+
+        // The delivery is valid if any of its signatures match.
+        foreach ($signatures as $signature) {
+            if (hash_equals($expected, $signature)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
