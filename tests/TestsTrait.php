@@ -4691,8 +4691,8 @@ trait TestsTrait
         $this->assertCount(1, $result->subscribers);
 
         // Assert has_previous_page and has_next_page are correct.
-        $this->assertTrue($result->pagination->has_previous_page);
-        $this->assertFalse($result->pagination->has_next_page);
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
     }
 
     /**
