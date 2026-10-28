@@ -944,8 +944,12 @@ trait TestsTrait
     public function testGetSequencesPagination()
     {
         $result = $this->api->get_sequences(
+            include_total_count: true,
             per_page: 1
         );
+
+        // Store total count, as other sequences may exist on the account.
+        $totalCount = $result->pagination->total_count;
 
         // Assert sequences and pagination exist.
         $this->assertDataExists($result, 'sequences');
@@ -973,7 +977,7 @@ trait TestsTrait
 
         // Assert has_previous_page and has_next_page are correct.
         $this->assertTrue($result->pagination->has_previous_page);
-        $this->assertFalse($result->pagination->has_next_page);
+        $this->assertEquals($totalCount > 2, $result->pagination->has_next_page);
 
         // Use pagination to fetch previous page.
         $result = $this->api->get_sequences(
