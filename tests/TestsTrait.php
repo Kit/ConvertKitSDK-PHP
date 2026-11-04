@@ -182,10 +182,8 @@ trait TestsTrait
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
-        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
+        $this->assertEquals($this->formatDateInAccountTimezone($starting, '00:00:00'), $stats['starting']);
+        $this->assertEquals($this->formatDateInAccountTimezone($ending, '23:59:59'), $stats['ending']);
     }
 
     /**
@@ -221,10 +219,8 @@ trait TestsTrait
         $this->assertArrayHasKey('ending', $stats);
 
         // Assert start and end dates were honored.
-        // Gets timezone offset for New York (-04:00 during DST, -05:00 otherwise).
-        $timezone = ( new DateTime() )->setTimezone(new DateTimeZone('America/New_York'))->format('P');
-        $this->assertEquals($stats['starting'], $starting->format('Y-m-d') . 'T00:00:00' . $timezone);
-        $this->assertEquals($stats['ending'], $ending->format('Y-m-d') . 'T23:59:59' . $timezone);
+        $this->assertEquals($this->formatDateInAccountTimezone($starting, '00:00:00'), $stats['starting']);
+        $this->assertEquals($this->formatDateInAccountTimezone($ending, '23:59:59'), $stats['ending']);
     }
 
     /**
@@ -7690,6 +7686,22 @@ trait TestsTrait
     public function generateEmailAddress($domain = 'kit.com')
     {
         return 'php-sdk-' . date('Y-m-d-H-i-s') . '-php-' . PHP_VERSION_ID . '@' . $domain;
+    }
+
+    /**
+     * Returns the given date and time as an ISO 8601 string in the Kit account's timezone,
+     * using the UTC offset in effect at that date and time (-04:00 during DST, -05:00 otherwise).
+     *
+     * @since   2.8.0
+     *
+     * @param   DateTime $date Date.
+     * @param   string   $time Time (H:i:s).
+     *
+     * @return  string
+     */
+    public function formatDateInAccountTimezone(DateTime $date, string $time)
+    {
+        return (new DateTime($date->format('Y-m-d') . ' ' . $time, new DateTimeZone('America/New_York')))->format('Y-m-d\TH:i:sP');
     }
 
     /**
