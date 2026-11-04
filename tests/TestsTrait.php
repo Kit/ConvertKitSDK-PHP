@@ -7701,7 +7701,8 @@ trait TestsTrait
      */
     public function formatDateInAccountTimezone(DateTime $date, string $time)
     {
-        return (new DateTime($date->format('Y-m-d') . ' ' . $time, new DateTimeZone('America/New_York')))->format('Y-m-d\TH:i:sP');
+        $dateTime = new DateTime($date->format('Y-m-d') . ' ' . $time, new DateTimeZone('America/New_York'));
+        return $dateTime->format('Y-m-d\TH:i:sP');
     }
 
     /**
