@@ -818,21 +818,22 @@ trait ConvertKit_API_Traits
     }
 
     /**
-     * Updates a sequence
+     * Updates a sequence email.
      *
-     * @param integer            $sequence_id       Sequence ID.
-     * @param integer            $email_id          Sequence Email ID.
-     * @param string|null        $subject           Subject line of the email.
-     * @param integer|null       $delay_value       Number of days or hours to wait before sending this email after the previous one.
-     * @param string|null        $delay_unit        Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
-     * @param string|null        $preview_text      Preview text shown in email clients before the email is opened.
-     * @param string|null        $content           HTML body content of the email.
-     * @param integer|null       $email_template_id ID of the email template to use for layout and styling.
-     * @param boolean|null       $published         Whether the email is active and will be sent to subscribers.
-     * @param array<string>|null $send_days         Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
-     * @param integer|null       $position          Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     * @param integer            $sequence_id        Sequence ID.
+     * @param integer            $email_id           Sequence Email ID.
+     * @param string|null        $subject            Subject line of the email.
+     * @param integer|null       $delay_value        Number of days or hours to wait before sending this email after the previous one.
+     * @param string|null        $delay_unit         Unit for the send delay. Use `days` for schedule-aware delivery, `hours` for a fixed hourly delay.
+     * @param string|null        $preview_text       Preview text shown in email clients before the email is opened.
+     * @param string|null        $content            HTML body content of the email.
+     * @param integer|null       $email_template_id  ID of the email template to use for layout and styling.
+     * @param boolean|null       $published          Whether the email is active and will be sent to subscribers.
+     * @param array<string>|null $send_days          Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param integer|null       $position           Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
+     * @param boolean            $allow_content_loss Confirm changing $email_template_id without $content, when this would discard the email's existing content.
      *
-     * @see https://developers.kit.com/api-reference/sequences/create-a-sequence
+     * @see https://developers.kit.com/api-reference/sequence-emails/update-a-sequence-email
      *
      * @return mixed|object
      */
@@ -848,6 +849,7 @@ trait ConvertKit_API_Traits
         bool|null $published = null,
         array|null $send_days = null,
         int|null $position = null,
+        bool $allow_content_loss = false,
     ) {
         // Build parameters.
         $options = ['send_days' => $send_days];
@@ -878,6 +880,9 @@ trait ConvertKit_API_Traits
         }
         if (!is_null($position)) {
             $options['position'] = $position;
+        }
+        if ($allow_content_loss) {
+            $options['allow_content_loss'] = true;
         }
 
         // Send request.
@@ -2137,26 +2142,27 @@ trait ConvertKit_API_Traits
     /**
      * Update a broadcast.
      *
-     * @param integer              $id                Broadcast ID.
-     * @param string               $subject           The broadcast email's subject.
-     * @param string               $content           The broadcast's email HTML content.
-     * @param string               $description       An internal description of this broadcast.
-     * @param boolean              $public            Specifies whether or not this is a public post.
-     * @param \DateTime|null       $published_at      Specifies the time that this post was published (applicable
-     *                                                only to public posts).
-     * @param \DateTime|null       $send_at           Time that this broadcast should be sent; leave blank to create
-     *                                                a draft broadcast. If set to a future time, this is the time that
-     *                                                the broadcast will be scheduled to send.
-     * @param string               $email_address     Sending email address; leave blank to use your account's
-     *                                                default sending email address.
-     * @param string               $email_template_id ID of the email template to use; leave blank to use your
-     *                                                account's default email template.
-     * @param string               $thumbnail_alt     Specify the ALT attribute of the public thumbnail image
-     *                                                (applicable only to public posts).
-     * @param string               $thumbnail_url     Specify the URL of the thumbnail image to accompany the broadcast
-     *                                                post (applicable only to public posts).
-     * @param string               $preview_text      Specify the preview text of the email.
-     * @param array<string,string> $subscriber_filter Filter subscriber(s) to send the email to.
+     * @param integer              $id                 Broadcast ID.
+     * @param string               $subject            The broadcast email's subject.
+     * @param string               $content            The broadcast's email HTML content.
+     * @param string               $description        An internal description of this broadcast.
+     * @param boolean              $public             Specifies whether or not this is a public post.
+     * @param \DateTime|null       $published_at       Specifies the time that this post was published (applicable
+     *                                                 only to public posts).
+     * @param \DateTime|null       $send_at            Time that this broadcast should be sent; leave blank to create
+     *                                                 a draft broadcast. If set to a future time, this is the time that
+     *                                                 the broadcast will be scheduled to send.
+     * @param string               $email_address      Sending email address; leave blank to use your account's
+     *                                                 default sending email address.
+     * @param string               $email_template_id  ID of the email template to use; leave blank to use your
+     *                                                 account's default email template.
+     * @param string               $thumbnail_alt      Specify the ALT attribute of the public thumbnail image
+     *                                                 (applicable only to public posts).
+     * @param string               $thumbnail_url      Specify the URL of the thumbnail image to accompany the broadcast
+     *                                                 post (applicable only to public posts).
+     * @param string               $preview_text       Specify the preview text of the email.
+     * @param array<string,string> $subscriber_filter  Filter subscriber(s) to send the email to.
+     * @param boolean              $allow_content_loss Confirm changing $email_template_id without $content, when this would discard the broadcast's existing content.
      *
      * @see https://developers.kit.com/api-reference/broadcasts/update-a-broadcast
      *
@@ -2175,7 +2181,8 @@ trait ConvertKit_API_Traits
         string $thumbnail_alt = '',
         string $thumbnail_url = '',
         string $preview_text = '',
-        array $subscriber_filter = []
+        array $subscriber_filter = [],
+        bool $allow_content_loss = false
     ) {
         $options = [
             'email_template_id' => $email_template_id,
@@ -2204,6 +2211,10 @@ trait ConvertKit_API_Traits
         // If the post isn't public, remove some options that don't apply.
         if (!$public) {
             unset($options['published_at'], $options['thumbnail_alt'], $options['thumbnail_url']);
+        }
+
+        if ($allow_content_loss) {
+            $options['allow_content_loss'] = true;
         }
 
         // Send request.
