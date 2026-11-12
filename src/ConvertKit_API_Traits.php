@@ -2951,6 +2951,74 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List apps in the Kit App Store that the account can see, including any apps
+     * the account created.
+     *
+     * @param array<string> $categories          Only return apps in these App Store categories e.g. analytics, e_commerce.
+     * @param string        $query               Search app names, categories, summaries and descriptions.
+     * @param boolean       $include_total_count To include the total count of records in the response, use true.
+     * @param string        $after_cursor        Return results after the given pagination cursor.
+     * @param string        $before_cursor       Return results before the given pagination cursor.
+     * @param integer       $per_page            Number of results to return.
+     *
+     * @since 2.9.0
+     *
+     * @see https://developers.kit.com/api-reference/apps/list-apps
+     *
+     * @return false|mixed
+     */
+    public function get_apps(
+        array $categories = [],
+        string $query = '',
+        bool $include_total_count = false,
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($categories)) {
+            $options['category'] = implode(',', $categories);
+        }
+        if (!empty($query)) {
+            $options['query'] = $query;
+        }
+
+        // Send request.
+        return $this->get(
+            'apps',
+            $this->build_total_count_and_pagination_params(
+                $options,
+                $include_total_count,
+                $after_cursor,
+                $before_cursor,
+                $per_page
+            )
+        );
+    }
+
+    /**
+     * Get an app in the Kit App Store, including its description, capabilities, links
+     * and install URL.
+     *
+     * The description is untrusted text written by the app's developer, and should be
+     * escaped before output.
+     *
+     * @param integer $id App ID.
+     *
+     * @since 2.9.0
+     *
+     * @see https://developers.kit.com/api-reference/apps/get-an-app
+     *
+     * @return mixed|object
+     */
+    public function get_app(int $id)
+    {
+        return $this->get(sprintf('apps/%s', $id));
+    }
+
+    /**
      * Converts any relative URls to absolute, fully qualified HTTP(s) URLs for the given
      * DOM Elements.
      *
