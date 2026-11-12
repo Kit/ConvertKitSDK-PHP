@@ -7584,6 +7584,219 @@ trait TestsTrait
     }
 
     /**
+     * Test that get_apps() returns the expected data.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetApps()
+    {
+        $result = $this->api->get_apps();
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Check first app in resultset has expected data.
+        $app = get_object_vars($result->apps[0]);
+        $this->assertArrayHasKey('id', $app);
+        $this->assertArrayHasKey('name', $app);
+        $this->assertArrayHasKey('summary', $app);
+        $this->assertArrayHasKey('categories', $app);
+        $this->assertArrayHasKey('installable', $app);
+        $this->assertArrayHasKey('owned', $app);
+        $this->assertArrayHasKey('status', $app);
+    }
+
+    /**
+     * Test that get_apps() returns the expected data
+     * when the total count is included.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppsWithTotalCount()
+    {
+        $result = $this->api->get_apps(
+            include_total_count: true
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Assert total count is included.
+        $this->assertArrayHasKey('total_count', get_object_vars($result->pagination));
+        $this->assertGreaterThan(0, $result->pagination->total_count);
+    }
+
+    /**
+     * Test that get_apps() returns the expected data
+     * when pagination parameters and per_page limits are specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppsPagination()
+    {
+        $result = $this->api->get_apps(
+            per_page: 1
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Assert a single app was returned.
+        $this->assertCount(1, $result->apps);
+
+        // Assert has_previous_page and has_next_page are correct.
+        $this->assertFalse($result->pagination->has_previous_page);
+        $this->assertTrue($result->pagination->has_next_page);
+
+        // Use pagination to fetch next page.
+        $result = $this->api->get_apps(
+            per_page: 1,
+            after_cursor: $result->pagination->end_cursor
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Assert a single app was returned.
+        $this->assertCount(1, $result->apps);
+
+        // Assert has_previous_page is correct.
+        $this->assertTrue($result->pagination->has_previous_page);
+
+        // Use pagination to fetch previous page.
+        $result = $this->api->get_apps(
+            per_page: 1,
+            before_cursor: $result->pagination->start_cursor
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Assert a single app was returned.
+        $this->assertCount(1, $result->apps);
+    }
+
+    /**
+     * Test that get_apps() returns the expected data
+     * when categories are specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppsWithCategories()
+    {
+        $categories = ['analytics', 'e_commerce'];
+        $result = $this->api->get_apps(
+            categories: $categories
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+
+        // Assert each app is listed under at least one of the categories.
+        foreach ($result->apps as $app) {
+            $this->assertNotEmpty(array_intersect($categories, $app->categories));
+        }
+    }
+
+    /**
+     * Test that get_apps() throws a ClientException when an invalid
+     * category is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppsWithInvalidCategory()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->get_apps(
+                    categories: ['not-a-category']
+                );
+            }
+        );
+    }
+
+    /**
+     * Test that get_apps() returns the expected data
+     * when a search query is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppsWithQuery()
+    {
+        $result = $this->api->get_apps(
+            query: 'WordPress'
+        );
+
+        // Assert apps and pagination exist.
+        $this->assertDataExists($result, 'apps');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_app() returns the expected data.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetApp()
+    {
+        // Get ID of first app.
+        $apps = $this->api->get_apps(
+            per_page: 1
+        );
+        $id = $apps->apps[0]->id;
+
+        // Get app.
+        $result = $this->api->get_app($id);
+
+        // Confirm the expected app and its details were returned.
+        $app = get_object_vars($result->app);
+        $this->assertEquals($id, $app['id']);
+        $this->assertArrayHasKey('description', $app);
+        $this->assertArrayHasKey('capabilities', $app);
+        $this->assertArrayHasKey('links', $app);
+        $this->assertArrayHasKey('media_links', $app);
+        $this->assertArrayHasKey('upgrade_required', $app);
+        $this->assertArrayHasKey('install_url', $app);
+    }
+
+    /**
+     * Test that get_app() throws a ClientException when an invalid
+     * app ID is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetAppWithInvalidID()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->get_app(999999999);
+            }
+        );
+    }
+
+    /**
      * Test that fetching a legacy form's markup works.
      *
      * @since   1.0.0
