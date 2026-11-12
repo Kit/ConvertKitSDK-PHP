@@ -2594,6 +2594,84 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List deliveries for a webhook endpoint.
+     *
+     * Delivery history is retained for 30 days.
+     *
+     * @param integer $id            Webhook Endpoint ID.
+     * @param string  $status        Delivery status (pending|delivered|failed|retrying).
+     * @param string  $event_type    Event type e.g. subscriber.created.
+     * @param string  $after_cursor  Return results after the given pagination cursor.
+     * @param string  $before_cursor Return results before the given pagination cursor.
+     * @param integer $per_page      Number of results to return.
+     *
+     * @since 2.9.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/list-webhook-deliveries
+     *
+     * @return false|mixed
+     */
+    public function get_webhook_endpoint_deliveries(
+        int $id,
+        string $status = '',
+        string $event_type = '',
+        string $after_cursor = '',
+        string $before_cursor = '',
+        int $per_page = 100
+    ) {
+        // Build parameters.
+        $options = [];
+
+        if (!empty($status)) {
+            $options['status'] = $status;
+        }
+        if (!empty($event_type)) {
+            $options['event_type'] = $event_type;
+        }
+
+        // Send request.
+        return $this->get(
+            sprintf('webhook_endpoints/%s/deliveries', $id),
+            $this->build_total_count_and_pagination_params(
+                params: $options,
+                after_cursor: $after_cursor,
+                before_cursor: $before_cursor,
+                per_page: $per_page
+            )
+        );
+    }
+
+    /**
+     * Get a delivery for a webhook endpoint, including each delivery attempt.
+     *
+     * @param integer $id              Webhook Endpoint ID.
+     * @param integer $delivery_id     Delivery ID.
+     * @param boolean $include_payload Include the events sent in the delivery.
+     *
+     * @since 2.9.0
+     *
+     * @see https://developers.kit.com/api-reference/webhooks/get-webhook-delivery-details
+     *
+     * @return mixed|object
+     */
+    public function get_webhook_endpoint_delivery(int $id, int $delivery_id, bool $include_payload = false)
+    {
+        // Build parameters.
+        $options = [];
+
+        // The API only accepts the strings true or false for this parameter.
+        if ($include_payload) {
+            $options['include_payload'] = 'true';
+        }
+
+        // Send request.
+        return $this->get(
+            sprintf('webhook_endpoints/%s/deliveries/%s', $id, $delivery_id),
+            $options
+        );
+    }
+
+    /**
      * Verify the signature of a webhook endpoint delivery.
      *
      * Kit signs each delivery with the endpoint's signing secret, sending the timestamp

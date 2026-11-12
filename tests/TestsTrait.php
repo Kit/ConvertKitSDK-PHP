@@ -6755,6 +6755,193 @@ trait TestsTrait
     }
 
     /**
+     * Test that get_webhook_endpoint_deliveries() returns the expected data.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointDeliveries()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Get deliveries.
+        $result = $this->api->get_webhook_endpoint_deliveries($id);
+
+        // Assert deliveries and pagination exist.
+        $this->assertDataExists($result, 'deliveries');
+        $this->assertPaginationExists($result);
+    }
+
+    /**
+     * Test that get_webhook_endpoint_deliveries() returns the expected data
+     * when a status is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointDeliveriesWithStatus()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Get failed deliveries.
+        $result = $this->api->get_webhook_endpoint_deliveries(
+            id: $id,
+            status: 'failed'
+        );
+
+        // Assert deliveries and pagination exist.
+        $this->assertDataExists($result, 'deliveries');
+        $this->assertPaginationExists($result);
+
+        // Assert only failed deliveries were returned.
+        foreach ($result->deliveries as $delivery) {
+            $this->assertEquals('failed', $delivery->status);
+        }
+    }
+
+    /**
+     * Test that get_webhook_endpoint_deliveries() throws a ClientException when an invalid
+     * webhook endpoint ID is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointDeliveriesWithInvalidID()
+    {
+        $this->assertApiError(
+            function () {
+                return $this->api->get_webhook_endpoint_deliveries(12345);
+            }
+        );
+    }
+
+    /**
+     * Test that get_webhook_endpoint_deliveries() and get_webhook_endpoint_delivery()
+     * return the expected data once a delivery has been made to the webhook endpoint.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointDelivery()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        // Create a subscriber, which triggers a delivery to the webhook endpoint.
+        $result = $this->api->create_subscriber(
+            email_address: $this->generateEmailAddress()
+        );
+
+        // Set subscriber_ids to ensure subscriber is unsubscribed after test.
+        $this->subscriber_ids = [ $result->subscriber->id ];
+
+        // Wait for the delivery to be made, as deliveries are sent asynchronously.
+        $delivery = $this->retryUntil(
+            function () use ($id) {
+                $result = $this->api->get_webhook_endpoint_deliveries(
+                    id: $id,
+                    event_type: 'subscriber.created'
+                );
+
+                return count($result->deliveries) ? $result->deliveries[0] : false;
+            }
+        );
+        $this->assertNotFalse($delivery, 'No delivery was made to the webhook endpoint in time.');
+        $delivery_id = $delivery->id;
+
+        // Confirm filtering by an event type the webhook endpoint isn't subscribed to returns no deliveries.
+        $result = $this->api->get_webhook_endpoint_deliveries(
+            id: $id,
+            event_type: 'tag.created'
+        );
+        $this->assertCount(0, $result->deliveries);
+
+        // Get the delivery.
+        $result = $this->api->get_webhook_endpoint_delivery(
+            id: $id,
+            delivery_id: $delivery_id
+        );
+
+        // Confirm the delivery and its attempts are returned, without the payload.
+        $delivery = get_object_vars($result->delivery);
+        $this->assertEquals($delivery_id, $delivery['id']);
+        $this->assertEquals('subscriber.created', $delivery['event_type']);
+        $this->assertArrayHasKey('attempts', $delivery);
+        $this->assertIsArray($delivery['attempts']);
+        $this->assertArrayNotHasKey('payload', $delivery);
+
+        // Get the delivery, including the payload.
+        $result = $this->api->get_webhook_endpoint_delivery(
+            id: $id,
+            delivery_id: $delivery_id,
+            include_payload: true
+        );
+
+        // Confirm the events sent in the delivery are returned.
+        $delivery = get_object_vars($result->delivery);
+        $this->assertArrayHasKey('payload', $delivery);
+        $this->assertIsArray($delivery['payload']);
+        $this->assertEquals('subscriber.created', $delivery['payload'][0]->type);
+    }
+
+    /**
+     * Test that get_webhook_endpoint_delivery() throws a ClientException when an invalid
+     * delivery ID is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetWebhookEndpointDeliveryWithInvalidID()
+    {
+        // Create a webhook endpoint first.
+        $result = $this->api->create_webhook_endpoint(
+            url: 'https://webhook.site/' . str_shuffle('wfervdrtgsdewrafvwefds'),
+            events: ['subscriber.created']
+        );
+        $id = $result->webhook_endpoint->id;
+
+        // Set webhook_endpoint_ids to ensure webhook endpoints are deleted after test.
+        $this->webhook_endpoint_ids = [ $id ];
+
+        $this->assertApiError(
+            function () use ($id) {
+                return $this->api->get_webhook_endpoint_delivery(
+                    id: $id,
+                    delivery_id: 12345
+                );
+            }
+        );
+    }
+
+    /**
      * Test that verify_webhook_signature() returns true when the signature is valid.
      *
      * @since   2.8.0
