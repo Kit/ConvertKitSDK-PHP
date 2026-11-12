@@ -1837,6 +1837,54 @@ trait TestsTrait
     }
 
     /**
+     * Test that update_sequence_email() keeps the email's send days when they aren't specified,
+     * and resets them to inherit the sequence's send days when an empty array is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailSendDays()
+    {
+        // Create a draft sequence email that sends on specific days.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            content: 'Test Content',
+            published: false,
+            send_days: ['monday', 'tuesday']
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Update the subject only.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            subject: 'Edited Test Sequence Email'
+        );
+
+        // Confirm the subject changed and the send days were kept.
+        $this->assertEquals('Edited Test Sequence Email', $result->email->subject);
+        $this->assertEquals(['monday', 'tuesday'], $result->email->send_days);
+
+        // Reset the send days.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            send_days: []
+        );
+
+        // Confirm all 7 days are returned, as the email now inherits the sequence's send days.
+        $this->assertCount(7, $result->email->send_days);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
      * Test that get_sequence_email() returns the expected data.
      *
      * @since   2.6.0
@@ -5716,6 +5764,52 @@ trait TestsTrait
             allow_content_loss: true
         );
         $this->assertEquals($emailTemplateID, $result->broadcast->email_template->id);
+    }
+
+    /**
+     * Test that update_broadcast() keeps a public broadcast's public setting and dates
+     * when they aren't specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdatePublicBroadcastWithoutPublic()
+    {
+        // Create DateTime object.
+        $publishedAt = new DateTime('now');
+        $publishedAt->modify('+7 days');
+        $sendAt = new DateTime('now');
+        $sendAt->modify('+14 days');
+
+        // Create a public broadcast.
+        $result = $this->api->create_broadcast(
+            subject: 'Test Subject',
+            content: 'Test Content',
+            description: 'Test Broadcast from PHP SDK',
+            public: true,
+            published_at: $publishedAt,
+            send_at: $sendAt
+        );
+        $broadcastID = $result->broadcast->id;
+        $publishedAtValue = $result->broadcast->published_at;
+        $sendAtValue = $result->broadcast->send_at;
+
+        // Set broadcast_ids to ensure broadcast is deleted after test.
+        $this->broadcast_ids[] = $broadcastID;
+
+        // Update the subject only.
+        $result = $this->api->update_broadcast(
+            id: $broadcastID,
+            subject: 'New Test Subject'
+        );
+
+        // Confirm the subject changed and the broadcast is still public, with the same dates.
+        $result = get_object_vars($result->broadcast);
+        $this->assertEquals('New Test Subject', $result['subject']);
+        $this->assertTrue($result['public']);
+        $this->assertEquals($publishedAtValue, $result['published_at']);
+        $this->assertEquals($sendAtValue, $result['send_at']);
     }
 
     /**

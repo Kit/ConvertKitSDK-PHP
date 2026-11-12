@@ -829,7 +829,8 @@ trait ConvertKit_API_Traits
      * @param string|null        $content            HTML body content of the email.
      * @param integer|null       $email_template_id  ID of the email template to use for layout and styling.
      * @param boolean|null       $published          Whether the email is active and will be sent to subscribers.
-     * @param array<string>|null $send_days          Days of the week this email may be sent. Defaults to all 7 days (inherits the sequence schedule). Pass a subset to restrict delivery, or null to reset to all days.
+     * @param array<string>|null $send_days          Days of the week this email may be sent. Pass a subset to restrict delivery, or an empty array to reset to all days
+     *                                               (inherits the sequence schedule). Leave as null to keep the email's current setting.
      * @param integer|null       $position           Zero-based position of the email in the sequence. Assigned automatically after the last email if omitted.
      * @param boolean            $allow_content_loss Confirm changing $email_template_id without $content, when this would discard the email's existing content.
      *
@@ -852,7 +853,7 @@ trait ConvertKit_API_Traits
         bool $allow_content_loss = false,
     ) {
         // Build parameters.
-        $options = ['send_days' => $send_days];
+        $options = [];
 
         if (!is_null($subject)) {
             $options['subject'] = $subject;
@@ -876,7 +877,8 @@ trait ConvertKit_API_Traits
             $options['published'] = $published;
         }
         if (!is_null($send_days)) {
-            $options['send_days'] = $send_days;
+            // An empty array resets the email to inherit the sequence's send days.
+            $options['send_days'] = (count($send_days) ? $send_days : null);
         }
         if (!is_null($position)) {
             $options['position'] = $position;
@@ -2146,7 +2148,8 @@ trait ConvertKit_API_Traits
      * @param string               $subject            The broadcast email's subject.
      * @param string               $content            The broadcast's email HTML content.
      * @param string               $description        An internal description of this broadcast.
-     * @param boolean              $public             Specifies whether or not this is a public post.
+     * @param boolean|null         $public             Specifies whether or not this is a public post. Leave as null to keep the
+     *                                                 broadcast's current setting.
      * @param \DateTime|null       $published_at       Specifies the time that this post was published (applicable
      *                                                 only to public posts).
      * @param \DateTime|null       $send_at            Time that this broadcast should be sent; leave blank to create
@@ -2173,7 +2176,7 @@ trait ConvertKit_API_Traits
         string $subject = '',
         string $content = '',
         string $description = '',
-        bool $public = false,
+        bool|null $public = null,
         \DateTime|null $published_at = null,
         \DateTime|null $send_at = null,
         string $email_address = '',
@@ -2189,7 +2192,6 @@ trait ConvertKit_API_Traits
             'email_address'     => $email_address,
             'content'           => $content,
             'description'       => $description,
-            'public'            => $public,
             'published_at'      => (!is_null($published_at) ? $published_at->format('Y-m-d H:i:s') : ''),
             'send_at'           => (!is_null($send_at) ? $send_at->format('Y-m-d H:i:s') : ''),
             'thumbnail_alt'     => $thumbnail_alt,
@@ -2208,8 +2210,12 @@ trait ConvertKit_API_Traits
             }
         }
 
+        if (!is_null($public)) {
+            $options['public'] = $public;
+        }
+
         // If the post isn't public, remove some options that don't apply.
-        if (!$public) {
+        if ($public === false) {
             unset($options['published_at'], $options['thumbnail_alt'], $options['thumbnail_url']);
         }
 
