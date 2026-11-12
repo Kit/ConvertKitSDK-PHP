@@ -126,6 +126,10 @@ trait TestsTrait
         $this->assertArrayHasKey('click_tracking_enabled', $stats);
         $this->assertArrayHasKey('starting', $stats);
         $this->assertArrayHasKey('ending', $stats);
+        $this->assertArrayHasKey('open_rate', $stats);
+        $this->assertArrayHasKey('click_rate', $stats);
+        $this->assertArrayHasKey('unsubscribe_rate', $stats);
+        $this->assertArrayHasKey('bounce_rate', $stats);
     }
 
     /**
@@ -882,6 +886,8 @@ trait TestsTrait
         $this->assertArrayHasKey('hold', $sequence);
         $this->assertArrayHasKey('repeat', $sequence);
         $this->assertArrayHasKey('created_at', $sequence);
+        $this->assertArrayHasKey('email_count', $sequence);
+        $this->assertArrayHasKey('subscriber_count', $sequence);
     }
 
     /**
@@ -1074,6 +1080,8 @@ trait TestsTrait
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('sequence', get_object_vars($result));
         $this->assertArrayHasKey('id', get_object_vars($result->sequence));
+        $this->assertArrayHasKey('email_count', get_object_vars($result->sequence));
+        $this->assertArrayHasKey('subscriber_count', get_object_vars($result->sequence));
     }
 
     /**
@@ -1577,6 +1585,7 @@ trait TestsTrait
         $this->assertArrayHasKey('delay_value', $email);
         $this->assertArrayHasKey('delay_unit', $email);
         $this->assertArrayHasKey('send_days', $email);
+        $this->assertArrayHasKey('has_unpublished_changes', $email);
     }
 
     /**
@@ -1798,6 +1807,7 @@ trait TestsTrait
         );
         $this->assertInstanceOf('stdClass', $result);
         $this->assertArrayHasKey('id', get_object_vars($result->email));
+        $this->assertArrayHasKey('has_unpublished_changes', get_object_vars($result->email));
     }
 
     /**
@@ -5230,6 +5240,9 @@ trait TestsTrait
 
         // Assert content is not included.
         $this->assertArrayNotHasKey('content', get_object_vars($result->posts[0]));
+
+        // Assert the product ID for paid posts is included.
+        $this->assertArrayHasKey('product_id', get_object_vars($result->posts[0]));
     }
 
     /**
@@ -5350,6 +5363,7 @@ trait TestsTrait
         $result = $this->api->get_post($_ENV['CONVERTKIT_API_POST_ID']);
         $result = get_object_vars($result->post);
         $this->assertEquals($result['id'], $_ENV['CONVERTKIT_API_POST_ID']);
+        $this->assertArrayHasKey('product_id', $result);
     }
 
     /**
@@ -7238,6 +7252,9 @@ trait TestsTrait
         // Assert purchases and pagination exist.
         $this->assertDataExists($result, 'purchases');
         $this->assertPaginationExists($result);
+
+        // Assert the purchase's source is included.
+        $this->assertArrayHasKey('source', get_object_vars($result->purchases[0]));
     }
 
     /**
@@ -7341,7 +7358,8 @@ trait TestsTrait
         // Get purchase.
         $result = $this->api->get_purchase($id);
         $this->assertInstanceOf('stdClass', $result);
-        $this->assertEquals($purchases->purchases[0]->id, $id);
+        $this->assertEquals($id, $result->purchase->id);
+        $this->assertArrayHasKey('source', get_object_vars($result->purchase));
     }
 
     /**
