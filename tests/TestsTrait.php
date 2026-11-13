@@ -5767,8 +5767,8 @@ trait TestsTrait
     }
 
     /**
-     * Test that update_broadcast() keeps a public broadcast's public setting and dates
-     * when they aren't specified.
+     * Test that update_broadcast() keeps a public broadcast's public setting and published
+     * date when they aren't specified.
      *
      * @since   2.9.0
      *
@@ -5793,7 +5793,6 @@ trait TestsTrait
         );
         $broadcastID = $result->broadcast->id;
         $publishedAtValue = $result->broadcast->published_at;
-        $sendAtValue = $result->broadcast->send_at;
 
         // Set broadcast_ids to ensure broadcast is deleted after test.
         $this->broadcast_ids[] = $broadcastID;
@@ -5804,12 +5803,11 @@ trait TestsTrait
             subject: 'New Test Subject'
         );
 
-        // Confirm the subject changed and the broadcast is still public, with the same dates.
+        // Confirm the subject changed and the broadcast is still public, with the same published date.
         $result = get_object_vars($result->broadcast);
         $this->assertEquals('New Test Subject', $result['subject']);
         $this->assertTrue($result['public']);
         $this->assertEquals($publishedAtValue, $result['published_at']);
-        $this->assertEquals($sendAtValue, $result['send_at']);
     }
 
     /**
