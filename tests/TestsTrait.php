@@ -1794,10 +1794,7 @@ trait TestsTrait
      */
     public function testUpdateSequenceEmailWithAllowContentLoss()
     {
-        $emailTemplateID = $this->getStartingPointEmailTemplateID();
-        if (!$emailTemplateID) {
-            $this->markTestSkipped('No Starting point email template exists on the Kit account.');
-        }
+        $emailTemplateID = (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_STARTING_POINT_ID'];
 
         // Create a draft sequence email with content.
         $result = $this->api->create_sequence_email(
@@ -5730,10 +5727,7 @@ trait TestsTrait
      */
     public function testUpdateBroadcastWithAllowContentLoss()
     {
-        $emailTemplateID = $this->getStartingPointEmailTemplateID();
-        if (!$emailTemplateID) {
-            $this->markTestSkipped('No Starting point email template exists on the Kit account.');
-        }
+        $emailTemplateID = (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_STARTING_POINT_ID'];
 
         // Create a broadcast with content.
         $result = $this->api->create_broadcast(
@@ -7985,32 +7979,6 @@ trait TestsTrait
             $timestamp,
             hash_hmac('sha256', $timestamp . '.' . $payload, $secret)
         );
-    }
-
-    /**
-     * Returns the ID of an email template in the Starting point category, excluding the
-     * email template defined in CONVERTKIT_API_EMAIL_TEMPLATE_ID.
-     *
-     * @since   2.9.0
-     *
-     * @return  integer|false
-     */
-    public function getStartingPointEmailTemplateID()
-    {
-        $result = $this->api->get_email_templates();
-
-        foreach ($result->email_templates as $emailTemplate) {
-            if ($emailTemplate->category !== 'Starting point') {
-                continue;
-            }
-            if ($emailTemplate->id === (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID']) {
-                continue;
-            }
-
-            return $emailTemplate->id;
-        }
-
-        return false;
     }
 
     /**
