@@ -1784,6 +1784,104 @@ trait TestsTrait
     }
 
     /**
+     * Test that update_sequence_email() returns an error when changing the email template
+     * without content would discard the email's content, and changes the email template
+     * when allow_content_loss is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailWithAllowContentLoss()
+    {
+        $emailTemplateID = (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_STARTING_POINT_ID'];
+
+        // Create a draft sequence email with content.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            content: 'Test Content',
+            email_template_id: (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID'],
+            published: false
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Confirm changing to a Starting point template without content errors, as it would discard the content.
+        $this->assertApiError(
+            function () use ($sequenceEmailID, $emailTemplateID) {
+                return $this->api->update_sequence_email(
+                    sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+                    email_id: $sequenceEmailID,
+                    email_template_id: $emailTemplateID
+                );
+            }
+        );
+
+        // Confirm the email template is changed when allow_content_loss is specified.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            email_template_id: $emailTemplateID,
+            allow_content_loss: true
+        );
+        $this->assertEquals($emailTemplateID, $result->email->email_template_id);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
+     * Test that update_sequence_email() keeps the email's send days when they aren't specified,
+     * and resets them to inherit the sequence's send days when an empty array is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdateSequenceEmailSendDays()
+    {
+        // Create a draft sequence email that sends on specific days.
+        $result = $this->api->create_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            subject: 'Test Sequence Email',
+            delay_value: 1,
+            delay_unit: 'days',
+            content: 'Test Content',
+            published: false,
+            send_days: ['monday', 'tuesday']
+        );
+        $sequenceEmailID = $result->email->id;
+
+        // Update the subject only.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            subject: 'Edited Test Sequence Email'
+        );
+
+        // Confirm the subject changed and the send days were kept.
+        $this->assertEquals('Edited Test Sequence Email', $result->email->subject);
+        $this->assertEquals(['monday', 'tuesday'], $result->email->send_days);
+
+        // Reset the send days.
+        $result = $this->api->update_sequence_email(
+            sequence_id: (int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'],
+            email_id: $sequenceEmailID,
+            send_days: []
+        );
+
+        // Confirm all 7 days are returned, as the email now inherits the sequence's send days.
+        $this->assertCount(7, $result->email->send_days);
+
+        // Delete Sequence Email.
+        $this->api->delete_sequence_email((int) $_ENV['CONVERTKIT_API_SEQUENCE_ID'], $sequenceEmailID);
+        $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
      * Test that get_sequence_email() returns the expected data.
      *
      * @since   2.6.0
@@ -5616,6 +5714,94 @@ trait TestsTrait
         // Delete Broadcast.
         $this->api->delete_broadcast($broadcastID);
         $this->assertLastResponseStatusCode(204);
+    }
+
+    /**
+     * Test that update_broadcast() returns an error when changing the email template
+     * without content would discard the broadcast's content, and changes the email
+     * template when allow_content_loss is specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdateBroadcastWithAllowContentLoss()
+    {
+        $emailTemplateID = (int) $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_STARTING_POINT_ID'];
+
+        // Create a broadcast with content.
+        $result = $this->api->create_broadcast(
+            subject: 'Test Subject',
+            content: 'Test Content',
+            description: 'Test Broadcast from PHP SDK',
+            email_template_id: $_ENV['CONVERTKIT_API_EMAIL_TEMPLATE_ID']
+        );
+        $broadcastID = $result->broadcast->id;
+
+        // Set broadcast_ids to ensure broadcast is deleted after test.
+        $this->broadcast_ids[] = $broadcastID;
+
+        // Confirm changing to a Starting point template without content errors, as it would discard the content.
+        $this->assertApiError(
+            function () use ($broadcastID, $emailTemplateID) {
+                return $this->api->update_broadcast(
+                    id: $broadcastID,
+                    email_template_id: (string) $emailTemplateID
+                );
+            }
+        );
+
+        // Confirm the email template is changed when allow_content_loss is specified.
+        $result = $this->api->update_broadcast(
+            id: $broadcastID,
+            email_template_id: (string) $emailTemplateID,
+            allow_content_loss: true
+        );
+        $this->assertEquals($emailTemplateID, $result->broadcast->email_template->id);
+    }
+
+    /**
+     * Test that update_broadcast() keeps a public broadcast's public setting and published
+     * date when they aren't specified.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testUpdatePublicBroadcastWithoutPublic()
+    {
+        // Create DateTime object.
+        $publishedAt = new DateTime('now');
+        $publishedAt->modify('+7 days');
+        $sendAt = new DateTime('now');
+        $sendAt->modify('+14 days');
+
+        // Create a public broadcast.
+        $result = $this->api->create_broadcast(
+            subject: 'Test Subject',
+            content: 'Test Content',
+            description: 'Test Broadcast from PHP SDK',
+            public: true,
+            published_at: $publishedAt,
+            send_at: $sendAt
+        );
+        $broadcastID = $result->broadcast->id;
+        $publishedAtValue = $result->broadcast->published_at;
+
+        // Set broadcast_ids to ensure broadcast is deleted after test.
+        $this->broadcast_ids[] = $broadcastID;
+
+        // Update the subject only.
+        $result = $this->api->update_broadcast(
+            id: $broadcastID,
+            subject: 'New Test Subject'
+        );
+
+        // Confirm the subject changed and the broadcast is still public, with the same published date.
+        $result = get_object_vars($result->broadcast);
+        $this->assertEquals('New Test Subject', $result['subject']);
+        $this->assertTrue($result['public']);
+        $this->assertEquals($publishedAtValue, $result['published_at']);
     }
 
     /**
