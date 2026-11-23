@@ -2900,6 +2900,23 @@ trait ConvertKit_API_Traits
     }
 
     /**
+     * List Kit Fields, which are the subscriber fields available through Subscriber Signals,
+     * such as job title, social profiles and demographics.
+     *
+     * Requires Subscriber Signals on a paid Pro plan.
+     *
+     * @since 2.9.0
+     *
+     * @see https://developers.kit.com/api-reference/kit-fields/list-kit-fields
+     *
+     * @return false|mixed
+     */
+    public function get_kit_fields()
+    {
+        return $this->get('kit_fields');
+    }
+
+    /**
      * List purchases.
      *
      * @param boolean $include_total_count To include the total count of records in the response, use true.
