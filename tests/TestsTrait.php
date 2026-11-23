@@ -7612,6 +7612,38 @@ trait TestsTrait
     }
 
     /**
+     * Test that get_kit_fields() returns the expected data.
+     *
+     * @since   2.9.0
+     *
+     * @return void
+     */
+    public function testGetKitFields()
+    {
+        $result = $this->api->get_kit_fields();
+
+        // Assert Kit Fields exist.
+        $this->assertDataExists($result, 'kit_fields');
+        $this->assertNotEmpty($result->kit_fields);
+
+        // Assert each Kit Field has a name and valid data type.
+        foreach ($result->kit_fields as $kitField) {
+            $kitField = get_object_vars($kitField);
+            $this->assertArrayHasKey('name', $kitField);
+            $this->assertArrayHasKey('data_type', $kitField);
+            $this->assertContains(
+                $kitField['data_type'],
+                ['String', 'Text', 'Integer', 'Float', 'Boolean', 'Date', 'DateTime']
+            );
+
+            // Fields with a fixed list of values return them in available_options.
+            if (array_key_exists('available_options', $kitField)) {
+                $this->assertIsArray($kitField['available_options']);
+            }
+        }
+    }
+
+    /**
      * Test that get_purchases() returns the expected data.
      *
      * @since   1.0.0
